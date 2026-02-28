@@ -737,42 +737,45 @@ class IndustrialERPApp {
           </div>
         </div>
         
-        <!-- Quick Stats -->
-        <div class="card stat-card">
-          <div class="stat-icon"><i class="ph-duotone ph-wallet"></i></div>
-          <div class="stat-content">
-            <p class="stat-label">Cash Flow</p>
-            <h3 id="stat-cash-flow" class="stat-value">Loading...</h3>
-            <p class="stat-change positive"><i class="ph-bold ph-arrow-up"></i> Track via PocketBooks</p>
+        <!-- Quick Stats: 2-column sub-grid on mobile -->
+        <div class="dashboard-stats-row">
+          <div class="card stat-card">
+            <div class="stat-icon"><i class="ph-duotone ph-wallet"></i></div>
+            <div class="stat-content">
+              <p class="stat-label">Cash Flow</p>
+              <h3 id="stat-cash-flow" class="stat-value">Loading...</h3>
+              <p class="stat-change positive"><i class="ph-bold ph-arrow-up"></i> Track via PocketBooks</p>
+            </div>
+          </div>
+          
+          <div class="card stat-card">
+            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
+            <div class="stat-content">
+              <p class="stat-label">Inventory Health</p>
+              <h3 id="stat-inventory" class="stat-value">Loading...</h3>
+              <p class="stat-change"><i class="ph-bold ph-arrow-up-right"></i> View in PoolStock</p>
+            </div>
+          </div>
+          
+          <div class="card stat-card">
+            <div class="stat-icon"><i class="ph-duotone ph-gear"></i></div>
+            <div class="stat-content">
+              <p class="stat-label">Machine Utilization</p>
+              <h3 id="stat-machine-util" class="stat-value">Loading...</h3>
+              <p class="stat-change"><i class="ph-bold ph-arrow-right"></i> Optimize in SmartShift</p>
+            </div>
+          </div>
+          
+          <div class="card stat-card">
+            <div class="stat-icon"><i class="ph-duotone ph-users-three"></i></div>
+            <div class="stat-content">
+              <p class="stat-label">Syndicate Status</p>
+              <h3 id="stat-syndicates" class="stat-value">Loading...</h3>
+              <p class="stat-change"><i class="ph-bold ph-check"></i> Active in TrustCircle</p>
+            </div>
           </div>
         </div>
-        
-        <div class="card stat-card">
-          <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
-          <div class="stat-content">
-            <p class="stat-label">Inventory Health</p>
-            <h3 id="stat-inventory" class="stat-value">Loading...</h3>
-            <p class="stat-change"><i class="ph-bold ph-arrow-up-right"></i> View in PoolStock</p>
-          </div>
-        </div>
-        
-        <div class="card stat-card">
-          <div class="stat-icon"><i class="ph-duotone ph-gear"></i></div>
-          <div class="stat-content">
-            <p class="stat-label">Machine Utilization</p>
-            <h3 id="stat-machine-util" class="stat-value">Loading...</h3>
-            <p class="stat-change"><i class="ph-bold ph-arrow-right"></i> Optimize in SmartShift</p>
-          </div>
-        </div>
-        
-        <div class="card stat-card">
-          <div class="stat-icon"><i class="ph-duotone ph-users-three"></i></div>
-          <div class="stat-content">
-            <p class="stat-label">Syndicate Status</p>
-            <h3 id="stat-syndicates" class="stat-value">Loading...</h3>
-            <p class="stat-change"><i class="ph-bold ph-check"></i> Active in TrustCircle</p>
-          </div>
-        </div>
+
         
         <!-- Recent Activity -->
         <div class="card full-width">
@@ -1165,8 +1168,8 @@ class IndustrialERPApp {
         
         .dashboard-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+          gap: 1rem;
         }
         
         .card {
@@ -1875,8 +1878,35 @@ class IndustrialERPApp {
                 display: none; /* Use mobile header instead */
             }
 
+            /* Dashboard: full single-column stack on mobile */
             .dashboard-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+
+            /* Stat cards: 2-per-row within the single column flow */
+            .dashboard-grid .stat-card {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 0.75rem !important;
+                padding: 0.875rem !important;
+            }
+
+            /* Chart cards and AI alert: full width */
+            .dashboard-grid .ai-alert,
+            .dashboard-grid .chart-card,
+            .dashboard-grid .full-width {
+                grid-column: 1 / -1 !important;
+                width: 100% !important;
+            }
+
+            /* Stat cards sit side by side using a nested grid trick */
+            .dashboard-stats-row {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.75rem !important;
+                grid-column: 1 / -1;
             }
 
             .stats-grid {
