@@ -72,12 +72,16 @@ class IndustrialERPApp {
   async navigateTo(module) {
     console.log('Navigating to module:', module); // Debug log
 
-    // Update active state
+    // Update sidebar nav active state
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
     });
-
     document.querySelector(`[data-module="${module}"]`)?.classList.add('active');
+
+    // Update persistent bottom nav active state
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.module === module);
+    });
 
     // Update title based on module and business type
     const businessLabel = BUSINESS_LABELS[this.currentUser?.businessType] || 'Dashboard';
@@ -702,9 +706,16 @@ class IndustrialERPApp {
           </div>
           
           <div id="content-area" class="content-area">
-            ${this.renderDashboardContent(bottomNavItems)}
+            ${this.renderDashboardContent()}
           </div>
         </main>
+
+        <!-- Bottom Navigation (Mobile) - PERSISTENT ACROSS ALL PAGES -->
+        <nav class="bottom-nav" id="bottom-nav">
+          <ul class="bottom-nav-items" id="bottom-nav-items">
+            ${bottomNavItems}
+          </ul>
+        </nav>
       </div>
       
       ${this.renderStyles()}
@@ -809,13 +820,6 @@ class IndustrialERPApp {
           </div>
         </div>
       </div>
-
-      <!-- Bottom Navigation (Mobile) -->
-      <nav class="bottom-nav">
-        <ul class="bottom-nav-items">
-          ${bottomNavItems}
-        </ul>
-      </nav>
     `;
   }
 
@@ -914,9 +918,28 @@ class IndustrialERPApp {
           flex-direction: column;
           position: fixed;
           height: 100vh;
-          overflow-y: hidden;
+          overflow-y: hidden; /* Outer sidebar never scrolls */
           transition: width 0.3s ease;
           z-index: 100;
+        }
+
+        /* Make the nav-menu scrollable so footer is always visible */
+        .nav-menu {
+          flex: 1;
+          overflow-y: auto;
+          padding: 0.5rem 0;
+        }
+
+        /* Footer always pinned to the bottom of the sidebar */
+        .sidebar-footer {
+          margin-top: auto;
+          flex-shrink: 0;
+          position: sticky;
+          bottom: 0;
+          background: var(--bg-sidebar);
+          padding: 1rem;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          z-index: 2;
         }
 
         .sidebar.collapsed {
@@ -2159,14 +2182,18 @@ class IndustrialERPApp {
       const sidebar = document.getElementById('sidebar');
 
       if (toggleBtn && sidebar) {
-        // Restore state
+        // Restore sidebar state - only on desktop, and only if user explicitly collapsed it
         const isCollapsed = localStorage.getItem('erp_sidebar_collapsed') === 'true';
-        if (isCollapsed) {
+        const isDesktop = window.innerWidth > 768;
+        if (isCollapsed && isDesktop) {
           sidebar.classList.add('collapsed');
+        } else {
+          // Ensure clean expanded state by default
+          sidebar.classList.remove('collapsed');
         }
 
         toggleBtn.addEventListener('click', (e) => {
-          e.stopPropagation(); // Prevent bubbling to header click
+          e.stopPropagation();
           sidebar.classList.toggle('collapsed');
           const collapsed = sidebar.classList.contains('collapsed');
           localStorage.setItem('erp_sidebar_collapsed', collapsed);
