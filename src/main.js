@@ -94,7 +94,15 @@ class IndustrialERPApp {
 
     document.getElementById('module-title').textContent = titles[module] || businessLabel;
 
-    const contentArea = document.getElementById('content-area');
+    let contentArea = document.getElementById('content-area');
+
+    // Performance Fix: Destroy all stale event listeners from previous modules
+    // This prevents massive memory leaks when navigating between tabs
+    const newContentArea = contentArea.cloneNode(false);
+    contentArea.parentNode.replaceChild(newContentArea, contentArea);
+    contentArea = newContentArea;
+    contentArea.innerHTML = '<div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading...</div>';
+
     const sidebar = document.getElementById('sidebar');
 
     // Handle Full-Screen Modules (Pricing)
@@ -194,7 +202,8 @@ class IndustrialERPApp {
       }
     } else if (module === 'dashboard' || !module) {
       const userModules = this.getModulesForUser();
-      const bottomNavItems = userModules.slice(0, 5).map(mod => {
+      // UX Fix: Limit mobile bottom nav to 4 items so it doesn't overflow horizontally
+      const bottomNavItems = userModules.slice(0, 4).map(mod => {
         const info = MODULE_INFO[mod];
         return `
           <li class="bottom-nav-item ${mod === 'dashboard' ? 'active' : ''}" data-module="${mod}">
@@ -1738,12 +1747,15 @@ class IndustrialERPApp {
 
         .bottom-nav-items {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between; /* Spread items evenly */
             align-items: center;
             height: 100%;
             list-style: none;
             margin: 0;
-            padding: 0;
+            padding: 0 0.5rem; /* Add padding to prevent edge hugging */
+            overflow-x: auto; /* Prevent squishing on tiny screens */
+            flex-wrap: nowrap;
+            gap: 0.25rem;
         }
 
         .bottom-nav-item {
@@ -1754,8 +1766,10 @@ class IndustrialERPApp {
             color: #9ca3af;
             font-size: 0.65rem;
             cursor: pointer;
-            padding: 0.5rem;
-            min-width: 60px;
+            padding: 0.5rem 0.25rem;
+            flex: 1; /* Allow items to stretch evenly */
+            text-align: center;
+            min-width: 0; /* Prevent flex blowout */
         }
 
         .bottom-nav-item.active {
