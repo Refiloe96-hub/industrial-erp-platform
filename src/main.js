@@ -1,3 +1,4 @@
+import './mobile.css'; // Global mobile responsive fixes for all pages
 import SeedData from './utils/seedData.js';
 import db from './db/index.js';
 import { initRouter } from './router.js';
@@ -1160,6 +1161,9 @@ class IndustrialERPApp {
         
         .content-area {
           padding: 2rem;
+          /* Prevent content from being hidden behind fixed bottom nav on mobile */
+          padding-bottom: 5rem;
+          overflow-x: hidden;
         }
         
         .dashboard-grid {

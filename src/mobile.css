@@ -1,0 +1,193 @@
+/**
+ * Global Mobile Responsive CSS
+ * Injected once via main.js - covers all UI modules
+ */
+
+/* ===== SHARED LAYOUT FIXES ===== */
+
+/* Make all data tables horizontally scrollable on mobile */
+@media (max-width: 768px) {
+
+  /* Content area gets extra bottom padding on mobile for bottom nav bar */
+  .content-area {
+    padding: 0.75rem !important;
+    padding-bottom: 5rem !important; /* Space for bottom-nav */
+  }
+
+  /* Module Headers: stack vertically on mobile */
+  .module-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .module-header h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .module-header .btn,
+  .page-header .btn {
+    width: 100% !important;
+  }
+
+  /* Page headers: stack */
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Stats cards: 2-column grid instead of 4 across */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .stat-card {
+    padding: 0.875rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.1rem !important;
+  }
+
+  .stat-icon {
+    font-size: 1.5rem !important;
+  }
+
+  /* Table containers: enable horizontal scroll */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+  }
+
+  .data-table {
+    min-width: 600px; /* Forces scroll instead of squish */
+  }
+
+  /* Filters bar: stack vertically */
+  .filters-bar {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .filter-group {
+    width: 100% !important;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Form rows: collapse to single column */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modals: full screen on mobile */
+  dialog,
+  .transaction-modal,
+  .item-modal,
+  .po-modal,
+  .invoice-modal,
+  .scanner-modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
+    padding: 1.25rem !important;
+  }
+
+  /* Tab bars: wrap on mobile */
+  .ps-tab-bar,
+  .tab-bar {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .ps-tab,
+  .tab-btn {
+    flex: 1 !important;
+    min-width: 120px !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem !important;
+    text-align: center;
+  }
+
+  /* Search bars */
+  .search-bar,
+  .search-with-scan {
+    width: 100% !important;
+  }
+
+  .search-bar input,
+  .search-with-scan input {
+    width: 100% !important;
+  }
+
+  /* Cards grid: single column */
+  .customers-grid,
+  .cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* POS layout: stack vertically */
+  .pos-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Make sure dashboard stats fit */
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Reports charts */
+  .chart-row,
+  .chart-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Wallet cards */
+  .wallet-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* TrustCircle syndicate grid */
+  .syndicate-grid,
+  .members-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* SmartShift machine grid */
+  .machines-grid,
+  .shift-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Action buttons - full width */
+  .form-actions {
+    flex-direction: column-reverse !important;
+    gap: 0.5rem !important;
+  }
+
+  .form-actions .btn {
+    width: 100% !important;
+  }
+
+  /* Typography adjustments */
+  h1 { font-size: 1.4rem !important; }
+  h2 { font-size: 1.2rem !important; }
+  h3 { font-size: 1rem !important; }
+}
