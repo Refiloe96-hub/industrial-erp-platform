@@ -1828,22 +1828,46 @@ class IndustrialERPApp {
                 display: block;
             }
 
+            /* Sidebar: fixed overlay — takes zero layout space when hidden */
             .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100dvh !important;
+                height: 100vh !important; /* fallback */
+                width: 280px !important;
                 transform: translateX(-100%);
                 z-index: 1001;
                 transition: transform 0.3s ease;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+
+            /* Nav menu scrolls internally, footer stays pinned */
+            .sidebar .nav-menu {
+                flex: 1 !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+            }
+
+            .sidebar .sidebar-footer {
+                flex-shrink: 0 !important;
+                padding: 1rem !important;
+                border-top: 1px solid rgba(255,255,255,0.1) !important;
             }
 
             .sidebar.open {
                 transform: translateX(0);
             }
 
+            /* Main content: full width since sidebar is out of flow */
             .main-content {
                 margin-left: 0 !important;
                 padding-top: 56px !important;
                 padding-bottom: 80px !important;
                 width: 100% !important;
-                max-width: 100% !important;
+                max-width: 100vw !important;
                 overflow-x: hidden !important;
             }
 
