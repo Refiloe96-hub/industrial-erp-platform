@@ -11,7 +11,8 @@
   /* Content area gets extra bottom padding on mobile for bottom nav bar */
   .content-area {
     padding: 0.75rem !important;
-    padding-bottom: 5rem !important; /* Space for bottom-nav */
+    padding-bottom: 5rem !important;
+    /* Space for bottom-nav */
   }
 
   /* Module Headers: stack vertically on mobile */
@@ -66,7 +67,8 @@
   }
 
   .data-table {
-    min-width: 600px; /* Forces scroll instead of squish */
+    min-width: 600px;
+    /* Forces scroll instead of squish */
   }
 
   /* Filters bar: stack vertically */
@@ -186,8 +188,135 @@
     width: 100% !important;
   }
 
-  /* Typography adjustments */
-  h1 { font-size: 1.4rem !important; }
-  h2 { font-size: 1.2rem !important; }
-  h3 { font-size: 1rem !important; }
+  /* ===== SMARTSHIFT SPECIFIC ===== */
+  /* Tab bar: wrap on mobile */
+  .module-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem !important;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .btn-tab {
+    flex: 1 !important;
+    min-width: 0 !important;
+    font-size: 0.75rem !important;
+    padding: 0.45rem 0.4rem !important;
+    text-align: center !important;
+    white-space: nowrap;
+    border-radius: 6px;
+  }
+
+  /* SmartShift action bars */
+  .action-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .action-bar h2 {
+    margin: 0 !important;
+  }
+
+  .action-bar .btn,
+  .action-bar>div {
+    width: 100% !important;
+  }
+
+  .action-bar>div {
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+
+  .machine-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .smart-shift-layout .dashboard-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* ===== TRUSTCIRCLE SPECIFIC ===== */
+  /* TrustCircle header stacks h1, p, button vertically */
+  .trustcircle-dashboard .module-header,
+  .trustcircle-dashboard header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .trustcircle-dashboard .module-header h1,
+  .trustcircle-dashboard header h1 {
+    font-size: 1.2rem !important;
+    width: 100% !important;
+  }
+
+  .trustcircle-dashboard .module-header p {
+    width: 100% !important;
+  }
+
+  .trustcircle-dashboard .module-header .btn,
+  .trustcircle-dashboard header .btn {
+    width: 100% !important;
+  }
+
+  .stats-overview {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Section headers (group buys, funding requests) */
+  .section-header {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .section-header .btn {
+    width: 100% !important;
+  }
+
+  /* Detail tabs inside syndicate pages */
+  .detail-tab-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .detail-tab {
+    flex: 1 !important;
+    min-width: 0 !important;
+    font-size: 0.75rem !important;
+    padding: 0.45rem !important;
+    text-align: center !important;
+  }
+
+  /* TrustCircle syndicate detail grid - stack on mobile */
+  .grid-layout {
+    display: block !important;
+  }
+
+  /* ===== SIDEBAR FOOTER ALWAYS VISIBLE ===== */
+  .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .sidebar .sidebar-footer {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+  }
 }
