@@ -643,7 +643,7 @@ class ReportsUI {
         /* Advanced Stats Grid */
         .advanced-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -708,7 +708,7 @@ class ReportsUI {
 
         .report-stats {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
           gap: 1rem;
           margin-bottom: 1.5rem;
         }
@@ -741,7 +741,7 @@ class ReportsUI {
 
         .reports-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
           gap: 1.5rem;
         }
 
@@ -751,7 +751,7 @@ class ReportsUI {
 
         .inventory-summary {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
           gap: 1rem;
         }
 
@@ -800,16 +800,55 @@ class ReportsUI {
         }
 
         @media (max-width: 768px) {
-          .reports-grid {
-            grid-template-columns: 1fr;
+          /* All grids: single column on mobile */
+          .reports-grid,
+          .advanced-stats-grid,
+          .report-stats {
+            grid-template-columns: 1fr !important;
+            gap: 0.75rem !important;
+          }
+
+          /* Inventory summary: 2-col on mobile is fine */
+          .inventory-summary {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.5rem !important;
+          }
+
+          /* Controls: stack vertically */
+          .report-controls {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+
+          .filter-controls {
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+
+          .filter-controls .form-select,
+          .export-controls .form-select {
+            width: 100% !important;
           }
 
           .date-range-selector {
             width: 100%;
+            display: flex;
           }
 
           .date-range-selector button {
             flex: 1;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.5rem;
+          }
+
+          /* ABC analysis cards: full width */
+          .reports-grid.mb-4 {
+            grid-template-columns: 1fr !important;
+          }
+
+          /* KPI value smaller on mobile */
+          .kpi-value {
+            font-size: 1.75rem !important;
           }
         }
       </style>
