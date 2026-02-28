@@ -1019,6 +1019,7 @@ class IndustrialERPApp {
           flex: 1;
           background: var(--bg-secondary);
           transition: margin-left 0.3s ease;
+          min-width: 0;
         }
 
         .sidebar.collapsed + .main-content {
@@ -1111,11 +1112,7 @@ class IndustrialERPApp {
           border-top: 1px solid rgba(255,255,255,0.1);
         }
         
-        .main-content {
-          margin-left: 260px;
-          flex: 1;
-          background: var(--bg-secondary);
-        }
+        /* NOTE: duplicate removed - see .main-content above */
         
         .content-header {
           background: var(--bg-primary);
@@ -1842,9 +1839,12 @@ class IndustrialERPApp {
             }
 
             .main-content {
-                margin-left: 0;
-                padding-top: 70px;
-                padding-bottom: 80px;
+                margin-left: 0 !important;
+                padding-top: 56px !important;
+                padding-bottom: 80px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: hidden !important;
             }
 
             .content-header {

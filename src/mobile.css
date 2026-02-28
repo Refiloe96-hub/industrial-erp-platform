@@ -15,6 +15,14 @@
     /* Space for bottom-nav */
   }
 
+  /* CRITICAL: force main content to fill full width on mobile */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
   /* Module Headers: stack vertically on mobile */
   .module-header {
     flex-direction: column !important;
