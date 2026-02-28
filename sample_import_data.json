@@ -1,0 +1,59 @@
+{
+    "inventory": [
+        {
+            "name": "Coca Cola 2L",
+            "category": "Drinks",
+            "price": 22.00,
+            "cost": 15.00,
+            "quantity": 50,
+            "reorderLevel": 10,
+            "image": "https://example.com/coke.png"
+        },
+        {
+            "name": "Blue Ribbon Bread",
+            "category": "Food",
+            "price": 18.00,
+            "cost": 12.00,
+            "quantity": 30,
+            "reorderLevel": 5,
+            "image": "https://example.com/bread.png"
+        },
+        {
+            "name": "Vodacom Airtime R10",
+            "category": "Airtime",
+            "price": 10.00,
+            "cost": 9.50,
+            "quantity": 100,
+            "reorderLevel": 20,
+            "image": "https://example.com/vodacom.png"
+        },
+        {
+            "name": "Chicken Licken Full Chicken",
+            "category": "Food",
+            "price": 95.00,
+            "cost": 65.00,
+            "quantity": 20,
+            "reorderLevel": 3
+        }
+    ],
+    "suppliers": [
+        {
+            "name": "Makro Cash & Carry",
+            "contact": "Sales Desk",
+            "email": "support@makro.co.za",
+            "phone": "+27 860 300 999"
+        }
+    ],
+    "accounts": [
+        {
+            "name": "Cash Drawer",
+            "type": "asset",
+            "balance": 2500.00
+        },
+        {
+            "name": "Sales Revenue",
+            "type": "income",
+            "balance": 15000.00
+        }
+    ]
+}

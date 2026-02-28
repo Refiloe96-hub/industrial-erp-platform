@@ -1,0 +1,493 @@
+// SmartShift Module - Manufacturing Execution System (MES)
+// Purpose: Optimize machines, people, and time
+// Role: Floor Manager
+// NOT: Gig marketplace or worker discovery platform
+
+import db, { STORES } from '../db/index.js';
+
+class SmartShift {
+  constructor(aiEngine, pocketBooks) {
+    this.aiEngine = aiEngine;
+    this.pocketBooks = pocketBooks;
+  }
+
+  // Create production order
+  async createProductionOrder(data) {
+    const order = {
+      orderNumber: data.orderNumber || `PO-${Date.now()}`,
+      product: data.product,
+      quantity: data.quantity,
+      unit: data.unit,
+      dueDate: data.dueDate,
+      priority: data.priority || 5, // 1-10, 10 is highest
+      requiredCapability: data.requiredCapability,
+      requiredSkill: data.requiredSkill,
+      estimatedTime: data.estimatedTime, // in hours
+      status: 'pending', // pending, scheduled, in_progress, completed, cancelled
+      progress: 0,
+      notes: data.notes,
+      createdAt: Date.now()
+    };
+
+    const id = await db.add(STORES.productionOrders, order);
+    console.log('✅ Production order created:', id);
+
+    return { id, ...order };
+  }
+
+  // Get production orders
+  async getProductionOrders(filters = {}) {
+    let orders = await db.getAll(STORES.productionOrders);
+
+    if (filters.status) {
+      orders = orders.filter(o => o.status === filters.status);
+    }
+
+    if (filters.priority) {
+      orders = orders.filter(o => o.priority >= filters.priority);
+    }
+
+    // Sort by priority and due date
+    orders.sort((a, b) => {
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return a.dueDate - b.dueDate;
+    });
+
+    return orders;
+  }
+
+  // Add/Update machine
+  async updateMachine(data) {
+    const machine = {
+      id: data.id,
+      name: data.name,
+      type: data.type,
+      capabilities: data.capabilities || [], // ['cutting', 'welding', 'assembly']
+      throughput: data.throughput, // units per hour
+      status: data.status || 'operational', // operational, maintenance, broken, idle
+      utilization: data.utilization || 0, // percentage
+      location: data.location,
+      lastMaintenance: data.lastMaintenance,
+      nextMaintenance: data.nextMaintenance,
+      notes: data.notes,
+      lastUpdated: Date.now()
+    };
+
+    if (machine.id) {
+      await db.update(STORES.machines, machine);
+    } else {
+      const id = await db.add(STORES.machines, machine);
+      machine.id = id;
+    }
+
+    console.log('✅ Machine updated:', machine.name);
+    return machine;
+  }
+
+  // Get all machines
+  async getMachines(filters = {}) {
+    let machines = await db.getAll(STORES.machines);
+
+    if (filters.status) {
+      machines = machines.filter(m => m.status === filters.status);
+    }
+
+    if (filters.capability) {
+      machines = machines.filter(m => m.capabilities.includes(filters.capability));
+    }
+
+    return machines;
+  }
+
+  // Add/Update worker
+  async updateWorker(data) {
+    const worker = {
+      id: data.id,
+      name: data.name,
+      skills: data.skills || [], // ['machinist', 'welder', 'quality_control']
+      availability: data.availability || 'available', // available, busy, off_duty
+      shiftPreference: data.shiftPreference, // day, night, flexible
+      hourlyRate: data.hourlyRate,
+      performance: data.performance || 100, // percentage
+      notes: data.notes,
+      lastUpdated: Date.now()
+    };
+
+    if (worker.id) {
+      await db.update(STORES.workers, worker);
+    } else {
+      const id = await db.add(STORES.workers, worker);
+      worker.id = id;
+    }
+
+    console.log('✅ Worker updated:', worker.name);
+    return worker;
+  }
+
+  // Get all workers
+  async getWorkers(filters = {}) {
+    let workers = await db.getAll(STORES.workers);
+
+    if (filters.availability) {
+      workers = workers.filter(w => w.availability === filters.availability);
+    }
+
+    if (filters.skill) {
+      workers = workers.filter(w => w.skills.includes(filters.skill));
+    }
+
+    return workers;
+  }
+
+  // Create shift
+  async createShift(data) {
+    const shift = {
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      machineId: data.machineId,
+      workerId: data.workerId,
+      orderId: data.orderId,
+      plannedHours: data.plannedHours,
+      standardHours: 8, // standard shift
+      actualHours: null,
+      status: 'scheduled', // scheduled, in_progress, completed, cancelled
+      output: null,
+      notes: data.notes,
+      createdAt: Date.now()
+    };
+
+    const id = await db.add(STORES.shifts, shift);
+    console.log('✅ Shift created:', id);
+
+    // Update production order status
+    if (data.orderId) {
+      const order = await db.get(STORES.productionOrders, data.orderId);
+      if (order && order.status === 'pending') {
+        order.status = 'scheduled';
+        await db.update(STORES.productionOrders, order);
+      }
+    }
+
+    return { id, ...shift };
+  }
+
+  // Get all shifts
+  async getShifts(filters = {}) {
+    let shifts = await db.getAll(STORES.shifts);
+
+    if (filters.status) {
+      shifts = shifts.filter(s => s.status === filters.status);
+    }
+
+    if (filters.machineId) {
+      shifts = shifts.filter(s => s.machineId === filters.machineId);
+    }
+
+    // Sort by date/time descending
+    shifts.sort((a, b) => {
+      return b.startTime - a.startTime;
+    });
+
+    // Enhance with related data names for UI
+    const machines = await this.getMachines();
+    const workers = await this.getWorkers();
+
+    return shifts.map(s => ({
+      ...s,
+      machineName: machines.find(m => m.id === s.machineId)?.name || 'Unknown',
+      workerName: workers.find(w => w.id === s.workerId)?.name || 'Unknown'
+    }));
+  }
+
+  // Start shift
+  async startShift(shiftId) {
+    const shift = await db.get(STORES.shifts, shiftId);
+
+    if (!shift) {
+      throw new Error('Shift not found');
+    }
+
+    shift.status = 'in_progress';
+    shift.actualStartTime = Date.now();
+    await db.update(STORES.shifts, shift);
+
+    // Update production order
+    if (shift.orderId) {
+      const order = await db.get(STORES.productionOrders, shift.orderId);
+      if (order) {
+        order.status = 'in_progress';
+        await db.update(STORES.productionOrders, order);
+      }
+    }
+
+    // Update machine utilization
+    const machine = await db.get(STORES.machines, shift.machineId);
+    if (machine) {
+      machine.status = 'operational';
+      await db.update(STORES.machines, machine);
+    }
+
+    // Update worker availability
+    const worker = await db.get(STORES.workers, shift.workerId);
+    if (worker) {
+      worker.availability = 'busy';
+      await db.update(STORES.workers, worker);
+    }
+
+    console.log('✅ Shift started:', shiftId);
+
+    // Check materials (Integration)
+    if (shift.orderId) {
+      const order = await db.get(STORES.productionOrders, shift.orderId);
+      if (order) {
+        const hasMaterials = await this.checkMaterials(order.product, 1);
+        if (!hasMaterials) {
+          console.warn('⚠️ Warning: Starting shift with low raw materials!');
+        }
+      }
+    }
+
+    return shift;
+  }
+
+  // Complete shift
+  async completeShift(shiftId, output) {
+    const shift = await db.get(STORES.shifts, shiftId);
+
+    if (!shift) {
+      throw new Error('Shift not found');
+    }
+
+    shift.status = 'completed';
+    shift.actualEndTime = Date.now();
+    shift.actualHours = (shift.actualEndTime - shift.actualStartTime) / (1000 * 60 * 60);
+    shift.output = output;
+    await db.update(STORES.shifts, shift);
+
+    // Update production order progress
+    if (shift.orderId) {
+      const order = await db.get(STORES.productionOrders, shift.orderId);
+      if (order) {
+        order.progress = Math.min(100, order.progress + (output / order.quantity * 100));
+
+        if (order.progress >= 100) {
+          order.status = 'completed';
+          order.completedAt = Date.now();
+        }
+
+        await db.update(STORES.productionOrders, order);
+
+        // Deduct materials (Integration)
+        await this.deductMaterials(order.product, output);
+      }
+    }
+
+    // Update machine utilization (simplified)
+    const machine = await db.get(STORES.machines, shift.machineId);
+    if (machine) {
+      machine.status = 'idle';
+      await db.update(STORES.machines, machine);
+    }
+
+    // Update worker availability
+    const worker = await db.get(STORES.workers, shift.workerId);
+    if (worker) {
+      worker.availability = 'available';
+      await db.update(STORES.workers, worker);
+
+      // Integration: Record Labor Cost
+      if (this.pocketBooks && shift.actualHours > 0) {
+        const cost = shift.actualHours * worker.hourlyRate;
+        await this.pocketBooks.recordTransaction({
+          type: 'expense',
+          category: 'Labor',
+          amount: cost,
+          description: `Shift Labor: ${worker.name} on ${shift.machineName} (${shift.actualHours.toFixed(2)} hrs)`,
+          date: Date.now(),
+          reference: `SHIFT-${shiftId}`
+        });
+      }
+    }
+
+    console.log('✅ Shift completed:', shiftId);
+    return shift;
+  }
+
+  // Integration: Check materials
+  async checkMaterials(product, quantity) {
+    try {
+      const inventory = await db.getAll(STORES.inventory);
+      // Find raw materials or parts
+      const material = inventory.find(i =>
+        (i.category === 'Raw Materials' || i.category === 'Parts') &&
+        i.quantity >= quantity
+      );
+      return !!material;
+    } catch (e) {
+      return true; // Fail open if inventory generic check fails
+    }
+  }
+
+  // Integration: Deduct materials
+  async deductMaterials(product, quantity) {
+    try {
+      const inventory = await db.getAll(STORES.inventory);
+      // Find first available raw material to consume
+      // In real app, this would use BOM
+      const material = inventory.find(i =>
+        (i.category === 'Raw Materials' || i.category === 'Parts') &&
+        i.quantity > 0
+      );
+
+      if (material) {
+        const consumed = quantity;
+        material.quantity = Math.max(0, material.quantity - consumed);
+        await db.update(STORES.inventory, material);
+        console.log(`📉 Integrated: Consumed ${consumed} of ${material.name}`); // Log for demo
+      }
+    } catch (err) {
+      console.warn('Inventory deduction failed:', err);
+    }
+  }
+
+  // AI: Optimize production schedule
+  async optimizeSchedule() {
+    if (!this.aiEngine) {
+      console.warn('AI Engine not available');
+      return null;
+    }
+
+    const orders = await this.getProductionOrders({ status: 'pending' });
+    const machines = await this.getMachines({ status: 'operational' });
+    const workers = await this.getWorkers({ availability: 'available' });
+
+    if (orders.length === 0) {
+      return {
+        schedule: [],
+        insights: {
+          message: 'No pending orders to schedule'
+        }
+      };
+    }
+
+    const result = await this.aiEngine.optimizeSchedule(orders, machines, workers);
+
+    console.log('🤖 AI Schedule optimization complete');
+    return result;
+  }
+
+  // Apply AI-generated schedule
+  async applySchedule(schedule) {
+    const createdShifts = [];
+
+    for (const item of schedule) {
+      if (item.status === 'scheduled') {
+        const shift = await this.createShift({
+          date: new Date(item.startTime).toISOString().split('T')[0],
+          startTime: item.startTime,
+          endTime: item.startTime + (item.duration * 3600000),
+          machineId: item.machineId,
+          workerId: item.workerId,
+          orderId: item.orderId,
+          plannedHours: item.duration,
+          notes: 'AI-optimized schedule'
+        });
+
+        createdShifts.push(shift);
+      }
+    }
+
+    console.log(`✅ Applied schedule: ${createdShifts.length} shifts created`);
+    return createdShifts;
+  }
+
+  // Get production metrics
+  async getProductionMetrics(period = 30) {
+    const startDate = Date.now() - (period * 24 * 60 * 60 * 1000);
+
+    const orders = await this.getProductionOrders();
+    const shifts = await db.getAll(STORES.shifts);
+    const machines = await this.getMachines();
+
+    const periodOrders = orders.filter(o => o.createdAt >= startDate);
+    const periodShifts = shifts.filter(s => s.date >= startDate);
+
+    const completed = periodOrders.filter(o => o.status === 'completed').length;
+    const inProgress = periodOrders.filter(o => o.status === 'in_progress').length;
+    const pending = periodOrders.filter(o => o.status === 'pending').length;
+
+    // Calculate machine utilization
+    const totalMachineHours = machines.length * period * 24;
+    const actualMachineHours = periodShifts.reduce((sum, s) => sum + (s.actualHours || 0), 0);
+    // Fix: Handle division by zero if no machines
+    const machineUtilization = totalMachineHours > 0 ? (actualMachineHours / totalMachineHours) * 100 : 0;
+
+    // Calculate on-time delivery
+    const completedWithDueDate = periodOrders.filter(o =>
+      o.status === 'completed' && o.dueDate && o.completedAt
+    );
+    const onTime = completedWithDueDate.filter(o => o.completedAt <= o.dueDate).length;
+    const onTimeRate = completedWithDueDate.length > 0
+      ? (onTime / completedWithDueDate.length) * 100
+      : 0;
+
+    return {
+      period: `${period} days`,
+      orders: {
+        total: periodOrders.length,
+        completed,
+        inProgress,
+        pending
+      },
+      machineUtilization: Math.round(machineUtilization),
+      onTimeDeliveryRate: Math.round(onTimeRate),
+      shifts: periodShifts.length,
+      insights: this.generateProductionInsights(machineUtilization, onTimeRate, pending)
+    };
+  }
+
+  generateProductionInsights(utilization, onTimeRate, pendingOrders) {
+    const insights = [];
+
+    if (utilization < 50) {
+      insights.push({
+        type: 'warning',
+        message: 'Low machine utilization detected',
+        action: 'Consider taking on more orders or performing maintenance'
+      });
+    } else if (utilization > 85) {
+      insights.push({
+        type: 'info',
+        message: 'High machine utilization',
+        action: 'Monitor for capacity constraints'
+      });
+    }
+
+    if (onTimeRate < 70) {
+      insights.push({
+        type: 'warning',
+        message: 'Low on-time delivery rate',
+        action: 'Review scheduling and capacity planning'
+      });
+    } else if (onTimeRate > 90) {
+      insights.push({
+        type: 'success',
+        message: 'Excellent on-time delivery rate',
+        action: null
+      });
+    }
+
+    if (pendingOrders > 10) {
+      insights.push({
+        type: 'info',
+        message: `${pendingOrders} orders pending`,
+        action: 'Use AI schedule optimizer to plan production'
+      });
+    }
+
+    return insights;
+  }
+}
+
+export default SmartShift;

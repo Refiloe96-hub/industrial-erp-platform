@@ -1,0 +1,29 @@
+PWA Icon Placeholders
+
+For production deployment, replace these placeholders with actual branded icons.
+
+Required icon sizes:
+- 72x72
+- 96x96
+- 128x128
+- 144x144
+- 152x152
+- 192x192 (recommended for home screen)
+- 384x384
+- 512x512 (recommended for splash screen)
+
+Icon should:
+- Be simple and recognizable
+- Work on light and dark backgrounds
+- Represent industrial/manufacturing theme
+- Be visible at small sizes
+
+Use tools like:
+- Figma / Adobe Illustrator
+- PWA Asset Generator
+- RealFaviconGenerator
+
+Color scheme suggestion:
+- Primary: Industrial blue (#2563eb)
+- Secondary: Manufacturing gray (#1a1a1a)
+- Accent: Success green (#10b981)
