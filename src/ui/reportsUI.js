@@ -714,29 +714,25 @@ class ReportsUI {
         }
 
         .stat-card.revenue {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: white;
+          border-left: 4px solid #16a34a;
         }
 
         .stat-card.expenses {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
-          color: white;
+          border-left: 4px solid #dc2626;
         }
 
         .stat-card.profit.positive {
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
-          color: white;
+          border-left: 4px solid #6366f1;
         }
 
         .stat-card.profit.negative {
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          color: white;
+          border-left: 4px solid #f59e0b;
         }
 
         .stat-card.revenue .stat-label,
         .stat-card.expenses .stat-label,
         .stat-card.profit .stat-label {
-          color: rgba(255,255,255,0.8);
+          color: var(--text-secondary);
         }
 
         .reports-grid {

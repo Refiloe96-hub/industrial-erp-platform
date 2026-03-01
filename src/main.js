@@ -477,8 +477,8 @@ class IndustrialERPApp {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = loginForm.querySelector('button');
-      const originalText = btn.textContent;
-      btn.textContent = 'Verifying...';
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Verifying...';
       btn.disabled = true;
 
       try {
@@ -486,54 +486,43 @@ class IndustrialERPApp {
         const username = formData.get('username');
         const password = formData.get('password');
 
-        // Fetch local user record first (needed for both paths)
+        // ALWAYS verify locally first — fast, reliable, works offline
         const localUser = await db.get('users', username);
+        const hashedPassword = await hashPassword(password);
 
-        if (isSupabaseEnabled() && localUser?.email) {
-          // --- Supabase auth path ---
-          const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: localUser.email,
-            password
-          });
-          if (error) throw new Error(error.message);
-
-          // Fetch full profile from Supabase
-          const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-          const user = profile || localUser;
-          user.lastLogin = Date.now();
-          this.currentUser = user;
-          localStorage.setItem('erp_session', JSON.stringify(user));
-          this.render();
-          initSync();
-        } else {
-          // --- Local auth path ---
-          const hashedPassword = await hashPassword(password);
-
-          if (localUser && localUser.password === hashedPassword) {
-            this.currentUser = localUser;
-            localStorage.setItem('erp_session', JSON.stringify(localUser));
-            localUser.lastLogin = Date.now();
-            await db.update('users', localUser);
-            this.render();
-            initSync();
-          } else {
-            alert('Invalid username or password');
-            btn.textContent = originalText;
-            btn.disabled = false;
-          }
+        if (!localUser || localUser.password !== hashedPassword) {
+          alert('Invalid username or password.');
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+          return;
         }
+
+        // Local auth passed — log them in immediately
+        localUser.lastLogin = Date.now();
+        this.currentUser = localUser;
+        localStorage.setItem('erp_session', JSON.stringify(localUser));
+        await db.update('users', localUser);
+
+        // Optionally sync session with Supabase in the background (non-blocking)
+        if (isSupabaseEnabled() && localUser.email) {
+          supabaseClient.auth.signInWithPassword({ email: localUser.email, password })
+            .then(({ data }) => {
+              if (data?.user) initSync();
+            })
+            .catch(err => console.warn('Supabase sync skipped:', err.message));
+        }
+
+        this.render();
+        initSync();
+
       } catch (err) {
         console.error('Login error:', err);
         alert('Login failed: ' + err.message);
-        btn.textContent = originalText;
+        btn.innerHTML = originalHTML;
         btn.disabled = false;
       }
     });
+
 
     // Handle Register
     registerForm.addEventListener('submit', async (e) => {
@@ -555,6 +544,7 @@ class IndustrialERPApp {
           return;
         }
 
+        const password = formData.get('password');
         const email = formData.get('email')?.trim() || '';
         // Only use email with Supabase if it looks genuinely valid (has @ and a real TLD)
         const emailIsValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) &&
@@ -576,33 +566,34 @@ class IndustrialERPApp {
 
         if (isSupabaseEnabled() && emailIsValid) {
           // --- Supabase auth path (only when email is provably real) ---
-          const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: {
-              // Don't send a confirmation email — avoids bounces and is
-              // not needed since this is an invite-based internal app
-              emailRedirectTo: null,
-              data: { username, business_name: userData.businessName }
+          try {
+            const { data, error } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                emailRedirectTo: null,
+                data: { username, business_name: userData.businessName }
+              }
+            });
+            if (!error && data?.user) {
+              await supabaseClient.from('profiles').upsert({
+                id: data.user.id,
+                username,
+                business_name: userData.businessName,
+                business_type: userData.businessType,
+                owner_name: userData.ownerName,
+                phone: userData.phone,
+                email,
+                role: 'admin',
+                created_at: new Date().toISOString()
+              });
+              userData.supabaseId = data.user.id;
             }
-          });
-          if (error) throw new Error(error.message);
-
-          // Store profile in Supabase
-          await supabaseClient.from('profiles').upsert({
-            id: data.user.id,
-            username,
-            business_name: userData.businessName,
-            business_type: userData.businessType,
-            owner_name: userData.ownerName,
-            phone: userData.phone,
-            email,
-            role: 'admin',
-            created_at: new Date().toISOString()
-          });
-
-          userData.supabaseId = data.user.id;
+          } catch (supabaseErr) {
+            console.warn('Supabase signUp failed, continuing with local account:', supabaseErr.message);
+          }
         }
+
 
         // Always store locally for offline operation
         await db.add('users', userData);
@@ -1205,17 +1196,29 @@ class IndustrialERPApp {
         }
         
         .ai-alert {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+          background: var(--bg-primary);
+          border-left: 4px solid #6366f1;
+          position: relative;
+          overflow: hidden;
         }
+        .ai-alert .card-header h3 { color: #6366f1; }
+        .ai-alert .alert-text { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+        .ai-alert .btn-primary { background: #6366f1; font-size: 0.875rem; padding: 0.5rem 1.25rem; }
+        .ai-alert .btn-primary:hover { background: #4f46e5; }
         
         .stat-card {
           display: flex;
+          align-items: center;
           gap: 1rem;
+          border-left: 3px solid var(--border);
         }
+        .stat-card:hover { border-left-color: var(--accent-primary); }
         
         .stat-icon {
-          font-size: 2.5rem;
+          font-size: 1.75rem;
+          color: var(--text-secondary);
+          opacity: 0.6;
+          flex-shrink: 0;
         }
         
         .stat-content {

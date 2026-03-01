@@ -136,10 +136,10 @@ class PocketBooksUI {
         }
 
         return transactions.map(t => `
-            <tr class="transaction-row ${t.type}">
+            <tr class="transaction-row ${t.type}" data-id="${t.id}" style="cursor:pointer;">
                 <td>${new Date(t.date).toLocaleDateString('en-ZA')}</td>
                 <td>${t.description}</td>
-                <td><span class="badge ${t.category.toLowerCase()}">${t.category}</span></td>
+                <td><span class="badge ${t.category?.toLowerCase()}">${t.category}</span></td>
                 <td class="reference">${t.reference || '-'}</td>
                 <td class="amount ${t.type}">
                     ${t.type === 'income' ? '+' : '-'} R ${(t.amount || 0).toLocaleString()}
@@ -154,15 +154,18 @@ class PocketBooksUI {
             this.showAddTransactionModal();
         });
 
+        // Row click → detail panel
+        this.container.querySelector('#transactions-table tbody').addEventListener('click', async (e) => {
+            const row = e.target.closest('tr[data-id]');
+            if (!row) return;
+            const all = await this.module.getTransactions();
+            const t = all.find(x => String(x.id) === row.dataset.id);
+            if (t) this.showTransactionDetail(t);
+        });
+
         // Filters
-        this.container.querySelector('#category-filter').addEventListener('change', (e) => {
-            this.applyFilters();
-        });
-
-        this.container.querySelector('#type-filter').addEventListener('change', (e) => {
-            this.applyFilters();
-        });
-
+        this.container.querySelector('#category-filter').addEventListener('change', () => this.applyFilters());
+        this.container.querySelector('#type-filter').addEventListener('change', () => this.applyFilters());
         this.container.querySelector('#period-filter').addEventListener('change', (e) => {
             this.dateRange = parseInt(e.target.value);
             this.loadDashboard();
@@ -180,6 +183,96 @@ class PocketBooksUI {
         const transactions = await this.module.getTransactions(filters);
         const tbody = this.container.querySelector('#transactions-table tbody');
         tbody.innerHTML = this.renderTransactionRows(transactions);
+    }
+
+    showTransactionDetail(t) {
+        // Remove existing panel if open
+        document.querySelector('.tx-detail-panel')?.remove();
+        document.querySelector('.tx-detail-overlay')?.remove();
+
+        const isIncome = t.type === 'income';
+        const amountColor = isIncome ? '#16a34a' : '#dc2626';
+        const dateStr = new Date(t.date).toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        const overlay = document.createElement('div');
+        overlay.className = 'tx-detail-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
+
+        const panel = document.createElement('div');
+        panel.className = 'tx-detail-panel';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
+
+        panel.innerHTML = `
+            <style>
+                @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+                .tx-detail-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border,#e5e7eb); display:flex; align-items:center; justify-content:space-between; }
+                .tx-detail-header h2 { font-size: 1rem; font-weight: 600; color: var(--text-primary,#111); margin:0; }
+                .tx-detail-body { flex:1; overflow-y:auto; padding:1.5rem; }
+                .tx-amount-hero { text-align:center; padding: 2rem 0 1.5rem; }
+                .tx-amount-hero .amount { font-size: 2.5rem; font-weight: 700; letter-spacing:-1px; color:${amountColor}; }
+                .tx-amount-hero .type-badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:${isIncome ? '#dcfce7' : '#fee2e2'}; color:${amountColor}; margin-top:0.5rem; }
+                .tx-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
+                .tx-field { background:var(--bg-secondary,#f8fafc); border-radius:8px; padding:0.875rem 1rem; }
+                .tx-field .field-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-secondary,#6b7280); margin-bottom:0.25rem; }
+                .tx-field .field-value { font-size:0.95rem; font-weight:500; color:var(--text-primary,#111); word-break:break-word; }
+                .tx-field.full-span { grid-column:1/-1; }
+                .tx-detail-footer { padding:1rem 1.5rem; border-top:1px solid var(--border,#e5e7eb); display:flex; gap:0.75rem; }
+                .btn-close-panel { flex:1; padding:0.6rem; border:1px solid var(--border,#e5e7eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#6b7280); }
+                .btn-close-panel:hover { background:var(--bg-secondary,#f8fafc); }
+            </style>
+            <div class="tx-detail-header">
+                <h2>Transaction Details</h2>
+                <button id="close-tx-panel" style="background:none;border:none;cursor:pointer;color:var(--text-secondary,#6b7280);font-size:1.25rem;">✕</button>
+            </div>
+            <div class="tx-detail-body">
+                <div class="tx-amount-hero">
+                    <div class="amount">${isIncome ? '+' : '-'} R ${(t.amount || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</div>
+                    <div class="type-badge">${t.type}</div>
+                </div>
+                <div class="tx-field-grid">
+                    <div class="tx-field">
+                        <div class="field-label">Date</div>
+                        <div class="field-value">${dateStr}</div>
+                    </div>
+                    <div class="tx-field">
+                        <div class="field-label">Category</div>
+                        <div class="field-value">${t.category || '—'}</div>
+                    </div>
+                    <div class="tx-field full-span">
+                        <div class="field-label">Description</div>
+                        <div class="field-value">${t.description || '—'}</div>
+                    </div>
+                    <div class="tx-field">
+                        <div class="field-label">Reference</div>
+                        <div class="field-value">${t.reference || '—'}</div>
+                    </div>
+                    <div class="tx-field">
+                        <div class="field-label">Payment Method</div>
+                        <div class="field-value">${t.paymentMethod || '—'}</div>
+                    </div>
+                    ${t.notes ? `<div class="tx-field full-span"><div class="field-label">Notes</div><div class="field-value">${t.notes}</div></div>` : ''}
+                    <div class="tx-field">
+                        <div class="field-label">Transaction ID</div>
+                        <div class="field-value" style="font-family:monospace;font-size:0.8rem;">${t.id || '—'}</div>
+                    </div>
+                    <div class="tx-field">
+                        <div class="field-label">Status</div>
+                        <div class="field-value">${t.status || 'Completed'}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tx-detail-footer">
+                <button class="btn-close-panel" id="close-tx-panel-footer">Close</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(panel);
+
+        const close = () => { panel.remove(); overlay.remove(); };
+        panel.querySelector('#close-tx-panel').addEventListener('click', close);
+        panel.querySelector('#close-tx-panel-footer').addEventListener('click', close);
+        overlay.addEventListener('click', close);
     }
 
     showAddTransactionModal() {

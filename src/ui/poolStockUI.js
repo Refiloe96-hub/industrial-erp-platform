@@ -144,7 +144,7 @@ class PoolStockUI {
         return inventory.map(item => {
             const status = this.getStockStatus(item);
             return `
-                <tr class="inventory-row ${status.class}">
+                <tr class="inventory-row ${status.class}" data-sku="${item.sku}" style="cursor:pointer;">
                     <td class="item-image">
                         ${item.image ?
                     `<img src="${item.image}" alt="${item.name}" class="product-thumb">` :
@@ -158,7 +158,7 @@ class PoolStockUI {
                     <td>${item.reorderLevel || 10}</td>
                     <td>R ${(item.unitPrice || 0).toLocaleString()}</td>
                     <td><span class="badge ${status.class}">${status.label}</span></td>
-                    <td class="actions">
+                    <td class="actions" onclick="event.stopPropagation()">
                         <button class="btn-icon" onclick="window.poolStockUI.editItem('${item.sku}')" title="Edit"><i class="ph-duotone ph-pencil-simple"></i></button>
                         <button class="btn-icon" onclick="window.poolStockUI.adjustStock('${item.sku}')" title="Adjust Stock"><i class="ph-duotone ph-archive-box"></i></button>
                     </td>
@@ -176,6 +176,137 @@ class PoolStockUI {
         return { label: 'In Stock', class: 'success' };
     }
 
+    showItemDetail(item) {
+        document.querySelector('.item-detail-panel')?.remove();
+        document.querySelector('.item-detail-overlay')?.remove();
+
+        const status = this.getStockStatus(item);
+        const totalValue = (item.quantity || 0) * (item.unitPrice || 0);
+        const reorderLevel = item.reorderLevel || 10;
+        const maxBar = Math.max(item.quantity, reorderLevel) * 1.3 || 1;
+        const qtyPct = Math.min((item.quantity / maxBar) * 100, 100);
+        const reorderPct = Math.min((reorderLevel / maxBar) * 100, 100);
+
+        const statusColors = { success: '#16a34a', warning: '#d97706', danger: '#dc2626' };
+        const statusBg = { success: '#dcfce7', warning: '#fef3c7', danger: '#fee2e2' };
+        const color = statusColors[status.class] || '#6b7280';
+        const bg = statusBg[status.class] || '#f3f4f6';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'item-detail-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
+
+        const panel = document.createElement('div');
+        panel.className = 'item-detail-panel';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(460px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
+
+        panel.innerHTML = `
+            <style>
+                @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+                .ip-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border,#e5e7eb); display:flex; align-items:center; justify-content:space-between; }
+                .ip-header h2 { font-size: 1rem; font-weight: 600; margin: 0; color: var(--text-primary,#111); }
+                .ip-body { flex:1; overflow-y:auto; padding: 1.5rem; }
+                .ip-hero { display:flex; align-items:center; gap:1rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border,#e5e7eb); margin-bottom:1.25rem; }
+                .ip-hero-icon { width:56px; height:56px; border-radius:12px; background:var(--bg-secondary,#f8fafc); display:flex; align-items:center; justify-content:center; font-size:1.75rem; flex-shrink:0; }
+                .ip-hero-name { font-size:1.125rem; font-weight:700; color:var(--text-primary,#111); }
+                .ip-hero-sub { font-size:0.8rem; color:var(--text-secondary,#6b7280); margin-top:0.2rem; font-family:monospace; }
+                .ip-status-badge { display:inline-flex; align-items:center; padding:0.2rem 0.65rem; border-radius:999px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:${bg}; color:${color}; margin-top:0.4rem; }
+                .ip-section-title { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-secondary,#9ca3af); margin-bottom:0.75rem; }
+                .ip-chart-wrap { margin-bottom:1.5rem; }
+                .ip-chart-row { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; }
+                .ip-chart-label { font-size:0.75rem; color:var(--text-secondary,#6b7280); width:100px; flex-shrink:0; }
+                .ip-bar-track { flex:1; height:10px; background:var(--bg-secondary,#f0f0f0); border-radius:999px; overflow:hidden; }
+                .ip-bar-fill { height:100%; border-radius:999px; transition:width 0.6s ease; }
+                .ip-bar-val { font-size:0.8rem; font-weight:600; color:var(--text-primary,#111); width:40px; text-align:right; flex-shrink:0; }
+                .ip-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
+                .ip-field { background:var(--bg-secondary,#f8fafc); border-radius:8px; padding:0.75rem 1rem; }
+                .ip-field .fl { font-size:0.67rem; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-secondary,#9ca3af); margin-bottom:0.2rem; }
+                .ip-field .fv { font-size:0.925rem; font-weight:600; color:var(--text-primary,#111); }
+                .ip-field.full { grid-column:1/-1; }
+                .ip-footer { padding:1rem 1.5rem; border-top:1px solid var(--border,#e5e7eb); display:flex; gap:0.75rem; }
+                .ip-btn { flex:1; padding:0.6rem; border:1px solid var(--border,#e5e7eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#6b7280); }
+                .ip-btn:hover { background:var(--bg-secondary,#f8fafc); }
+                .ip-btn-primary { background:#f97316; color:#fff; border-color:#f97316; font-weight:600; }
+                .ip-btn-primary:hover { background:#ea580c; }
+            </style>
+            <div class="ip-header">
+                <h2>Item Details</h2>
+                <button id="close-ip" style="background:none;border:none;cursor:pointer;color:var(--text-secondary,#6b7280);font-size:1.25rem;">✕</button>
+            </div>
+            <div class="ip-body">
+                <div class="ip-hero">
+                    <div class="ip-hero-icon">${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : '<i class="ph-duotone ph-package"></i>'}</div>
+                    <div>
+                        <div class="ip-hero-name">${item.name}</div>
+                        <div class="ip-hero-sub">${item.sku}</div>
+                        <div class="ip-status-badge">${status.label}</div>
+                    </div>
+                </div>
+
+                <div class="ip-chart-wrap">
+                    <div class="ip-section-title">Stock Level</div>
+                    <div class="ip-chart-row">
+                        <span class="ip-chart-label">Current Stock</span>
+                        <div class="ip-bar-track">
+                            <div class="ip-bar-fill" style="width:${qtyPct}%; background:${color};"></div>
+                        </div>
+                        <span class="ip-bar-val">${item.quantity}</span>
+                    </div>
+                    <div class="ip-chart-row">
+                        <span class="ip-chart-label">Reorder Level</span>
+                        <div class="ip-bar-track">
+                            <div class="ip-bar-fill" style="width:${reorderPct}%; background:#94a3b8;"></div>
+                        </div>
+                        <span class="ip-bar-val">${reorderLevel}</span>
+                    </div>
+                    ${item.quantity <= reorderLevel ? `<p style="font-size:0.8rem;color:${color};margin-top:0.5rem;font-weight:500;">⚠ Stock is at or below reorder level. Consider restocking.</p>` : ''}
+                </div>
+
+                <div class="ip-section-title">Product Information</div>
+                <div class="ip-field-grid">
+                    <div class="ip-field">
+                        <div class="fl">Category</div>
+                        <div class="fv">${item.category || '—'}</div>
+                    </div>
+                    <div class="ip-field">
+                        <div class="fl">Unit Price</div>
+                        <div class="fv">R ${(item.unitPrice || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="ip-field">
+                        <div class="fl">Total Value</div>
+                        <div class="fv" style="color:${color};">R ${totalValue.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="ip-field">
+                        <div class="fl">Reorder Level</div>
+                        <div class="fv">${reorderLevel} units</div>
+                    </div>
+                    ${item.supplier ? `<div class="ip-field full"><div class="fl">Supplier</div><div class="fv">${item.supplier}</div></div>` : ''}
+                    ${item.description ? `<div class="ip-field full"><div class="fl">Description</div><div class="fv">${item.description}</div></div>` : ''}
+                    <div class="ip-field">
+                        <div class="fl">SKU</div>
+                        <div class="fv" style="font-family:monospace;font-size:0.8rem;">${item.sku}</div>
+                    </div>
+                    <div class="ip-field">
+                        <div class="fl">Last Updated</div>
+                        <div class="fv">${item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('en-ZA') : '—'}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ip-footer">
+                <button class="ip-btn" id="close-ip-footer">Close</button>
+                <button class="ip-btn ip-btn-primary" onclick="window.poolStockUI.adjustStock('${item.sku}'); document.querySelector('.item-detail-panel')?.remove(); document.querySelector('.item-detail-overlay')?.remove();">Adjust Stock</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(panel);
+
+        const close = () => { panel.remove(); overlay.remove(); };
+        panel.querySelector('#close-ip').addEventListener('click', close);
+        panel.querySelector('#close-ip-footer').addEventListener('click', close);
+        overlay.addEventListener('click', close);
+    }
+
     attachEventListeners() {
         // Make instance globally available for inline handlers
         window.poolStockUI = this;
@@ -183,6 +314,16 @@ class PoolStockUI {
         // Add Item Button
         this.container.querySelector('#add-item-btn').addEventListener('click', () => {
             this.showAddItemModal();
+        });
+
+        // Row click → detail panel (but not on action buttons)
+        this.container.querySelector('#inventory-table tbody').addEventListener('click', async (e) => {
+            if (e.target.closest('.actions')) return;
+            const row = e.target.closest('tr[data-sku]');
+            if (!row) return;
+            const all = await this.module.getInventory();
+            const item = all.find(x => x.sku === row.dataset.sku);
+            if (item) this.showItemDetail(item);
         });
 
         // Tab navigation
@@ -747,7 +888,7 @@ class PoolStockUI {
                         modal.remove();
                         onResult(barcodes[0].rawValue);
                     }
-                } catch {}
+                } catch { }
             }, 200);
         } catch (err) {
             modal.close();
