@@ -28,7 +28,12 @@ class PocketBooksUI {
                             <h1><i class="ph-duotone ph-wallet"></i> PocketBooks</h1>
                             <p>Financial Ledger & Cash Flow Management</p>
                         </div>
-                        <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
+                        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                            <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
+                                <i class="ph-duotone ph-robot"></i> AI Insights
+                            </button>
+                            <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
+                        </div>
                     </header>
 
                     <!-- Stats Cards -->
@@ -153,6 +158,57 @@ class PocketBooksUI {
         // Add Transaction Button
         this.container.querySelector('#add-transaction-btn').addEventListener('click', () => {
             this.showAddTransactionModal();
+        });
+
+        // AI Insights Button
+        this.container.querySelector('#pb-ai-btn')?.addEventListener('click', async () => {
+            const { default: aiEngine } = await import('../services/aiEngine.js');
+            const { showDetailPanel, dpKV } = await import('./panelHelper.js');
+            const transactions = await this.module.getTransactions();
+            const result = aiEngine.analyzePocketBooks(transactions);
+
+            const sevColors = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+
+            // Forecast bar SVG (14-day)
+            const maxFc = Math.max(...result.forecast, 1);
+            const fcBars = result.forecast.slice(0, 14).map((v, i) => {
+                const h = Math.round((v / maxFc) * 40);
+                return `<rect x="${i * 14 + 2}" y="${44 - h}" width="11" height="${h}" rx="2" fill="#6366f1" opacity="0.7"/>`;
+            }).join('');
+            const fcSvg = `<svg width="210" height="46" viewBox="0 0 210 46" style="display:block;margin:0.5rem 0">${fcBars}</svg>`;
+
+            // NL Insights
+            const apiKey = aiEngine.getApiKey();
+            const insights = await aiEngine.getNLInsights(
+                { finance: result, inventory: { score: 50 }, production: { score: 50 }, syndicate: { score: 50 }, sales: { score: 50, status: 'no_data' }, overallScore: result.score },
+                apiKey
+            );
+
+            showDetailPanel({
+                title: '💰 PocketBooks AI Insights',
+                subtitle: `Financial score: ${result.score}/100 — ${result.trend} trend`,
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Financial Health</div>
+                        <div class="dp-kv-grid">
+                            ${dpKV('Net Cash Flow', (result.netCashFlow >= 0 ? '+' : '') + 'R ' + Math.round(result.netCashFlow).toLocaleString(), result.netCashFlow >= 0)}
+                            ${dpKV('Savings Rate', result.savingsRate + '%')}
+                            ${dpKV('Daily Burn Rate', 'R ' + result.burnRate)}
+                            ${dpKV('Anomalies Detected', result.anomalyCount)}
+                            ${dpKV('Top Expense Category', result.topExpenseCategory)}
+                        </div>
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">14-Day Cash Flow Forecast</div>
+                        ${fcSvg}
+                        <small style="color:var(--text-secondary)">Projected daily net (income trend using Holt's smoothing)</small>
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">AI Insights</div>
+                        ${insights.map(ins => `<div style="padding:0.5rem 0.75rem;border-radius:8px;background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#6366f1'};margin-bottom:0.5rem;font-size:0.875rem;">${ins.text}</div>`).join('')}
+                    </div>
+                `
+            });
         });
 
         // Row click → detail panel

@@ -103,6 +103,36 @@ class SettingsUI {
               <button class="btn btn-sm btn-secondary" disabled>Test Print</button>
             </div>
           </div>
+
+          <!-- AI & Forecasting -->
+          <div class="card settings-card" style="border-left:4px solid #6366f1">
+            <div class="card-header">
+              <h3><i class="ph-duotone ph-robot" style="color:#6366f1"></i> AI &amp; Forecasting</h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Groq API Key <small style="color:var(--text-secondary)">(free — <a href="https://console.groq.com" target="_blank" rel="noopener" style="color:#6366f1">get one here</a>)</small></label>
+                <input type="password" id="set-groq-key"
+                  value="${localStorage.getItem('erp_groq_api_key') || ''}"
+                  placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx"
+                  autocomplete="off">
+                <small style="color:var(--text-secondary);display:block;margin-top:0.3rem">
+                  Powers AI Business Advisor — signs up free, no credit card. Leave blank for rule-based insights.
+                </small>
+              </div>
+              <div class="form-group">
+                <label>Forecast Horizon</label>
+                <select id="set-forecast-horizon">
+                  <option value="7" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '7' ? 'selected' : ''}>7 Days</option>
+                  <option value="14" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '14' ? 'selected' : ''}>14 Days</option>
+                  <option value="30" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '30' ? 'selected' : ''}>30 Days</option>
+                </select>
+              </div>
+              <button class="btn btn-primary w-100" id="save-ai-settings">
+                <i class="ph ph-check"></i> Save AI Settings
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="settings-footer">
@@ -144,6 +174,15 @@ class SettingsUI {
         console.error(err);
         alert('Failed to save settings');
       }
+    });
+
+    // AI Settings Save
+    container.querySelector('#save-ai-settings')?.addEventListener('click', () => {
+      const key = (container.querySelector('#set-groq-key')?.value || '').trim();
+      const horizon = container.querySelector('#set-forecast-horizon')?.value || '14';
+      localStorage.setItem('erp_groq_api_key', key);
+      localStorage.setItem('erp_forecast_horizon', horizon);
+      alert(key ? '✅ Groq API key saved! AI insights are now enabled.' : '✅ AI settings saved (rule-based insights mode).');
     });
 
     // Backup

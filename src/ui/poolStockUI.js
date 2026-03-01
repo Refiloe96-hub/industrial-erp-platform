@@ -41,6 +41,7 @@ class PoolStockUI {
                     <div class="ps-tab-bar">
                         <button class="ps-tab active" data-tab="inventory"><i class="ph ph-package"></i> Inventory</button>
                         <button class="ps-tab" data-tab="purchase-orders"><i class="ph ph-clipboard-text"></i> Purchase Orders</button>
+                        <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast 🤖</button>
                     </div>
 
                     <!-- Stats Cards -->
@@ -404,6 +405,8 @@ class PoolStockUI {
             btn.addEventListener('click', () => {
                 if (btn.dataset.tab === 'purchase-orders') {
                     this.loadPurchaseOrders();
+                } else if (btn.dataset.tab === 'forecast') {
+                    this.loadForecastView();
                 } else {
                     this.loadDashboard();
                 }
@@ -425,6 +428,106 @@ class PoolStockUI {
                 }
             });
         });
+    }
+
+    async loadForecastView() {
+        this.container.innerHTML = '<div class="loading">🤖 Generating forecast...</div>';
+        try {
+            const { default: aiEngine } = await import('../services/aiEngine.js');
+            const [items, movements] = await Promise.all([
+                this.module.getInventory(),
+                db.getAll('stockMovements').catch(() => [])
+            ]);
+
+            const result = aiEngine.analyzePoolStock(items, movements);
+            const apiKey = aiEngine.getApiKey();
+
+            const urgRow = (item) => {
+                const colors = { critical: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#10b981' };
+                const col = colors[item.urgency] || '#6b7280';
+                const daysText = item.urgency === 'critical' ? 'Out now' : `${item.daysToStockout}d`;
+                // Mini sparkline SVG for forecast
+                const max = Math.max(...item.forecastSeries, 1);
+                const bars = item.forecastSeries.slice(0, 7).map((v, i) => {
+                    const h = Math.round((v / max) * 24);
+                    const x = i * 10 + 2;
+                    return `<rect x="${x}" y="${28 - h}" width="7" height="${h}" rx="2" fill="${col}" opacity="0.7"/>`;
+                }).join('');
+                const spark = `<svg width="72" height="30" viewBox="0 0 72 30">${bars}</svg>`;
+                return `<tr>
+                    <td style="font-weight:500">${item.name}</td>
+                    <td><span style="background:${col};color:#fff;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.75rem;font-weight:600">${item.urgency.toUpperCase()}</span></td>
+                    <td style="font-weight:700;color:${col}">${daysText}</td>
+                    <td style="color:var(--text-secondary)">${item.avgDailyDemand}/day</td>
+                    <td>${spark}</td>
+                    <td style="font-size:0.8rem;color:var(--text-secondary)">${item.preferredSupplier}</td>
+                </tr>`;
+            };
+
+            // Parallel: request NL insights while rendering
+            const insightsPromise = aiEngine.getNLInsights(
+                { finance: { score: 50 }, inventory: result, production: { score: 50 }, syndicate: { score: 50 }, sales: { score: 50, status: 'no_data' }, overallScore: result.score },
+                apiKey
+            );
+
+            const sevColors = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+            this.container.innerHTML = `
+                <div class="poolstock-ui">
+                    <header class="module-header">
+                        <div>
+                            <h1><i class="ph-duotone ph-chart-line-up"></i> Demand Forecast</h1>
+                            <p>AI-powered stockout prediction (${aiEngine.getHorizon()}-day horizon)</p>
+                        </div>
+                        <button id="back-to-inv" class="btn btn-secondary"><i class="ph ph-arrow-left"></i> Back</button>
+                    </header>
+
+                    ${result.status === 'no_data' ? `
+                        <div style="text-align:center;padding:3rem 1rem;">
+                            <i class="ph ph-package" style="font-size:3rem;color:var(--text-secondary)"></i>
+                            <p style="color:var(--text-secondary);margin-top:1rem">No inventory data yet. Add items and record stock movements to see forecasts.</p>
+                        </div>` : `
+
+                    <div class="card" style="margin-bottom:1rem;border-left:4px solid #6366f1">
+                        <div class="card-header"><h3>📊 Urgency Ranking — ${result.urgencyList.length} SKUs</h3>
+                            <span style="font-size:0.8rem;color:var(--text-secondary)">Score: <strong style="color:${result.score >= 70 ? '#10b981' : result.score >= 40 ? '#f59e0b' : '#ef4444'}">${result.score}/100</strong></span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Item</th><th>Risk</th><th>Stockout</th><th>Demand</th><th>7-Day Trend</th><th>Supplier</th></tr></thead>
+                                <tbody>${result.urgencyList.map(urgRow).join('')}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card" id="forecast-insights-card" style="border-left:4px solid #6366f1">
+                        <div class="card-header"><i class="ph-duotone ph-robot" style="color:#6366f1"></i> <h3 style="display:inline;margin-left:0.5rem">AI Inventory Insights</h3></div>
+                        <div class="card-body" id="forecast-insights">
+                            <div style="color:var(--text-secondary);font-size:0.875rem;display:flex;align-items:center;gap:0.4rem">
+                                <i class="ph ph-circle-notch" style="animation:spin 1s linear infinite"></i> Generating insights...
+                            </div>
+                        </div>
+                    </div>`}
+                </div>`;
+
+            this.container.querySelector('#back-to-inv')?.addEventListener('click', () => this.loadDashboard());
+
+            // Await insights then render
+            insightsPromise.then(insights => {
+                const el = this.container.querySelector('#forecast-insights');
+                if (!el) return;
+                el.innerHTML = insights.map(ins => `
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:8px;
+                        background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#6366f1'};margin-bottom:0.5rem">
+                        <span style="font-size:0.875rem;line-height:1.5;color:var(--text-primary)">${ins.text}</span>
+                    </div>`).join('');
+                if (!apiKey) {
+                    el.insertAdjacentHTML('beforeend', '<p style="margin:0.5rem 0 0;font-size:0.7rem;color:var(--text-secondary)">💡 Add a Groq API key in Settings → AI for smarter insights.</p>');
+                }
+            }).catch(() => { });
+
+        } catch (err) {
+            this.container.innerHTML = `<p class="error">Forecast error: ${err.message}</p>`;
+        }
     }
 
     async applyFilters() {

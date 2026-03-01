@@ -779,8 +779,51 @@ class IndustrialERPApp {
           </div>
         </div>
 
-        
+        <!-- AI Advisor Card -->
+        <div class="card ai-advisor-card" id="ai-advisor-card" style="
+          grid-column: 1/-1;
+          border-left: 4px solid #6366f1;
+          margin-bottom: 0.5rem;
+        ">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <i class="ph-duotone ph-robot" style="font-size:1.5rem;color:#6366f1;"></i>
+              <div>
+                <h3 style="margin:0;font-size:1rem;">AI Business Advisor</h3>
+                <p style="margin:0;font-size:0.75rem;color:var(--text-secondary);">Cross-module analysis</p>
+              </div>
+            </div>
+            <button id="ai-refresh-btn" class="btn-icon" style="
+              background:none;border:1px solid var(--border,#e5e7eb);border-radius:8px;
+              padding:0.4rem 0.75rem;cursor:pointer;color:var(--text-secondary);font-size:0.8rem;
+              display:flex;align-items:center;gap:0.4rem;
+            " title="Refresh insights">
+              <i class="ph ph-arrows-clockwise"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body">
+            <!-- Module Health Scores Row -->
+            <div id="ai-module-scores" style="
+              display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;
+              padding-bottom:0.75rem;border-bottom:1px solid var(--border,#e5e7eb);
+            ">
+              <span style="font-size:0.75rem;color:var(--text-secondary);align-self:center;">Loading scores...</span>
+            </div>
+            <!-- Insight Bullets -->
+            <div id="ai-insights-list" style="display:flex;flex-direction:column;gap:0.5rem;">
+              <div style="display:flex;align-items:center;gap:0.5rem;color:var(--text-secondary);font-size:0.875rem;">
+                <i class="ph ph-circle-notch" style="animation:spin 1s linear infinite;"></i>
+                Analysing your business...
+              </div>
+            </div>
+            <p id="ai-source-note" style="margin:0.75rem 0 0;font-size:0.7rem;color:var(--text-secondary);display:none;">
+              💡 Add a Groq API key in Settings for AI-powered insights. Currently showing rule-based analysis.
+            </p>
+          </div>
+        </div>
+
         <!-- Recent Activity -->
+
         <div class="card full-width">
           <div class="card-header">
             <h3>Recent Activity</h3>
@@ -2617,6 +2660,9 @@ class IndustrialERPApp {
 
       console.log('✅ updateDashboardStats: Complete');
 
+      // 5. Load AI Advisor card
+      this.loadAIAdvisor();
+
     } catch (error) {
       console.error('🔥 CRITICAL FAIL in updateDashboardStats:', error);
       const chartCashflow = document.getElementById('chart-cashflow');
@@ -2629,7 +2675,60 @@ class IndustrialERPApp {
     }
   }
 
+  // ========== AI ADVISOR ==========
+  async loadAIAdvisor() {
+    const scoresEl = document.getElementById('ai-module-scores');
+    const insightsEl = document.getElementById('ai-insights-list');
+    const noteEl = document.getElementById('ai-source-note');
+    if (!scoresEl || !insightsEl) return;
+
+    const scoreColor = (s) => s >= 70 ? '#10b981' : s >= 40 ? '#f59e0b' : '#ef4444';
+    const moduleLabels = { finance: 'Finance', inventory: 'Inventory', production: 'Production', syndicate: 'Syndicate', sales: 'Sales' };
+
+    try {
+      const { default: aiEngine } = await import('./services/aiEngine.js');
+      const snapshot = await aiEngine.getBusinessSnapshot();
+
+      // Render module health scores
+      scoresEl.innerHTML = Object.entries(moduleLabels).map(([key, label]) => {
+        const s = snapshot[key]?.score ?? 50;
+        return `<div style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;">
+          <span style="width:10px;height:10px;border-radius:50%;background:${scoreColor(s)};flex-shrink:0;"></span>
+          <span style="color:var(--text-secondary)">${label}</span>
+          <span style="font-weight:700;color:${scoreColor(s)}">${s}</span>
+        </div>`;
+      }).join('') + `<div style="margin-left:auto;font-size:0.78rem;font-weight:700;color:var(--text-secondary)">
+        Overall: <span style="color:${scoreColor(snapshot.overallScore)}">${snapshot.overallScore}/100</span>
+      </div>`;
+
+      // Get NL insights
+      const apiKey = aiEngine.getApiKey();
+      const insights = await aiEngine.getNLInsights(snapshot, apiKey);
+
+      const severityColor = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+      insightsEl.innerHTML = insights.map(ins => `
+        <div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:8px;
+          background:var(--bg-secondary);border-left:3px solid ${severityColor[ins.severity] || '#6366f1'};">
+          <span style="font-size:0.875rem;line-height:1.5;color:var(--text-primary)">${ins.text}</span>
+          ${ins.source === 'ai' ? '<span style="margin-left:auto;font-size:0.65rem;color:var(--text-secondary);flex-shrink:0;align-self:center;">AI</span>' : ''}
+        </div>`).join('');
+
+      if (!apiKey && noteEl) noteEl.style.display = 'block';
+
+    } catch (err) {
+      console.warn('AI Advisor load error:', err.message);
+      if (insightsEl) insightsEl.innerHTML = `<p style="font-size:0.875rem;color:var(--text-secondary)">⚡ Analysis unavailable — add data to your modules to see insights.</p>`;
+    }
+
+    // Wire Refresh button
+    document.getElementById('ai-refresh-btn')?.addEventListener('click', () => {
+      if (insightsEl) insightsEl.innerHTML = '<div style="color:var(--text-secondary);font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;"><i class="ph ph-circle-notch" style="animation:spin 1s linear infinite;"></i> Refreshing...</div>';
+      this.loadAIAdvisor();
+    });
+  }
+
   // ========== NOTIFICATIONS ==========
+
   async initNotifications() {
     try {
       await notificationService.init();
