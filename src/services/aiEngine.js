@@ -61,7 +61,7 @@ function detectAnomalies(values, threshold = 2.0) {
 class AIEngine {
 
     // ── API Key Persistence ─────────────────────────────────────────────────
-    getApiKey() { return localStorage.getItem(LS_KEY_GROQ) || ''; }
+    getApiKey() { return localStorage.getItem(LS_KEY_GROQ) || import.meta.env.VITE_GROQ_API_KEY || ''; }
     saveApiKey(key) { localStorage.setItem(LS_KEY_GROQ, key.trim()); }
     getHorizon() { return parseInt(localStorage.getItem(LS_KEY_HORIZON) || '14', 10); }
     saveHorizon(h) { localStorage.setItem(LS_KEY_HORIZON, String(h)); }
