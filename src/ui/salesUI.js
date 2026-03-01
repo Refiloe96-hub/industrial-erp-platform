@@ -135,8 +135,8 @@ class SalesUI {
     const sorted = [...items].sort((a, b) => (b.reorderLevel || 0) - (a.reorderLevel || 0));
 
     const openItemBtn = `
-      <button class="product-card open-item-btn" style="border-left: 4px solid #6366f1; background: #eef2ff;">
-        <div class="prod-name">Open Item</div>
+      <button class="product-card open-item-btn" style="border-left: 4px solid #6366f1;">
+        <div class="prod-name" style="color: var(--text-primary);">Open Item</div>
         <div class="prod-price" style="font-size: 1rem; color: #6366f1;">Enter Price</div>
         <div class="prod-stock">Custom Sale</div>
       </button>
@@ -144,21 +144,69 @@ class SalesUI {
 
     // Modal for Open Item
     const modal = `
-      <dialog id="open-item-modal" style="border: none; border-radius: 12px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 300px;">
-        <h3 style="margin-top: 0;">Open Item</h3>
-        <input type="text" id="open-item-name" placeholder="Item Name (Optional)" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 1rem; box-sizing: border-box;">
-        <input type="number" id="open-item-price" placeholder="Price (R)" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 1rem; font-size: 1.5rem; text-align: center; box-sizing: border-box;" step="0.01">
+      <dialog id="open-item-modal" style="
+        border: none;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        width: 300px;
+        background: var(--bg-primary, #1e293b);
+        color: var(--text-primary, #f8fafc);
+      ">
+        <h3 style="margin-top: 0; color: var(--text-primary, #f8fafc);">Open Item</h3>
+        <input type="text" id="open-item-name" placeholder="Item Name (Optional)" style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid var(--border, #334155);
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          box-sizing: border-box;
+          background: var(--bg-secondary, #0f172a);
+          color: var(--text-primary, #f8fafc);
+          font-size: 0.95rem;
+        ">
+        <input type="number" id="open-item-price" placeholder="Price (R)" style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid var(--border, #334155);
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          font-size: 1.5rem;
+          text-align: center;
+          box-sizing: border-box;
+          background: var(--bg-secondary, #0f172a);
+          color: var(--text-primary, #f8fafc);
+        " step="0.01">
         <div style="display: flex; gap: 0.5rem;">
-          <button id="cancel-open-item" style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; background: white; border-radius: 8px; cursor: pointer;">Cancel</button>
-          <button id="add-open-item" style="flex: 1; padding: 0.75rem; border: none; background: #6366f1; color: white; border-radius: 8px; font-weight: bold; cursor: pointer;">Add</button>
+          <button id="cancel-open-item" style="
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border, #334155);
+            background: var(--bg-secondary, #0f172a);
+            color: var(--text-primary, #f8fafc);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+          ">Cancel</button>
+          <button id="add-open-item" style="
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: #6366f1;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+          ">Add</button>
         </div>
       </dialog>
     `;
 
-    // Append modal to body if not exists
-    if (!document.getElementById('open-item-modal')) {
-      document.body.insertAdjacentHTML('beforeend', modal);
-    }
+    // Always replace the modal so it picks up the current theme (CSS variables)
+    const existing = document.getElementById('open-item-modal');
+    if (existing) existing.remove();
+    document.body.insertAdjacentHTML('beforeend', modal);
 
     return openItemBtn + sorted.map(item => {
       const price = item.unitPrice || item.unitCost || 0;
@@ -819,6 +867,29 @@ class SalesUI {
         .scanner-modal::backdrop { background: rgba(0,0,0,0.6); }
         .scanner-content { padding: 1.5rem; }
         .scanner-content h3 { margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
+
+        /* Open Item modal — override browser default dialog white background */
+        #open-item-modal {
+          background: var(--bg-primary) !important;
+          color: var(--text-primary) !important;
+          border: 1px solid var(--border, #334155);
+        }
+        #open-item-modal::backdrop {
+          background: rgba(0, 0, 0, 0.6);
+        }
+        #open-item-modal input {
+          background: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          border-color: var(--border, #334155) !important;
+        }
+        #open-item-modal input::placeholder {
+          color: var(--text-secondary, #94a3b8);
+        }
+        #open-item-modal #cancel-open-item {
+          background: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          border-color: var(--border, #334155) !important;
+        }
 
         /* M-Pesa QR container */
         #mpesa-qr-container {

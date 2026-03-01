@@ -3,23 +3,23 @@
  * Opens a slide-in drawer from the right with the given content.
  */
 export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '' }) {
-    // Clean up any existing panels
-    document.querySelector('.dp-overlay')?.remove();
-    document.querySelector('.dp-panel')?.remove();
+  // Clean up any existing panels
+  document.querySelector('.dp-overlay')?.remove();
+  document.querySelector('.dp-panel')?.remove();
 
-    const overlay = document.createElement('div');
-    overlay.className = 'dp-overlay';
-    overlay.style.cssText =
-        'position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1200;backdrop-filter:blur(2px);';
+  const overlay = document.createElement('div');
+  overlay.className = 'dp-overlay';
+  overlay.style.cssText =
+    'position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1200;backdrop-filter:blur(2px);';
 
-    const panel = document.createElement('div');
-    panel.className = 'dp-panel';
-    panel.style.cssText =
-        'position:fixed;top:0;right:0;height:100%;width:min(440px,100vw);' +
-        'background:var(--bg-primary,#fff);z-index:1201;display:flex;flex-direction:column;' +
-        'box-shadow:-4px 0 32px rgba(0,0,0,0.12);overflow:hidden;animation:dpSlideIn 0.22s ease;';
+  const panel = document.createElement('div');
+  panel.className = 'dp-panel';
+  panel.style.cssText =
+    'position:fixed;top:0;right:0;height:100%;width:min(440px,100vw);' +
+    'background:var(--bg-primary,#fff);z-index:1201;display:flex;flex-direction:column;' +
+    'box-shadow:-4px 0 32px rgba(0,0,0,0.12);overflow:hidden;animation:dpSlideIn 0.22s ease;';
 
-    panel.innerHTML = `
+  panel.innerHTML = `
     <style>
       @keyframes dpSlideIn { from { transform:translateX(100%) } to { transform:translateX(0) } }
       .dp-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border,#e5e7eb); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
@@ -63,20 +63,45 @@ export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '
     ${footerHTML ? `<div class="dp-footer">${footerHTML}</div>` : ''}
   `;
 
-    document.body.appendChild(overlay);
-    document.body.appendChild(panel);
+  document.body.appendChild(overlay);
+  document.body.appendChild(panel);
 
-    const close = () => { panel.remove(); overlay.remove(); };
-    panel.querySelector('#dp-close-btn').addEventListener('click', close);
-    overlay.addEventListener('click', close);
+  // Push a history entry so the phone back button has something to pop
+  // instead of navigating away from the app.
+  history.pushState({ panel: true }, '');
 
-    return { panel, overlay, close };
+  const close = () => {
+    panel.remove();
+    overlay.remove();
+    // Remove the popstate listener — no longer needed
+    window.removeEventListener('popstate', onPopState);
+    // If we're still on the pushed state, go back to clean up history
+    // (only if the user closed via X or overlay, not via back button)
+    if (history.state?.panel) {
+      history.back();
+    }
+  };
+
+  // Handle phone / browser back button
+  const onPopState = (e) => {
+    // popstate fires AFTER the state has already been popped,
+    // so history.state is now the previous (non-panel) state.
+    panel.remove();
+    overlay.remove();
+    window.removeEventListener('popstate', onPopState);
+  };
+
+  window.addEventListener('popstate', onPopState);
+  panel.querySelector('#dp-close-btn').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+
+  return { panel, overlay, close };
 }
 
 /** Make a horizontal bar row */
 export function dpBar(label, value, max, color = '#f97316', fmt = v => v) {
-    const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-    return `
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  return `
     <div class="dp-bar-row">
       <span class="dp-bar-label" title="${label}">${label}</span>
       <div class="dp-bar-track"><div class="dp-bar-fill" style="width:${pct}%;background:${color};"></div></div>
@@ -86,5 +111,5 @@ export function dpBar(label, value, max, color = '#f97316', fmt = v => v) {
 
 /** Make a key-value tile */
 export function dpKV(label, value, full = false) {
-    return `<div class="dp-kv${full ? ' full' : ''}"><div class="k">${label}</div><div class="v">${value}</div></div>`;
+  return `<div class="dp-kv${full ? ' full' : ''}"><div class="k">${label}</div><div class="v">${value}</div></div>`;
 }
