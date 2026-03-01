@@ -833,12 +833,15 @@ class ReportsUI {
           .date-range-selector {
             width: 100%;
             display: flex;
+            flex-wrap: wrap;
           }
 
           .date-range-selector button {
             flex: 1;
+            min-width: 0;
             font-size: 0.8rem;
             padding: 0.4rem 0.5rem;
+            white-space: nowrap;
           }
 
           /* ABC analysis cards: full width */
