@@ -380,7 +380,7 @@ class IndustrialERPApp {
             </div>
 
             <div class="form-group">
-              <label>Email <span style="color:#9ca3af;font-size:0.8rem">(required for cloud sync)</span></label>
+              <label>Email <span style="color:#9ca3af;font-size:0.8rem">(optional — for account recovery)</span></label>
               <input type="email" name="email" placeholder="you@example.com" />
             </div>
 
@@ -555,8 +555,11 @@ class IndustrialERPApp {
           return;
         }
 
-        const password = formData.get('password');
-        const email = formData.get('email') || '';
+        const email = formData.get('email')?.trim() || '';
+        // Only use email with Supabase if it looks genuinely valid (has @ and a real TLD)
+        const emailIsValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) &&
+          !email.endsWith('@test.com') && !email.endsWith('@example.com') &&
+          !email.includes('test@') && !email.includes('fake@');
         const hashedPassword = await hashPassword(password);
 
         const userData = {
@@ -566,14 +569,23 @@ class IndustrialERPApp {
           businessType: formData.get('businessType'),
           ownerName: formData.get('ownerName'),
           phone: formData.get('phone') || '',
-          email,
+          email: emailIsValid ? email : '',
           createdAt: Date.now(),
           role: 'admin'
         };
 
-        if (isSupabaseEnabled() && email) {
-          // --- Supabase auth path ---
-          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (isSupabaseEnabled() && emailIsValid) {
+          // --- Supabase auth path (only when email is provably real) ---
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              // Don't send a confirmation email — avoids bounces and is
+              // not needed since this is an invite-based internal app
+              emailRedirectTo: null,
+              data: { username, business_name: userData.businessName }
+            }
+          });
           if (error) throw new Error(error.message);
 
           // Store profile in Supabase
