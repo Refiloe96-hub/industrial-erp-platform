@@ -1,5 +1,6 @@
 
 import PocketBooks from '../modules/PocketBooks.js';
+import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 
 class PocketBooksUI {
     constructor(container) {
@@ -32,28 +33,28 @@ class PocketBooksUI {
 
                     <!-- Stats Cards -->
                     <div class="stats-grid">
-                        <div class="stat-card income">
+                        <div class="stat-card income" data-card="income" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-trend-up"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Total Income</span>
                                 <span class="stat-value">R ${cashFlow.income.toLocaleString()}</span>
                             </div>
                         </div>
-                        <div class="stat-card expense">
+                        <div class="stat-card expense" data-card="expenses" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-trend-down"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Total Expenses</span>
                                 <span class="stat-value">R ${cashFlow.expenses.toLocaleString()}</span>
                             </div>
                         </div>
-                        <div class="stat-card ${cashFlow.netCashFlow >= 0 ? 'positive' : 'negative'}">
+                        <div class="stat-card ${cashFlow.netCashFlow >= 0 ? 'positive' : 'negative'}" data-card="net" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-money"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Net Cash Flow</span>
                                 <span class="stat-value">${cashFlow.netCashFlow >= 0 ? '+' : ''}R ${cashFlow.netCashFlow.toLocaleString()}</span>
                             </div>
                         </div>
-                        <div class="stat-card neutral">
+                        <div class="stat-card neutral" data-card="count" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-list-numbers"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Transactions</span>
@@ -163,6 +164,11 @@ class PocketBooksUI {
             if (t) this.showTransactionDetail(t);
         });
 
+        // Stat card click → drill-down panel
+        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+            card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
+        });
+
         // Filters
         this.container.querySelector('#category-filter').addEventListener('change', () => this.applyFilters());
         this.container.querySelector('#type-filter').addEventListener('change', () => this.applyFilters());
@@ -183,6 +189,83 @@ class PocketBooksUI {
         const transactions = await this.module.getTransactions(filters);
         const tbody = this.container.querySelector('#transactions-table tbody');
         tbody.innerHTML = this.renderTransactionRows(transactions);
+    }
+
+    async showStatPanel(card) {
+        const transactions = await this.module.getTransactions();
+        const cashFlow = await this.module.calculateCashFlow();
+
+        const incomeByCategory = {};
+        const expenseByCategory = {};
+        transactions.forEach(t => {
+            if (t.type === 'income') incomeByCategory[t.category || 'Other'] = (incomeByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
+            if (t.type === 'expense') expenseByCategory[t.category || 'Other'] = (expenseByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
+        });
+        const incomeCount = transactions.filter(t => t.type === 'income').length;
+        const expenseCount = transactions.filter(t => t.type === 'expense').length;
+        const maxIncome = Math.max(...Object.values(incomeByCategory), 1);
+        const maxExpense = Math.max(...Object.values(expenseByCategory), 1);
+
+        const panels = {
+            income: {
+                title: 'Total Income Breakdown',
+                subtitle: `R ${cashFlow.income.toLocaleString()} across ${incomeCount} income entries`,
+                bodyHTML: Object.keys(incomeByCategory).length ? `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Income by Category</div>
+                        ${Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
+                    dpBar(cat, amt, maxIncome, '#16a34a', v => `R ${v.toLocaleString()}`)).join('')}
+                    </div>` : '<div class="dp-empty">No income recorded yet.</div>'
+            },
+            expenses: {
+                title: 'Total Expenses Breakdown',
+                subtitle: `R ${cashFlow.expenses.toLocaleString()} across ${expenseCount} expense entries`,
+                bodyHTML: Object.keys(expenseByCategory).length ? `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Expenses by Category</div>
+                        ${Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
+                    dpBar(cat, amt, maxExpense, '#dc2626', v => `R ${v.toLocaleString()}`)).join('')}
+                    </div>` : '<div class="dp-empty">No expenses recorded yet.</div>'
+            },
+            net: {
+                title: 'Net Cash Flow',
+                subtitle: cashFlow.netCashFlow >= 0 ? 'Positive — you are earning more than you spend' : 'Negative — expenses exceed income',
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Overview</div>
+                        <div class="dp-kv-grid">
+                            ${dpKV('Total Income', 'R ' + cashFlow.income.toLocaleString())}
+                            ${dpKV('Total Expenses', 'R ' + cashFlow.expenses.toLocaleString())}
+                            ${dpKV('Net Cash Flow', (cashFlow.netCashFlow >= 0 ? '+' : '') + 'R ' + cashFlow.netCashFlow.toLocaleString(), true)}
+                        </div>
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">Comparison</div>
+                        ${dpBar('Income', cashFlow.income, Math.max(cashFlow.income, cashFlow.expenses, 1), '#16a34a', v => 'R ' + v.toLocaleString())}
+                        ${dpBar('Expenses', cashFlow.expenses, Math.max(cashFlow.income, cashFlow.expenses, 1), '#dc2626', v => 'R ' + v.toLocaleString())}
+                    </div>`
+            },
+            count: {
+                title: 'Transaction Summary',
+                subtitle: `${transactions.length} total entries`,
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">By Type</div>
+                        ${dpBar('Income', incomeCount, Math.max(incomeCount, expenseCount, 1), '#16a34a')}
+                        ${dpBar('Expenses', expenseCount, Math.max(incomeCount, expenseCount, 1), '#dc2626')}
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">Recent 5 Transactions</div>
+                        <ul class="dp-list">
+                            ${transactions.slice(0, 5).map(t => `<li>
+                                <span>${t.description || t.category}</span>
+                                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}R ${(t.amount || 0).toLocaleString()}</span>
+                            </li>`).join('') || '<li>No transactions yet.</li>'}
+                        </ul>
+                    </div>`
+            }
+        };
+        showDetailPanel(panels[card]);
     }
 
     showTransactionDetail(t) {

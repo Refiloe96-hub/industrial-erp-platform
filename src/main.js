@@ -742,7 +742,7 @@ class IndustrialERPApp {
         
         <!-- Quick Stats: 2-column sub-grid on mobile -->
         <div class="dashboard-stats-row">
-          <div class="card stat-card">
+          <div class="card stat-card" data-card="cashflow" style="cursor:pointer" title="Click for details">
             <div class="stat-icon"><i class="ph-duotone ph-wallet"></i></div>
             <div class="stat-content">
               <p class="stat-label">Cash Flow</p>
@@ -751,7 +751,7 @@ class IndustrialERPApp {
             </div>
           </div>
           
-          <div class="card stat-card">
+          <div class="card stat-card" data-card="inventory" style="cursor:pointer" title="Click for details">
             <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
             <div class="stat-content">
               <p class="stat-label">Inventory Health</p>
@@ -760,7 +760,7 @@ class IndustrialERPApp {
             </div>
           </div>
           
-          <div class="card stat-card">
+          <div class="card stat-card" data-card="machines" style="cursor:pointer" title="Click for details">
             <div class="stat-icon"><i class="ph-duotone ph-gear"></i></div>
             <div class="stat-content">
               <p class="stat-label">Machine Utilization</p>
@@ -769,7 +769,7 @@ class IndustrialERPApp {
             </div>
           </div>
           
-          <div class="card stat-card">
+          <div class="card stat-card" data-card="syndicates" style="cursor:pointer" title="Click for details">
             <div class="stat-icon"><i class="ph-duotone ph-users-three"></i></div>
             <div class="stat-content">
               <p class="stat-label">Syndicate Status</p>
@@ -2533,6 +2533,86 @@ class IndustrialERPApp {
         }
       } catch (e) {
         console.error('❌ Syndicate Error:', e);
+      }
+
+      // Attach click handlers to dashboard stat cards (data now available)
+      try {
+        const { showDetailPanel, dpBar, dpKV } = await import('./ui/panelHelper.js');
+        const txs = this.pocketBooks ? await this.pocketBooks.getTransactions() : [];
+        const items = this.poolStock ? await this.poolStock.getInventory() : [];
+        const machines = await db.getAll('machines');
+        const syndicates = await db.getAll('syndicates');
+
+        const balance = txs.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
+        const lowStock = items.filter(i => i.quantity <= (i.reorderLevel || 10)).length;
+        const operational = machines.filter(m => m.status === 'operational' || m.status === 'running').length;
+        const totalPool = syndicates.reduce((s, sy) => s + (sy.totalPool || 0), 0);
+        const byCategory = {};
+        items.forEach(i => { const c = i.category || 'Other'; byCategory[c] = (byCategory[c] || 0) + 1; });
+        const maxCat = Math.max(...Object.values(byCategory), 1);
+        const maxMUtil = Math.max(...machines.map(m => m.utilization || 0), 1);
+
+        const dashPanels = {
+          cashflow: {
+            title: 'Cash Flow Summary',
+            subtitle: `Net balance: R ${balance.toLocaleString()}`,
+            bodyHTML: `<div class="dp-section"><div class="dp-section-title">Overview</div><div class="dp-kv-grid">
+              ${dpKV('Total Income', 'R ' + txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0).toLocaleString())}
+              ${dpKV('Total Expenses', 'R ' + txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0).toLocaleString())}
+              ${dpKV('Net Balance', (balance >= 0 ? '+' : '') + 'R ' + balance.toLocaleString(), true)}
+            </div></div>
+            <div class="dp-section"><div class="dp-section-title">Recent Transactions</div>
+              <ul class="dp-list">${txs.slice(0, 6).map(t => `<li><span>${t.description || t.category}</span>
+                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}R ${(t.amount || 0).toLocaleString()}</span>
+              </li>`).join('') || '<li>No transactions yet</li>'}</ul>
+            </div>`
+          },
+          inventory: {
+            title: 'Inventory Health',
+            subtitle: `${items.length} items, ${lowStock} below reorder level`,
+            bodyHTML: `<div class="dp-section"><div class="dp-section-title">Stock Health</div><div class="dp-kv-grid">
+              ${dpKV('Total SKUs', items.length)}
+              ${dpKV('Low Stock', lowStock + ' items')}
+              ${dpKV('Out of Stock', items.filter(i => i.quantity === 0).length + ' items')}
+              ${dpKV('Total Value', 'R ' + items.reduce((s, i) => s + (i.quantity * (i.unitPrice || 0)), 0).toLocaleString())}
+            </div></div>
+            <div class="dp-section"><div class="dp-section-title">By Category</div>
+              ${Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([cat, n]) => dpBar(cat, n, maxCat, '#6366f1')).join('')}
+            </div>`
+          },
+          machines: {
+            title: 'Machine Utilization',
+            subtitle: `${machines.length} machines registered`,
+            bodyHTML: `<div class="dp-section"><div class="dp-section-title">Overview</div><div class="dp-kv-grid">
+              ${dpKV('Operational', operational)}
+              ${dpKV('Total', machines.length)}
+              ${dpKV('Utilization', machines.length ? Math.round((operational / machines.length) * 100) + '%' : '—')}
+            </div></div>
+            ${machines.length ? `<div class="dp-section"><div class="dp-section-title">By Machine</div>
+              ${machines.sort((a, b) => (b.utilization || 0) - (a.utilization || 0)).map(m => dpBar(m.name, m.utilization || 0, maxMUtil, m.status === 'running' || m.status === 'operational' ? '#16a34a' : '#94a3b8', v => v + '%')).join('')}
+            </div>` : '<div class="dp-empty">No machines yet. Add machines in SmartShift.</div>'}`
+          },
+          syndicates: {
+            title: 'Syndicate Status',
+            subtitle: `${syndicates.length} active syndicates, R ${totalPool.toLocaleString()} in capital pools`,
+            bodyHTML: `<div class="dp-section"><div class="dp-section-title">Summary</div><div class="dp-kv-grid">
+              ${dpKV('Active Syndicates', syndicates.length)}
+              ${dpKV('Total Capital', 'R ' + totalPool.toLocaleString())}
+            </div></div>
+            ${syndicates.length ? `<div class="dp-section"><div class="dp-section-title">Capital by Syndicate</div>
+              ${syndicates.sort((a, b) => (b.totalPool || 0) - (a.totalPool || 0)).map(s => dpBar(s.name, s.totalPool || 0, Math.max(...syndicates.map(x => x.totalPool || 0), 1), '#f97316', v => 'R ' + v.toLocaleString())).join('')}
+            </div>` : '<div class="dp-empty">No syndicates yet. Create one in TrustCircle.</div>'}`
+          }
+        };
+
+        document.querySelectorAll('.card.stat-card[data-card]').forEach(card => {
+          card.addEventListener('click', () => {
+            const p = dashPanels[card.dataset.card];
+            if (p) showDetailPanel(p);
+          });
+        });
+      } catch (panelErr) {
+        console.warn('Panel wiring skipped:', panelErr.message);
       }
 
       console.log('✅ updateDashboardStats: Complete');

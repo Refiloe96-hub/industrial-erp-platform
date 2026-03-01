@@ -1,6 +1,7 @@
 
 import SmartShift from '../modules/SmartShift.js';
 import db from '../db/index.js';
+import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 
 class SmartShiftUI {
   constructor(container, aiEngine, pocketBooks) {
@@ -66,22 +67,23 @@ class SmartShiftUI {
 
   async renderDashboard(container) {
     const metrics = await this.module.getProductionMetrics();
+    const machines = await this.module.getMachines();
 
     container.innerHTML = `
       <div class="dashboard-grid">
-        <div class="card">
+        <div class="card" data-card="running" style="cursor:pointer" title="Click for details">
           <h3>Running Orders</h3>
           <div class="big-number">${metrics.orders.inProgress}</div>
         </div>
-        <div class="card">
+        <div class="card" data-card="pending" style="cursor:pointer" title="Click for details">
           <h3>Pending Orders</h3>
           <div class="big-number">${metrics.orders.pending}</div>
         </div>
-        <div class="card">
+        <div class="card" data-card="utilization" style="cursor:pointer" title="Click for machine breakdown">
           <h3>Machine Utilization</h3>
           <div class="big-number">${metrics.machineUtilization}%</div>
         </div>
-        <div class="card">
+        <div class="card" data-card="delivery" style="cursor:pointer" title="Click for details">
           <h3>On-Time Delivery</h3>
           <div class="big-number">${metrics.onTimeDeliveryRate}%</div>
         </div>
@@ -99,6 +101,77 @@ class SmartShiftUI {
         </ul>
       </div>
     `;
+
+    // Stat card click handlers
+    container.querySelectorAll('.card[data-card]').forEach(card => {
+      card.addEventListener('click', () => this.showStatPanel(card.dataset.card, metrics, machines));
+    });
+  }
+
+  showStatPanel(card, metrics, machines) {
+    const running = machines.filter(m => m.status === 'running');
+    const idle = machines.filter(m => m.status === 'idle');
+    const maintenance = machines.filter(m => m.status === 'maintenance');
+    const maxUtil = Math.max(...machines.map(m => m.utilization || 0), 1);
+
+    const machineList = (list, color) => list.length
+      ? `<ul class="dp-list">${list.map(m => `<li><span>${m.name} <small style="color:var(--text-secondary,#9ca3af)">(${m.type})</small></span><span style="color:${color};font-weight:600">${m.utilization || 0}%</span></li>`).join('')}</ul>`
+      : '<div class="dp-empty">None</div>';
+
+    const panels = {
+      running: {
+        title: 'Running Production Orders',
+        subtitle: `${metrics.orders.inProgress} orders currently in progress`,
+        bodyHTML: `<div class="dp-section"><div class="dp-kv-grid">
+          ${dpKV('In Progress', metrics.orders.inProgress)}
+          ${dpKV('Pending', metrics.orders.pending)}
+          ${dpKV('Completed Today', metrics.orders.completed || 0)}
+          ${dpKV('On-Time Rate', metrics.onTimeDeliveryRate + '%')}
+        </div></div>`
+      },
+      pending: {
+        title: 'Pending Production Orders',
+        subtitle: `${metrics.orders.pending} orders queued`,
+        bodyHTML: `<div class="dp-section"><div class="dp-kv-grid">
+          ${dpKV('Pending', metrics.orders.pending)}
+          ${dpKV('In Progress', metrics.orders.inProgress)}
+          ${dpKV('Machine Utilization', metrics.machineUtilization + '%')}
+          ${dpKV('Active Machines', running.length)}
+        </div></div>`
+      },
+      utilization: {
+        title: 'Machine Utilization',
+        subtitle: `Average ${metrics.machineUtilization}% across ${machines.length} machines`,
+        bodyHTML: `
+          <div class="dp-section">
+            <div class="dp-section-title">By Machine</div>
+            ${machines.length ? machines.sort((a, b) => (b.utilization || 0) - (a.utilization || 0)).map(m =>
+          dpBar(m.name, m.utilization || 0, maxUtil, m.status === 'running' ? '#16a34a' : m.status === 'maintenance' ? '#dc2626' : '#94a3b8', v => v + '%')).join('') : '<div class="dp-empty">No machines registered. Go to the Machines tab to add one.</div>'}
+          </div>
+          <div class="dp-section">
+            <div class="dp-section-title">Status Breakdown</div>
+            <div class="dp-kv-grid">
+              ${dpKV('Running', running.length + ' machines')}
+              ${dpKV('Idle', idle.length + ' machines')}
+              ${dpKV('Maintenance', maintenance.length + ' machines')}
+              ${dpKV('Total', machines.length + ' machines')}
+            </div>
+          </div>`
+      },
+      delivery: {
+        title: 'On-Time Delivery Rate',
+        subtitle: `${metrics.onTimeDeliveryRate}% of orders are completed on schedule`,
+        bodyHTML: `<div class="dp-section">
+          <div class="dp-section-title">Performance</div>
+          ${dpBar('On-Time Rate', metrics.onTimeDeliveryRate, 100, metrics.onTimeDeliveryRate >= 80 ? '#16a34a' : '#f59e0b', v => v + '%')}
+          <div class="dp-kv-grid" style="margin-top:1rem">
+            ${dpKV('In Progress', metrics.orders.inProgress)}
+            ${dpKV('Pending', metrics.orders.pending)}
+          </div>
+        </div>`
+      }
+    };
+    if (panels[card]) showDetailPanel(panels[card]);
   }
 
   async renderMachines(container) {

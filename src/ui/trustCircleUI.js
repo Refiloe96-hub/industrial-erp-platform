@@ -1,5 +1,6 @@
 
 import TrustCircle from '../modules/TrustCircle.js';
+import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 import db, { STORES } from '../db/index.js';
 
 class TrustCircleUI {
@@ -55,6 +56,7 @@ class TrustCircleUI {
 
     async renderDashboard() {
         const syndicates = await this.module.getSyndicates();
+        const totalPool = syndicates.reduce((sum, s) => sum + (s.totalPool || 0), 0);
 
         this.container.innerHTML = `
       <div class="trustcircle-dashboard">
@@ -65,13 +67,13 @@ class TrustCircleUI {
         </header>
 
         <div class="stats-overview">
-          <div class="stat-card">
+          <div class="stat-card" data-card="syndicates" style="cursor:pointer" title="Click for breakdown">
             <h3>Active Syndicates</h3>
             <div class="value">${syndicates.length}</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" data-card="capital" style="cursor:pointer" title="Click for breakdown">
             <h3>Total Capital Pools</h3>
-            <div class="value">R ${syndicates.reduce((sum, s) => sum + (s.totalPool || 0), 0).toLocaleString()}</div>
+            <div class="value">R ${totalPool.toLocaleString()}</div>
           </div>
         </div>
 
@@ -92,6 +94,47 @@ class TrustCircleUI {
                 this.loadView('syndicate-detail', card.dataset.id);
             });
         });
+
+        // Stat card click → drill-down panels
+        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+            card.addEventListener('click', () => this.showStatPanel(card.dataset.card, syndicates, totalPool));
+        });
+    }
+
+    showStatPanel(card, syndicates, totalPool) {
+        const maxPool = Math.max(...syndicates.map(s => s.totalPool || 0), 1);
+        const maxMembers = Math.max(...syndicates.map(s => s.maxMembers || 1), 1);
+        const byType = {};
+        syndicates.forEach(s => { byType[s.type] = (byType[s.type] || 0) + 1; });
+        const maxType = Math.max(...Object.values(byType), 1);
+
+        const panels = {
+            syndicates: {
+                title: 'Active Syndicates',
+                subtitle: `${syndicates.length} syndicates registered`,
+                bodyHTML: syndicates.length ? `
+                    <div class="dp-section">
+                        <div class="dp-section-title">By Type</div>
+                        ${Object.entries(byType).map(([type, count]) =>
+                    dpBar(type.replace(/_/g, ' '), count, maxType, '#6366f1')).join('')}
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">Capacity</div>
+                        ${syndicates.map(s => dpBar(s.name, s.currentMembers || 0, s.maxMembers || 1, '#f97316', v => `${v}/${s.maxMembers} members`)).join('')}
+                    </div>` : '<div class="dp-empty">No syndicates yet.</div>'
+            },
+            capital: {
+                title: 'Capital Pools',
+                subtitle: `Total: R ${totalPool.toLocaleString()} across ${syndicates.length} syndicates`,
+                bodyHTML: syndicates.length ? `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Pool by Syndicate</div>
+                        ${syndicates.sort((a, b) => (b.totalPool || 0) - (a.totalPool || 0)).map(s =>
+                    dpBar(s.name, s.totalPool || 0, maxPool, '#16a34a', v => 'R ' + v.toLocaleString())).join('')}
+                    </div>` : '<div class="dp-empty">No syndicates yet.</div>'
+            }
+        };
+        showDetailPanel(panels[card]);
     }
 
     renderSyndicateCard(syndicate) {

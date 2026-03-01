@@ -214,7 +214,7 @@ class ReportsUI {
       </div>
     `;
 
-    this.attachHandlers(container, financialData, inventoryData);
+    this.attachHandlers(container, financialData, inventoryData, advancedStats);
   }
 
   getDateRange() {
@@ -329,7 +329,10 @@ class ReportsUI {
     };
   }
 
-  attachHandlers(container, financialData, inventoryData) {
+  attachHandlers(container, financialData, inventoryData, advancedStats) {
+    // Wire KPI card click handlers
+    if (advancedStats) this.setupKPIClickHandlers(advancedStats);
+
     // Date range buttons
     container.querySelectorAll('.date-range-selector button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -539,7 +542,7 @@ class ReportsUI {
     return `
       <div class="advanced-stats-grid">
         <!-- ROI Widget -->
-        <div class="kpi-card">
+        <div class="kpi-card" data-kpi="roi" style="cursor:pointer" title="Click for details">
            <div class="kpi-header">
               <span><i class="ph-duotone ph-rocket"></i> ROI</span>
               <span class="info-icon" title="Return on Investment = (Margin / Inventory Value)"><i class="ph-duotone ph-info"></i></span>
@@ -554,7 +557,7 @@ class ReportsUI {
         </div>
 
         <!-- Service Level Widget -->
-        <div class="kpi-card">
+        <div class="kpi-card" data-kpi="serviceLevel" style="cursor:pointer" title="Click for details">
            <div class="kpi-header">
               <span><i class="ph-duotone ph-target"></i> Service Level</span>
               <span class="info-icon" title="Percentage of items in stock"><i class="ph-duotone ph-info"></i></span>
@@ -569,7 +572,7 @@ class ReportsUI {
         </div>
 
         <!-- Stock Turns Widget -->
-        <div class="kpi-card">
+        <div class="kpi-card" data-kpi="stockTurns" style="cursor:pointer" title="Click for details">
            <div class="kpi-header">
               <span><i class="ph-duotone ph-arrows-clockwise"></i> Stock Turns</span>
               <span class="info-icon" title="How many times you sell out your stock per year"><i class="ph-duotone ph-info"></i></span>
@@ -584,6 +587,100 @@ class ReportsUI {
         </div>
       </div>
     `;
+  }
+
+  setupKPIClickHandlers(stats) {
+    import('./panelHelper.js').then(({ showDetailPanel, dpBar, dpKV }) => {
+      const panels = {
+        roi: {
+          title: 'Return on Investment (ROI)',
+          subtitle: `Currently ${stats.roi.toFixed(1)}% — ${stats.roi >= 100 ? 'Excellent' : stats.roi >= 0 ? 'Positive' : 'Negative'}`,
+          bodyHTML: `
+            <div class="dp-section">
+              <div class="dp-section-title">What is ROI?</div>
+              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+                ROI measures how much profit your inventory investment generates. A higher ROI means your stock is working harder for you.
+              </p>
+              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
+                ROI = (Total Revenue − Cost) ÷ Inventory Value × 100
+              </p>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">Current Performance</div>
+              <div class="dp-kv-grid">
+                ${dpKV('ROI', stats.roi.toFixed(1) + '%')}
+                ${dpKV('Rating', stats.roi >= 100 ? '🟢 Excellent' : stats.roi >= 0 ? '🟡 Positive' : '🔴 Negative')}
+                ${dpKV('Benchmark', '> 100% is excellent for retail', true)}
+              </div>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">How to Improve</div>
+              <ul class="dp-list">
+                <li><span>Reduce slow-moving inventory</span></li>
+                <li><span>Negotiate better supplier pricing</span></li>
+                <li><span>Increase prices on high-demand items</span></li>
+              </ul>
+            </div>`
+        },
+        serviceLevel: {
+          title: 'Service Level (Availability)',
+          subtitle: `${stats.serviceLevel.toFixed(1)}% of your inventory is in stock`,
+          bodyHTML: `
+            <div class="dp-section">
+              <div class="dp-section-title">What is Service Level?</div>
+              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+                Service Level is the percentage of your SKUs that are in stock (above their reorder level). High service levels mean fewer stockouts and better customer satisfaction.
+              </p>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">Current Performance</div>
+              <div class="dp-kv-grid">
+                ${dpKV('Service Level', stats.serviceLevel.toFixed(1) + '%')}
+                ${dpKV('Rating', stats.serviceLevel >= 95 ? '🟢 Excellent' : stats.serviceLevel >= 85 ? '🟡 Good' : '🔴 Needs Work')}
+                ${dpKV('Target', '≥ 95% is the industry standard', true)}
+              </div>
+              ${dpBar('Availability', stats.serviceLevel, 100, stats.serviceLevel >= 95 ? '#16a34a' : stats.serviceLevel >= 85 ? '#f59e0b' : '#dc2626', v => v.toFixed(1) + '%')}
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">How to Improve</div>
+              <ul class="dp-list">
+                <li><span>Review and restock items below reorder level</span></li>
+                <li><span>Set more accurate reorder levels per item</span></li>
+                <li><span>Set up purchase orders ahead of time</span></li>
+              </ul>
+            </div>`
+        },
+        stockTurns: {
+          title: 'Stock Turnover Rate',
+          subtitle: `Your inventory turns over ${stats.stockTurns.toFixed(1)} times per year`,
+          bodyHTML: `
+            <div class="dp-section">
+              <div class="dp-section-title">What is Stock Turnover?</div>
+              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+                Stock turns measures how many times your entire inventory is sold and replaced in a year. Higher is generally better — it means your stock is moving fast and your cash isn't tied up.
+              </p>
+              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
+                Stock Turns = Cost of Goods Sold ÷ Average Inventory Value
+              </p>
+            </div>
+            <div class="dp-section">
+              <div class="dp-section-title">Current Performance</div>
+              <div class="dp-kv-grid">
+                ${dpKV('Stock Turns', stats.stockTurns.toFixed(1) + 'x / year')}
+                ${dpKV('Industry Benchmark', '4–8x is typical for retail')}
+                ${dpKV('Interpretation', stats.stockTurns >= 6 ? 'Fast-moving inventory ✓' : stats.stockTurns >= 3 ? 'Moderate pace' : 'Slow — consider clearance sales', true)}
+              </div>
+            </div>`
+        }
+      };
+
+      document.querySelectorAll('.kpi-card[data-kpi]').forEach(card => {
+        card.addEventListener('click', () => {
+          const p = panels[card.dataset.kpi];
+          if (p) showDetailPanel(p);
+        });
+      });
+    }).catch(e => console.warn('KPI panel wiring skipped:', e));
   }
 
   renderFilterOptions(inventory, type) {

@@ -1,6 +1,7 @@
 
 import PoolStock from '../modules/PoolStock.js';
 import db, { STORES } from '../db/index.js';
+import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 
 class PoolStockUI {
     constructor(container) {
@@ -44,28 +45,28 @@ class PoolStockUI {
 
                     <!-- Stats Cards -->
                     <div class="stats-grid">
-                        <div class="stat-card primary">
+                        <div class="stat-card primary" data-card="items" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Total Items</span>
                                 <span class="stat-value">${totalItems}</span>
                             </div>
                         </div>
-                        <div class="stat-card warning">
+                        <div class="stat-card warning" data-card="low" style="cursor:pointer" title="Click to see low stock items">
                             <div class="stat-icon"><i class="ph-duotone ph-warning-circle"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Low Stock</span>
                                 <span class="stat-value">${lowStockItems.length}</span>
                             </div>
                         </div>
-                        <div class="stat-card danger">
+                        <div class="stat-card danger" data-card="out" style="cursor:pointer" title="Click to see out of stock items">
                             <div class="stat-icon"><i class="ph-duotone ph-prohibit"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Out of Stock</span>
                                 <span class="stat-value">${outOfStock.length}</span>
                             </div>
                         </div>
-                        <div class="stat-card success">
+                        <div class="stat-card success" data-card="value" style="cursor:pointer" title="Click for value breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-currency-dollar"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Inventory Value</span>
@@ -174,6 +175,73 @@ class PoolStockUI {
         if (qty === 0) return { label: 'Out of Stock', class: 'danger' };
         if (qty <= reorder) return { label: 'Low Stock', class: 'warning' };
         return { label: 'In Stock', class: 'success' };
+    }
+
+    async showStatPanel(card) {
+        const inventory = await this.module.getInventory();
+        const totalValue = inventory.reduce((s, i) => s + (i.quantity * (i.unitPrice || 0)), 0);
+        const lowStock = inventory.filter(i => i.quantity > 0 && i.quantity <= (i.reorderLevel || 10));
+        const outOfStock = inventory.filter(i => i.quantity === 0);
+
+        const byCategory = {};
+        inventory.forEach(i => {
+            const cat = i.category || 'Uncategorized';
+            if (!byCategory[cat]) byCategory[cat] = { count: 0, value: 0 };
+            byCategory[cat].count++;
+            byCategory[cat].value += i.quantity * (i.unitPrice || 0);
+        });
+        const maxCat = Math.max(...Object.values(byCategory).map(c => c.count), 1);
+        const maxVal = Math.max(...Object.values(byCategory).map(c => c.value), 1);
+
+        const listItems = (items, color) => items.length
+            ? `<ul class="dp-list">${items.map(i => `<li>
+                <span>${i.name} <small style="color:var(--text-secondary,#9ca3af);">(${i.sku})</small></span>
+                <span style="color:${color};font-weight:600">${i.quantity} units</span>
+              </li>`).join('')}</ul>`
+            : '<div class="dp-empty">None ✓</div>';
+
+        const panels = {
+            items: {
+                title: 'Inventory Overview',
+                subtitle: `${inventory.length} SKUs across ${Object.keys(byCategory).length} categories`,
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Items by Category</div>
+                        ${Object.entries(byCategory).sort((a, b) => b[1].count - a[1].count).map(([cat, d]) =>
+                    dpBar(cat, d.count, maxCat, '#6366f1')).join('')}
+                    </div>
+                    <div class="dp-section">
+                        <div class="dp-section-title">Stock Health</div>
+                        <div class="dp-kv-grid">
+                            ${dpKV('In Stock', inventory.filter(i => i.quantity > (i.reorderLevel || 10)).length + ' items')}
+                            ${dpKV('Low Stock', lowStock.length + ' items')}
+                            ${dpKV('Out of Stock', outOfStock.length + ' items')}
+                            ${dpKV('Total Value', 'R ' + totalValue.toLocaleString())}
+                        </div>
+                    </div>`
+            },
+            low: {
+                title: 'Low Stock Items',
+                subtitle: `${lowStock.length} items at or below their reorder level`,
+                bodyHTML: `<div class="dp-section"><div class="dp-section-title">Items Needing Attention</div>${listItems(lowStock, '#d97706')}</div>`
+            },
+            out: {
+                title: 'Out of Stock Items',
+                subtitle: `${outOfStock.length} items with zero quantity`,
+                bodyHTML: `<div class="dp-section"><div class="dp-section-title">Requires Immediate Restock</div>${listItems(outOfStock, '#dc2626')}</div>`
+            },
+            value: {
+                title: 'Inventory Value Breakdown',
+                subtitle: `Total: R ${totalValue.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`,
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Value by Category</div>
+                        ${Object.entries(byCategory).sort((a, b) => b[1].value - a[1].value).map(([cat, d]) =>
+                    dpBar(cat, d.value, maxVal, '#16a34a', v => 'R ' + v.toLocaleString())).join('')}
+                    </div>`
+            }
+        };
+        showDetailPanel(panels[card]);
     }
 
     showItemDetail(item) {
@@ -324,6 +392,11 @@ class PoolStockUI {
             const all = await this.module.getInventory();
             const item = all.find(x => x.sku === row.dataset.sku);
             if (item) this.showItemDetail(item);
+        });
+
+        // Stat card click → drill-down panel
+        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+            card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
         });
 
         // Tab navigation
