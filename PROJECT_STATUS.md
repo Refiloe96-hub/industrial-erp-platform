@@ -1,7 +1,7 @@
 # Industrial ERP Platform — Project Status
 
-> **Last Updated:** 2026-02-28  
-> **Current Phase:** Phase 13 Complete ✅  
+> **Last Updated:** 2026-03-01  
+> **Current Phase:** Phase 14 Complete ✅  
 > **Deployment:** Live at [industrial-erp-platform.vercel.app](https://industrial-erp-platform.vercel.app)
 
 ---
@@ -121,6 +121,16 @@ tests/manual.test.js  # Vanilla JS test suite (VAT, CRDT merge, pricing math)
 - ✅ Sidebar footer (Upgrade Plan, Seed Data) pinned via flex
 - ✅ Memory leak fix — DOM teardown on every navigation prevents event listener buildup
 
+### Phase 14: Mobile Responsiveness Deep Fix (2026-03-01)
+- ✅ **Root cause fixed** — duplicate `.main-content` CSS rule overrode `margin-left: 0` on mobile, pushing all content 260px off the left edge on every page except TrustCircle/SmartShift
+- ✅ **Sidebar gap eliminated** — sidebar now uses `position: fixed !important` on mobile; takes zero layout space when hidden, content fills full screen width
+- ✅ **Sidebar footer always visible** — `.nav-menu` scrolls internally (`flex: 1; overflow-y: auto`), `.sidebar-footer` pinned at bottom (`flex-shrink: 0`); no scrolling needed to reach Upgrade Plan / Seed Data
+- ✅ **Dashboard grid fixed** — stat cards in `.dashboard-stats-row` (2-col subgrid), AI Supervisor & chart cards full-width; `minmax(280px)` → `minmax(min(100%, 280px))` prevents overflow
+- ✅ **SmartShift tabs** — `.module-nav` / `.btn-tab` now wrap with `flex-wrap: wrap` on mobile
+- ✅ **TrustCircle header** — stacks `h1 + p + button` vertically on mobile
+- ✅ **Reports page fixed** — all four grids (`reports-grid`, `advanced-stats-grid`, `report-stats`, `inventory-summary`) collapse to single column; date filter buttons share equal width
+- ✅ **Verified via browser screenshots** — test account created, all pages navigated, correct rendering confirmed at 390px mobile viewport
+
 ---
 
 ## 🗃️ Database Setup (Supabase)
@@ -175,11 +185,16 @@ After pushing, Vercel rebuilds automatically. No manual deploy steps needed.
 ## 📱 Mobile UX Status
 
 The app is fully usable on mobile. Key behaviours:
-- **Bottom nav bar** persists on all pages (Dashboard, PocketBooks, PoolStock, SmartShift, TrustCircle)
-- **Sidebar** slides in from left via hamburger menu (☰)
-- **Tables** scroll horizontally when they have too many columns
-- **Forms** collapse to single-column layout
-- **Modals** expand to ~95% screen width
+- **Mobile header bar** — fixed at top with hamburger ☰, business name, theme toggle, and notification bell
+- **Bottom nav bar** — persists on all pages (Dashboard, Sales, PocketBooks, PoolStock, TrustCircle); 5 icons always visible
+- **Sidebar** — `position: fixed` overlay, slides in from left via hamburger. Takes zero space when hidden, so no blank left gap on any page
+- **Sidebar footer** — Upgrade Plan, Seed Data, and Logout buttons are always visible at the bottom of the sidebar without scrolling
+- **Tables** — scroll horizontally when they have too many columns (`.table-container { overflow-x: auto }`)
+- **Forms** — collapse to single-column layout
+- **Modals** — expand to ~95% screen width
+- **All grids** — use `minmax(min(100%, X), 1fr)` so no card ever overflows the screen edge
+- **Reports page** — all four grid sections (Supply Chain KPIs, ABC Analysis, Financial stats, Income/Expense cards) stack single-column on mobile
+- **Dashboard** — AI Supervisor and chart cards go full width; stat cards sit in a 2-col subgrid row
 
 ---
 
