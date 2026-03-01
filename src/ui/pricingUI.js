@@ -446,6 +446,61 @@ export default class PricingUI {
       document.dispatchEvent(new CustomEvent('navigate-to', { detail: 'dashboard' }));
     });
 
+    // Wire up plan buttons (Upgrade / Downgrade / Select Plan)
+    container.querySelectorAll('.plan-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const planId = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (!planId || action === 'none') return;
+
+        const plan = plans.find(p => p.id === planId);
+        if (!plan) return;
+
+        // Confirm downgrade
+        if (action === 'downgrade') {
+          const ok = confirm(`Downgrade to ${plan.name}? You may lose access to features on your current plan.`);
+          if (!ok) return;
+        }
+
+        // Persist the new plan
+        try {
+          // Update localStorage user
+          const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          userData.planId = planId;
+          userData.planName = plan.name;
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+
+          // Also update IndexedDB if db is available
+          try {
+            const { default: db } = await import('../db/index.js');
+            const users = await db.getAll('users');
+            const me = users.find(u => u.username === userData.username || u.id === userData.id);
+            if (me) {
+              me.planId = planId;
+              me.planName = plan.name;
+              await db.put('users', me);
+            }
+          } catch (dbErr) {
+            console.warn('DB plan update skipped:', dbErr.message);
+          }
+
+          // Visual feedback: show toast
+          const toast = document.createElement('div');
+          toast.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:0.75rem 1.5rem;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:opacity 0.3s;';
+          toast.textContent = `✓ ${action === 'downgrade' ? 'Downgraded' : 'Upgraded'} to ${plan.name}`;
+          document.body.appendChild(toast);
+          setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
+
+          // Re-render the pricing page to update button states
+          await PricingUI.render(container, { ...currentUser, planId, planName: plan.name });
+
+        } catch (err) {
+          alert('Could not save plan change. Please try again. (' + err.message + ')');
+          console.error('Plan change error:', err);
+        }
+      });
+    });
+
     // Wire up Support Modal
     const supportModal = container.querySelector('#pricing-support-modal');
     const closeSupport = container.querySelector('#close-pricing-support');

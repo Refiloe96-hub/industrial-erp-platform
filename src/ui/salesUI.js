@@ -563,10 +563,11 @@ class SalesUI {
           margin-bottom: 1rem; 
         }
         .stat-card {
-          background: white;
+          background: var(--bg-primary);
+          border: 1px solid var(--border, #e5e7eb);
           padding: 1rem;
           border-radius: 12px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.06);
           display: flex;
           align-items: center;
         }
@@ -574,9 +575,12 @@ class SalesUI {
         .badge.card { background: #6366f1; color: white; }
         .badge.mobile { background: #f59e0b; color: white; }
         .badge.mpesa { background: #16a34a; color: white; }
-        .today-revenue { background: #10b981; color: white; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .stat-label { font-size: 0.8rem; margin: 0; opacity: 0.9; }
+        .today-revenue { 
+          border-left: 4px solid #10b981;
+        }
+        .today-revenue .stat-value { color: #10b981; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-primary); }
+        .stat-label { font-size: 0.8rem; margin: 0; color: var(--text-secondary); }
 
         /* Layout */
         .pos-layout {
@@ -602,17 +606,20 @@ class SalesUI {
         }
         .cat-btn {
           padding: 0.5rem 1rem;
-          background: white;
-          border: 1px solid #e5e7eb;
+          background: var(--bg-secondary, #f8fafc);
+          border: 1px solid var(--border, #e5e7eb);
           border-radius: 20px;
           white-space: nowrap;
           cursor: pointer;
           transition: all 0.2s;
+          color: var(--text-secondary);
+          font-size: 0.875rem;
         }
+        .cat-btn:hover { border-color: var(--accent-primary, #f97316); color: var(--accent-primary, #f97316); }
         .cat-btn.active {
-          background: #2563eb;
+          background: var(--accent-primary, #2563eb);
           color: white;
-          border-color: #2563eb;
+          border-color: var(--accent-primary, #2563eb);
         }
 
         .product-grid {
@@ -625,24 +632,25 @@ class SalesUI {
         }
 
         .product-card {
-          background: white;
-          border: none;
+          background: var(--bg-primary);
+          border: 1px solid var(--border, #e5e7eb);
           border-radius: 12px;
           padding: 1rem;
           text-align: left;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.06);
           cursor: pointer;
-          transition: transform 0.1s;
+          transition: transform 0.1s, border-color 0.15s;
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
           height: 120px;
           position: relative;
         }
+        .product-card:hover { border-color: var(--accent-primary, #f97316); }
         .product-card:active { transform: scale(0.96); }
-        .prod-name { font-weight: 600; font-size: 1rem; line-height: 1.2; }
-        .prod-price { font-size: 1.25rem; font-weight: 700; color: #2563eb; margin-top: auto; }
-        .prod-stock { font-size: 0.75rem; color: #6b7280; }
+        .prod-name { font-weight: 600; font-size: 1rem; line-height: 1.2; color: var(--text-primary); }
+        .prod-price { font-size: 1.25rem; font-weight: 700; color: var(--accent-primary, #2563eb); margin-top: auto; }
+        .prod-stock { font-size: 0.75rem; color: var(--text-secondary); }
         .prod-stock.out-of-stock { color: #ef4444; font-weight: bold; }
 
         /* Cart */
@@ -651,7 +659,9 @@ class SalesUI {
           display: flex; 
           flex-direction: column; 
           border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+          background: var(--bg-primary);
+          border: 1px solid var(--border, #e5e7eb);
         }
         .cart-body { 
           flex: 1; 
@@ -666,11 +676,11 @@ class SalesUI {
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 0;
-          border-bottom: 1px solid #f3f4f6;
+          border-bottom: 1px solid var(--border, #f3f4f6);
         }
-        .cart-item-name { display: block; font-weight: 500; }
-        .cart-item-price { font-size: 0.8rem; color: #6b7280; }
-        .cart-item-total { font-weight: 600; }
+        .cart-item-name { display: block; font-weight: 500; color: var(--text-primary); }
+        .cart-item-price { font-size: 0.8rem; color: var(--text-secondary); }
+        .cart-item-total { font-weight: 600; color: var(--text-primary); }
         
         .btn-remove-item {
           background: none;
@@ -690,15 +700,17 @@ class SalesUI {
           flex: 1;
           text-align: center;
           padding: 0.75rem;
-          border: 1px solid #e5e7eb;
+          border: 1px solid var(--border, #e5e7eb);
           border-radius: 8px;
           cursor: pointer;
           font-size: 1.25rem;
+          color: var(--text-secondary);
+          transition: border-color 0.15s, background 0.15s;
         }
         .payment-option:has(input:checked) {
-          background: #eff6ff;
-          border-color: #2563eb;
-          color: #2563eb;
+          background: rgba(var(--accent-rgb, 37,99,235), 0.08);
+          border-color: var(--accent-primary, #2563eb);
+          color: var(--accent-primary, #2563eb);
         }
 
         /* Cart summary rows */
@@ -708,16 +720,16 @@ class SalesUI {
           justify-content: space-between;
           padding: 0.25rem 0;
           font-size: 0.95rem;
-          color: #4b5563;
+          color: var(--text-secondary);
         }
-        .summary-row.vat-row { color: #6b7280; font-size: 0.875rem; }
+        .summary-row.vat-row { color: var(--text-secondary); font-size: 0.875rem; }
         .summary-row.total-row {
           font-size: 1.4rem;
           font-weight: 700;
-          color: #111827;
+          color: var(--text-primary);
           padding-top: 0.75rem;
           margin-top: 0.5rem;
-          border-top: 2px solid #f3f4f6;
+          border-top: 2px solid var(--border, #f3f4f6);
         }
 
         /* Product toolbar (filters + scan btn) */
@@ -730,16 +742,34 @@ class SalesUI {
         .product-toolbar .category-filters { flex: 1; margin-bottom: 0; }
         .scan-btn {
           flex-shrink: 0;
-          background: white;
-          border: 1px solid #e5e7eb;
+          background: var(--bg-secondary, #f8fafc);
+          border: 1px solid var(--border, #e5e7eb);
           border-radius: 8px;
           padding: 0.5rem 0.75rem;
           font-size: 1.25rem;
           cursor: pointer;
-          color: #374151;
+          color: var(--text-secondary);
           transition: background 0.2s;
         }
-        .scan-btn:hover { background: #f3f4f6; }
+        .scan-btn:hover { background: var(--bg-primary); border-color: var(--accent-primary, #f97316); }
+
+        /* Search bar */
+        .product-search {
+          background: var(--bg-secondary, #f8fafc);
+          border: 1px solid var(--border, #e5e7eb);
+          border-radius: 8px;
+          padding: 0.5rem 0.75rem;
+          color: var(--text-primary);
+          font-size: 0.875rem;
+        }
+        .product-search::placeholder { color: var(--text-secondary); }
+
+        /* Customer selector */
+        .customer-selector select {
+          background: var(--bg-secondary, #f8fafc);
+          border: 1px solid var(--border, #e5e7eb);
+          color: var(--text-primary);
+        }
 
         /* Invoice modal */
         .invoice-modal {
@@ -749,11 +779,13 @@ class SalesUI {
           box-shadow: 0 20px 50px rgba(0,0,0,0.25);
           width: 420px;
           max-width: 95vw;
+          background: var(--bg-primary);
+          color: var(--text-primary);
         }
         .invoice-modal::backdrop { background: rgba(0,0,0,0.5); }
         .invoice-content { padding: 2rem; }
         .invoice-header { text-align: center; margin-bottom: 1.5rem; }
-        .invoice-header h2 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+        .invoice-header h2 { margin: 0 0 0.25rem; font-size: 1.5rem; color: var(--text-primary); }
         .invoice-meta {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -761,14 +793,15 @@ class SalesUI {
           font-size: 0.875rem;
           margin-bottom: 1.5rem;
           padding-bottom: 1rem;
-          border-bottom: 1px dashed #e5e7eb;
+          border-bottom: 1px dashed var(--border, #e5e7eb);
+          color: var(--text-secondary);
         }
         .invoice-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-bottom: 1rem; }
-        .invoice-table th { background: #f9fafb; padding: 0.5rem; text-align: left; font-weight: 600; }
-        .invoice-table td { padding: 0.5rem; border-bottom: 1px solid #f3f4f6; }
-        .invoice-totals { border-top: 2px solid #e5e7eb; padding-top: 1rem; margin-bottom: 1.5rem; }
-        .inv-row { display: flex; justify-content: space-between; padding: 0.25rem 0; color: #6b7280; font-size: 0.9rem; }
-        .inv-grand { font-size: 1.25rem; font-weight: 700; color: #111827; padding-top: 0.5rem; margin-top: 0.25rem; border-top: 1px solid #e5e7eb; }
+        .invoice-table th { background: var(--bg-secondary, #f9fafb); padding: 0.5rem; text-align: left; font-weight: 600; color: var(--text-primary); }
+        .invoice-table td { padding: 0.5rem; border-bottom: 1px solid var(--border, #f3f4f6); color: var(--text-primary); }
+        .invoice-totals { border-top: 2px solid var(--border, #e5e7eb); padding-top: 1rem; margin-bottom: 1.5rem; }
+        .inv-row { display: flex; justify-content: space-between; padding: 0.25rem 0; color: var(--text-secondary); font-size: 0.9rem; }
+        .inv-grand { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); padding-top: 0.5rem; margin-top: 0.25rem; border-top: 1px solid var(--border, #e5e7eb); }
         .invoice-actions { display: flex; gap: 1rem; }
         .invoice-actions .btn { flex: 1; }
 
@@ -780,10 +813,19 @@ class SalesUI {
           box-shadow: 0 20px 50px rgba(0,0,0,0.3);
           width: 380px;
           max-width: 95vw;
+          background: var(--bg-primary);
+          color: var(--text-primary);
         }
         .scanner-modal::backdrop { background: rgba(0,0,0,0.6); }
         .scanner-content { padding: 1.5rem; }
-        .scanner-content h3 { margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .scanner-content h3 { margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
+
+        /* M-Pesa QR container */
+        #mpesa-qr-container {
+          background: var(--bg-secondary, #f8fafc) !important;
+          border-color: var(--border, #e5e7eb) !important;
+          color: var(--text-primary);
+        }
 
         /* Print styles — hide everything except the invoice */
         @media print {
