@@ -220,6 +220,57 @@ class PocketBooks {
     return insights;
   }
 
+  // Proprietary Local Engine: Time-series anomaly detection (Z-score)
+  detectAnomalies(transactions, threshold = 2.0) {
+    const expenseTx = transactions.filter(t => t.type === 'expense' && typeof t.amount === 'number');
+    if (expenseTx.length < 4) return [];
+
+    const amounts = expenseTx.map(t => t.amount);
+    const mean = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+    const std = Math.sqrt(amounts.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / amounts.length) || 1;
+
+    return expenseTx.map(t => ({
+      ...t,
+      zScore: Math.abs((t.amount - mean) / std)
+    })).filter(t => t.zScore > threshold);
+  }
+
+  // Proprietary Local Engine: Holt's Double Exponential Smoothing Forecast
+  forecastCashflow(transactions, horizon = 14, alpha = 0.3, beta = 0.1) {
+    if (transactions.length === 0) return { forecastedRevenue: [], forecastedExpenses: [] };
+
+    // Group transactions by day
+    const dailyMap = {};
+    transactions.forEach(t => {
+      const d = new Date(t.date || t.createdAt);
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!dailyMap[day]) dailyMap[day] = { income: 0, expense: 0 };
+      if (t.type === 'income') dailyMap[day].income += t.amount;
+      if (t.type === 'expense') dailyMap[day].expense += t.amount;
+    });
+
+    const sortedDays = Object.keys(dailyMap).sort();
+    const incomeSeries = sortedDays.map(d => dailyMap[d].income);
+    const expenseSeries = sortedDays.map(d => dailyMap[d].expense);
+
+    const holtForecast = (series) => {
+      if (series.length < 2) return Array(horizon).fill(series[0] || 0);
+      let L = series[0];
+      let T = series[1] - series[0];
+      for (let i = 1; i < series.length; i++) {
+        const prevL = L;
+        L = alpha * series[i] + (1 - alpha) * (L + T);
+        T = beta * (L - prevL) + (1 - beta) * T;
+      }
+      return Array.from({ length: horizon }, (_, h) => Math.max(0, L + (h + 1) * T));
+    };
+
+    return {
+      forecastedRevenue: holtForecast(incomeSeries),
+      forecastedExpenses: holtForecast(expenseSeries)
+    };
+  }
+
   // Create account
   async createAccount(data) {
     const account = {

@@ -266,23 +266,14 @@ class SmartShiftUI {
       alert('No machines available to schedule');
       return;
     }
-    const unassigned = orders.filter(o => !o.assignedMachineId);
-    let currentHour = new Date().getHours() + 1;
 
-    for (let i = 0; i < unassigned.length; i++) {
-      const order = unassigned[i];
-      const mId = machines[i % machines.length].id;
-      order.assignedMachineId = mId;
+    // Call the embedded proprietary scheduling engine
+    const scheduledCount = await this.module.localOptimizeSchedule(orders, machines);
 
-      let dt = new Date();
-      dt.setHours(currentHour, 0, 0, 0);
-      order.scheduledStartTime = dt.getTime();
-      order.estimatedDuration = Math.max(1, Math.floor(order.quantity / 50));
-
-      currentHour += order.estimatedDuration;
-      if (currentHour > 20) currentHour = 8;
-
-      await db.put('productionOrders', order);
+    if (scheduledCount > 0) {
+      console.log(`Auto-scheduled ${scheduledCount} orders using proprietary engine.`);
+    } else {
+      console.log('No order required scheduling.');
     }
   }
 

@@ -377,6 +377,87 @@ class SmartShift {
     return result;
   }
 
+  // Proprietary Heuristic Scheduler: Local job-shop scheduling
+  async localOptimizeSchedule(orders, machines) {
+    if (machines.length === 0) return 0;
+
+    const unassigned = orders.filter(o => !o.assignedMachineId);
+    if (unassigned.length === 0) return 0;
+
+    // Sort by priority (descending) and due date (ascending)
+    unassigned.sort((a, b) => {
+      if (a.priority !== b.priority) return (b.priority || 0) - (a.priority || 0);
+      return (a.dueDate || Infinity) - (b.dueDate || Infinity);
+    });
+
+    // Track when each machine is next available.
+    // Start scheduling from the next whole hour.
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    now.setHours(now.getHours() + 1);
+    const baseTime = now.getTime();
+
+    const machineAvailability = {};
+    machines.forEach(m => { machineAvailability[m.id] = baseTime; });
+
+    let scheduledCount = 0;
+
+    for (const order of unassigned) {
+      // Find eligible machines (match capability if required)
+      let eligibleMachines = machines;
+      if (order.requiredCapability) {
+        eligibleMachines = machines.filter(m => m.capabilities?.includes(order.requiredCapability));
+      }
+
+      // If no machine has the specific capability, fallback to all machines
+      // (in a strict environment we'd skip, but we fallback for robustness)
+      if (eligibleMachines.length === 0) eligibleMachines = machines;
+
+      // Pick machine with the earliest available time
+      let selectedMachine = eligibleMachines[0];
+      let earliestTime = machineAvailability[selectedMachine.id];
+
+      for (let i = 1; i < eligibleMachines.length; i++) {
+        const m = eligibleMachines[i];
+        if (machineAvailability[m.id] < earliestTime) {
+          selectedMachine = m;
+          earliestTime = machineAvailability[m.id];
+        }
+      }
+
+      // Calculate duration
+      const throughput = selectedMachine.throughput || 50; // default 50 units/hr
+      const durationHours = Math.max(1, Math.ceil((order.quantity || 1) / throughput));
+
+      // Only schedule during working hours (8 AM to 8 PM) - simple heuristic
+      let scheduledStart = new Date(earliestTime);
+      if (scheduledStart.getHours() >= 20 || scheduledStart.getHours() < 8) {
+        // Move to 8 AM next day
+        if (scheduledStart.getHours() >= 20) {
+          scheduledStart.setDate(scheduledStart.getDate() + 1);
+        }
+        scheduledStart.setHours(8, 0, 0, 0);
+      }
+
+      // Assign order
+      order.assignedMachineId = selectedMachine.id;
+      order.scheduledStartTime = scheduledStart.getTime();
+      order.estimatedDuration = durationHours;
+      order.status = 'scheduled';
+
+      // Update machine availability
+      const nextAvailable = new Date(scheduledStart.getTime());
+      nextAvailable.setHours(nextAvailable.getHours() + durationHours);
+      machineAvailability[selectedMachine.id] = nextAvailable.getTime();
+
+      await db.update(STORES.productionOrders, order);
+      scheduledCount++;
+    }
+
+    console.log(`⏱️ Proprietary Scheduler: Assigned ${scheduledCount} orders locally.`);
+    return scheduledCount;
+  }
+
   // Apply AI-generated schedule
   async applySchedule(schedule) {
     const createdShifts = [];

@@ -409,17 +409,9 @@ class AIEngine {
     }
 
     async _callGroq(snapshot, apiKey) {
-        // Build compact summary for prompt (stay under ~400 tokens)
-        const s = snapshot;
-        const compact = {
-            financialHealth: `Net cash ${s.finance.netCashFlow > 0 ? '+' : ''}R${Math.round(s.finance.netCashFlow)}, trend: ${s.finance.trend}, ${s.finance.anomalyCount} anomalies`,
-            inventory: `${s.inventory.criticalCount} critical stockouts, ${s.inventory.highCount} high-urgency. Score: ${s.inventory.score}/100`,
-            topLowStock: s.inventory.urgencyList?.slice(0, 3).map(i => `${i.name} (${i.daysToStockout}d left)`).join(', '),
-            production: `${s.production.operational}/${s.production.totalMachines} machines OK. ${s.production.overdueOrders?.length || 0} overdue orders. Score: ${s.production.score}/100`,
-            atRiskMachines: s.production.atRiskMachines?.map(m => m.name).join(', ') || 'none',
-            syndicate: `${s.syndicate.highRiskCount} high-risk members, score: ${s.syndicate.score}/100`,
-            sales: `Revenue trend: ${s.sales.revenueTrend}. Peak day: ${s.sales.peakDay}. Top item: ${s.sales.topItems?.[0]?.name || 'N/A'}`,
-        };
+        // Generate the local, deterministic insights first
+        const localInsights = this._ruleBasedInsights(snapshot);
+        const localInsightsStr = localInsights.map((i, idx) => `${idx + 1}. ${i.text}`).join('\n');
 
         const res = await fetch(GROQ_ENDPOINT, {
             method: 'POST',
@@ -432,11 +424,11 @@ class AIEngine {
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a practical business advisor for a small African SME using an ERP system. Given a business snapshot, provide exactly 5 short, actionable plain-English insights. Each insight must: start with an emoji, be one sentence, be specific and practical. Rank by urgency. No markdown headers, just 5 lines.',
+                        content: 'You are a practical business advisor for an industrial manufacturing SME. Your job is ONLY to rewrite the provided system-generated insights into a more friendly, natural language tone. Keep them exactly as 5 short bullets. Start each with an emoji. Do not invent new facts, just rephrase the provided insights.',
                     },
                     {
                         role: 'user',
-                        content: `Here is today's business snapshot:\n${JSON.stringify(compact, null, 2)}\n\nGive me 5 prioritised insights.`,
+                        content: `Here are the system's deterministic insights:\n${localInsightsStr}\n\nPlease rewrite these 5 insights to be more conversational and encouraging while preserving the exact numbers and urgency.`,
                     },
                 ],
                 temperature: 0.4,

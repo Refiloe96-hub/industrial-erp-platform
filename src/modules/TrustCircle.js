@@ -111,7 +111,7 @@ class TrustCircle {
     return await db.query(STORES.members, 'syndicateId', syndicateId);
   }
 
-  // Calculate trust score based on behavior
+  // Proprietary Engine: Advanced Trust Scoring Algorithm
   async calculateTrustScore(memberId) {
     const member = await db.get(STORES.members, memberId);
     if (!member) return 0;
@@ -125,22 +125,45 @@ class TrustCircle {
     let missed = 0;
     let totalVolume = 0;
 
-    contributions.forEach(c => {
+    // Calculate streak
+    let currentOnTimeStreak = 0;
+    let maxOnTimeStreak = 0;
+
+    // Sort ascending for streak calculation
+    const sortedContribs = [...contributions].sort((a, b) => a.date - b.date);
+
+    sortedContribs.forEach(c => {
       totalVolume += c.amount || 0;
       if (c.status === 'paid') {
         onTime++;
+        currentOnTimeStreak++;
+        if (currentOnTimeStreak > maxOnTimeStreak) {
+          maxOnTimeStreak = currentOnTimeStreak;
+        }
         score += 2;
       } else if (c.status === 'late') {
         late++;
+        currentOnTimeStreak = 0;
         score -= 5;
       } else if (c.status === 'missed') {
         missed++;
+        currentOnTimeStreak = 0;
         score -= 15;
       }
     });
 
+    // Volume & Consistency Multipliers (Proprietary Risk Logic)
+    if (totalVolume > 20000 && onTime > late) score += 3;
     if (totalVolume > 50000 && onTime > late) score += 5;
     if (totalVolume > 100000 && missed === 0) score += 10;
+
+    // Streak Bonus
+    if (maxOnTimeStreak >= 5) score += 5;
+    if (maxOnTimeStreak >= 10) score += 10;
+
+    // Hard penalty for recent misses
+    const recentMisses = sortedContribs.slice(-3).filter(c => c.status === 'missed').length;
+    if (recentMisses > 0) score -= 20;
 
     score = Math.max(0, Math.min(100, score));
 
@@ -150,6 +173,41 @@ class TrustCircle {
     }
 
     return score;
+  }
+
+  // Proprietary Engine: Syndicate Health Evaluation
+  async evaluateSyndicateHealth(syndicateId) {
+    const members = await this.getMembers(syndicateId);
+    if (members.length === 0) return { healthScore: 50, status: 'empty' };
+
+    let totalScore = 0;
+    let highRiskCount = 0;
+
+    for (const member of members) {
+      const score = await this.calculateTrustScore(member.id);
+      totalScore += score;
+      if (score < 40) highRiskCount++;
+    }
+
+    const avgScore = totalScore / members.length;
+
+    // Penalty for having too many high-risk members concentrated
+    const riskConcentrationPenalty = (highRiskCount / members.length) * 30; // Up to 30 point penalty
+
+    let healthScore = avgScore - riskConcentrationPenalty;
+    healthScore = Math.max(0, Math.min(100, healthScore));
+
+    const status = healthScore >= 80 ? 'excellent' :
+      healthScore >= 60 ? 'healthy' :
+        healthScore >= 40 ? 'at_risk' : 'critical';
+
+    return {
+      healthScore: Math.round(healthScore),
+      status,
+      avgMemberScore: Math.round(avgScore),
+      highRiskMembers: highRiskCount,
+      totalMembers: members.length
+    };
   }
 
   // Record contribution
