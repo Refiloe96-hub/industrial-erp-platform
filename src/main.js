@@ -339,8 +339,8 @@ class IndustrialERPApp {
           <form id="login-form" class="auth-form">
             <h3 class="form-title">Welcome Back</h3>
             <div class="form-group">
-              <label>Username</label>
-              <input type="text" name="username" placeholder="Enter username" required autofocus />
+              <label>Username / Email</label>
+              <input type="text" name="username" placeholder="Username or Email" required autofocus />
             </div>
             
             <div class="form-group">
@@ -483,35 +483,95 @@ class IndustrialERPApp {
 
       try {
         const formData = new FormData(loginForm);
-        const username = formData.get('username');
+        const identifier = (formData.get('username') || '').trim(); // accepts username OR email
         const password = formData.get('password');
-
-        // ALWAYS verify locally first — fast, reliable, works offline
-        const localUser = await db.get('users', username);
         const hashedPassword = await hashPassword(password);
 
-        if (!localUser || localUser.password !== hashedPassword) {
+        // ── Step 1: Try local IndexedDB first (fast, works offline) ──────────
+        let localUser = await db.get('users', identifier).catch(() => null);
+
+        // Also try looking up by email if username lookup missed
+        if (!localUser) {
+          const allUsers = await db.getAll('users').catch(() => []);
+          localUser = allUsers.find(u => u.email && u.email.toLowerCase() === identifier.toLowerCase()) || null;
+        }
+
+        if (localUser && localUser.password === hashedPassword) {
+          // Local auth passed — log in immediately
+          localUser.lastLogin = Date.now();
+          this.currentUser = localUser;
+          localStorage.setItem('erp_session', JSON.stringify(localUser));
+          await db.update('users', localUser);
+          // Background Supabase sync
+          if (isSupabaseEnabled() && localUser.email) {
+            supabaseClient.auth.signInWithPassword({ email: localUser.email, password })
+              .then(({ data }) => { if (data?.user) initSync(); })
+              .catch(err => console.warn('Supabase bg-sync skipped:', err.message));
+          }
+          this.render();
+          initSync();
+          return;
+        }
+
+        // ── Step 2: IDB miss or wrong password — try Supabase (online fallback) ─
+        if (!isSupabaseEnabled()) {
           alert('Invalid username or password.');
           btn.innerHTML = originalHTML;
           btn.disabled = false;
           return;
         }
 
-        // Local auth passed — log them in immediately
-        localUser.lastLogin = Date.now();
-        this.currentUser = localUser;
-        localStorage.setItem('erp_session', JSON.stringify(localUser));
-        await db.update('users', localUser);
+        // Determine email: if identifier looks like an email use it directly,
+        // otherwise try to find it from a partial username match in IDB
+        const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(identifier);
+        const emailToTry = looksLikeEmail ? identifier : (localUser?.email || null);
 
-        // Optionally sync session with Supabase in the background (non-blocking)
-        if (isSupabaseEnabled() && localUser.email) {
-          supabaseClient.auth.signInWithPassword({ email: localUser.email, password })
-            .then(({ data }) => {
-              if (data?.user) initSync();
-            })
-            .catch(err => console.warn('Supabase sync skipped:', err.message));
+        if (!emailToTry) {
+          alert('Invalid username or password. If you registered with an email, try logging in with it directly.');
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+          return;
         }
 
+        const { data: sbData, error: sbError } = await supabaseClient.auth.signInWithPassword({
+          email: emailToTry,
+          password,
+        });
+
+        if (sbError || !sbData?.user) {
+          alert('Invalid username or password.');
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+          return;
+        }
+
+        // Supabase auth passed — rebuild local profile from profiles table
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', sbData.user.id)
+          .maybeSingle();
+
+        const rebuiltUser = {
+          username: profile?.username || emailToTry.split('@')[0],
+          password: hashedPassword, // store so next offline login works
+          email: emailToTry,
+          businessName: profile?.business_name || '',
+          businessType: profile?.business_type || 'shop',
+          ownerName: profile?.owner_name || '',
+          phone: profile?.phone || '',
+          supabaseId: sbData.user.id,
+          role: profile?.role || 'admin',
+          lastLogin: Date.now(),
+          createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+        };
+
+        // Upsert into local IDB so future offline logins work
+        try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
+        await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
+
+        this.currentUser = rebuiltUser;
+        localStorage.setItem('erp_session', JSON.stringify(rebuiltUser));
         this.render();
         initSync();
 
