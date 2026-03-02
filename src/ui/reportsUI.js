@@ -58,9 +58,10 @@ class ReportsUI {
 
           </div>
           
-          <div class="export-controls">
+          <div class="export-controls" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button id="export-pdf-btn" class="btn btn-secondary"><i class="ph-duotone ph-file-pdf"></i> Export PDF</button>
             <select id="export-type" class="form-select">
-                <option value=""><i class="ph-duotone ph-download-simple"></i> Export Report...</option>
+                <option value=""><i class="ph-duotone ph-download-simple"></i> Export CSV...</option>
                 <option value="all">Everything (CSV)</option>
                 <option value="mpesa">M-Pesa Sales</option>
                 <option value="cash">Cash Sales</option>
@@ -341,6 +342,14 @@ class ReportsUI {
       });
     });
 
+    // PDF Export Handler
+    const exportPdfBtn = container.querySelector('#export-pdf-btn');
+    if (exportPdfBtn) {
+      exportPdfBtn.addEventListener('click', () => {
+        this.exportToPDF(container);
+      });
+    }
+
     // Export Handler
     const exportSelect = container.querySelector('#export-type');
     if (exportSelect) {
@@ -392,6 +401,71 @@ class ReportsUI {
         this.activeFilter.value = e.target.value;
         this.render(container);
       });
+    }
+  }
+
+  async exportToPDF(container) {
+    const btn = container.querySelector('#export-pdf-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Generating...';
+    btn.disabled = true;
+
+    try {
+      const { startDate, endDate } = this.getDateRange();
+
+      const element = document.createElement('div');
+      element.innerHTML = container.innerHTML;
+
+      // Remove interactive parts
+      const controls = element.querySelector('.report-controls');
+      if (controls) controls.remove();
+
+      // Add a header for the PDF
+      const title = document.createElement('div');
+      title.innerHTML = `
+        <h1 style="color:#111827; margin-bottom: 0.5rem;">Business Status Report</h1>
+        <p style="color:#6b7280; margin-top:0; margin-bottom: 2rem;">Period: ${startDate} to ${endDate}</p>
+      `;
+      element.insertBefore(title, element.firstChild);
+
+      // Force print styles for PDF rendering
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .reports-container { padding: 20px; font-family: sans-serif; background: white !important; }
+        .report-stats { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+        .stat-card { flex: 1; min-width: 130px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .reports-grid { display: flex; flex-direction: column; gap: 20px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; break-inside: avoid; margin-bottom: 20px; }
+        .card-header { padding: 10px 15px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; font-weight: bold; }
+        .card-body { padding: 15px; }
+        table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .advanced-stats-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .kpi-card { flex: 1; min-width: 150px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .progress-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top:5px; }
+        .progress-bar-fill { height: 100%; }
+      `;
+      element.appendChild(style);
+
+      const opt = {
+        margin: 10,
+        filename: `business_report_${startDate}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      if (window.html2pdf) {
+        await window.html2pdf().set(opt).from(element).save();
+      } else {
+        alert('PDF generation library not ready. Please try again.');
+      }
+    } catch (err) {
+      console.error('PDF Export Error:', err);
+      alert('Failed to generate PDF.');
+    } finally {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
     }
   }
 

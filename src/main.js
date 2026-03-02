@@ -67,11 +67,37 @@ class IndustrialERPApp {
 
   getModulesForUser() {
     const type = this.currentUser?.businessType || 'manufacturer';
-    return MODULE_ACCESS[type] || MODULE_ACCESS.manufacturer;
+    const role = this.currentUser?.role || 'admin';
+    let modules = [...(MODULE_ACCESS[type] || MODULE_ACCESS.manufacturer)];
+
+    if (role === 'staff') {
+      modules = modules.filter(m => !['settings', 'reports', 'trustcircle', 'pocketwallet', 'pocketbooks'].includes(m));
+    } else if (role === 'manager') {
+      modules = modules.filter(m => !['settings', 'trustcircle'].includes(m));
+    }
+
+    return modules;
   }
 
   async navigateTo(module) {
     console.log('Navigating to module:', module); // Debug log
+
+    // RBAC: Check Deep Link Authorization
+    const allowedModules = this.getModulesForUser();
+    if (module && module !== 'dashboard' && module !== 'pricing' && !allowedModules.includes(module)) {
+      document.getElementById('content-area').innerHTML = `
+        <div class="card" style="margin:2rem;text-align:center;padding:3rem">
+          <i class="ph-duotone ph-shield-warning" style="font-size:4rem;color:#ef4444;margin-bottom:1rem"></i>
+          <h2 style="margin-bottom:0.5rem">Access Denied</h2>
+          <p style="color:var(--text-secondary)">Your current role (${this.currentUser?.role || 'staff'}) does not have permission to view this module.</p>
+          <button class="btn btn-primary mt-4" onclick="window.location.hash=''">Return to Dashboard</button>
+        </div>
+      `;
+      // Ensure nav limits active state safely
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+      return;
+    }
 
     // Update sidebar nav active state
     document.querySelectorAll('.nav-item').forEach(item => {

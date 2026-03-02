@@ -66,20 +66,20 @@ class TrustCircle {
   // Add member to syndicate
   async addMember(syndicateId, data) {
     const syndicate = await db.get(STORES.syndicates, syndicateId);
-    
+
     if (!syndicate) {
       throw new Error('Syndicate not found');
     }
 
     const members = await this.getMembers(syndicateId);
-    
+
     if (members.length >= syndicate.maxMembers) {
       throw new Error('Syndicate is full');
     }
 
     // AI: Calculate risk score
     let riskScore = 50; // default
-    
+
     if (this.aiEngine) {
       const riskAssessment = await this.aiEngine.calculateRiskScore(
         data.businessProfile || {},
@@ -109,6 +109,47 @@ class TrustCircle {
   // Get syndicate members
   async getMembers(syndicateId) {
     return await db.query(STORES.members, 'syndicateId', syndicateId);
+  }
+
+  // Calculate trust score based on behavior
+  async calculateTrustScore(memberId) {
+    const member = await db.get(STORES.members, memberId);
+    if (!member) return 0;
+
+    const contributions = await this.getContributions({ memberId });
+    if (contributions.length === 0) return 50; // Neutral starting score
+
+    let score = 50;
+    let onTime = 0;
+    let late = 0;
+    let missed = 0;
+    let totalVolume = 0;
+
+    contributions.forEach(c => {
+      totalVolume += c.amount || 0;
+      if (c.status === 'paid') {
+        onTime++;
+        score += 2;
+      } else if (c.status === 'late') {
+        late++;
+        score -= 5;
+      } else if (c.status === 'missed') {
+        missed++;
+        score -= 15;
+      }
+    });
+
+    if (totalVolume > 50000 && onTime > late) score += 5;
+    if (totalVolume > 100000 && missed === 0) score += 10;
+
+    score = Math.max(0, Math.min(100, score));
+
+    if (member.riskScore !== score) {
+      member.riskScore = score;
+      await db.update(STORES.members, member);
+    }
+
+    return score;
   }
 
   // Record contribution
@@ -144,7 +185,7 @@ class TrustCircle {
 
   async updateMemberContributions(memberId, amount) {
     const member = await db.get(STORES.members, memberId);
-    
+
     if (member) {
       member.totalContributions += amount;
       await db.update(STORES.members, member);
@@ -153,7 +194,7 @@ class TrustCircle {
 
   async updateSyndicatePool(syndicateId, amount) {
     const syndicate = await db.get(STORES.syndicates, syndicateId);
-    
+
     if (syndicate) {
       syndicate.totalPool += amount;
       await db.update(STORES.syndicates, syndicate);
@@ -230,7 +271,7 @@ class TrustCircle {
   // Join group buy
   async joinGroupBuy(groupBuyId, data) {
     const groupBuy = await db.get(STORES.groupBuys, groupBuyId);
-    
+
     if (!groupBuy) {
       throw new Error('Group buy not found');
     }
@@ -280,19 +321,21 @@ class TrustCircle {
       : 0;
 
     // Member performance
-    const memberPerformance = members.map(member => {
+    const memberPerformance = await Promise.all(members.map(async member => {
+      const score = await this.calculateTrustScore(member.id);
       const memberContributions = contributions.filter(c => c.memberId === member.id);
       const memberPaid = memberContributions.filter(c => c.status === 'paid').length;
       const memberLate = memberContributions.filter(c => c.status === 'late').length;
-      
+
       return {
         ...member,
-        paymentRate: memberContributions.length > 0 
-          ? (memberPaid / memberContributions.length) * 100 
+        riskScore: score,
+        paymentRate: memberContributions.length > 0
+          ? (memberPaid / memberContributions.length) * 100
           : 0,
         latePayments: memberLate
       };
-    });
+    }));
 
     return {
       syndicate,
@@ -357,7 +400,7 @@ class TrustCircle {
 
     // AI would analyze various factors
     // For Phase 11, return rule-based recommendation
-    
+
     const recommendations = {
       'group_buying': { min: 3, max: 8, optimal: 5 },
       'equipment_financing': { min: 3, max: 6, optimal: 4 },

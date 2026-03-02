@@ -133,17 +133,84 @@ class SettingsUI {
               </button>
             </div>
           </div>
+          <!-- Team Management -->
+          <div class="card settings-card">
+            <div class="card-header">
+              <h3><i class="ph-duotone ph-users"></i> Team Management</h3>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">Manage staff access and roles.</p>
+              <div id="team-list" style="margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
+                <div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading team...</div>
+              </div>
+              <button class="btn btn-outline-primary w-100" id="btn-add-team-member">
+                <i class="ph-duotone ph-user-plus"></i> Add Team Member
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="settings-footer">
           <button class="btn btn-primary btn-lg" id="save-settings"><i class="ph-duotone ph-floppy-disk"></i> Save Changes</button>
         </div>
       </div>
+      <!-- Add Team Member Modal -->
+      <dialog id="add-team-modal" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 25px rgba(0,0,0,0.2); max-width:400px; width:100%;">
+        <div style="padding:1.5rem;">
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+              <h3 style="margin:0">Add Team Member</h3>
+              <button type="button" class="btn-icon" id="close-add-team" style="background:none;border:none;font-size:1.5rem;cursor:pointer">&times;</button>
+           </div>
+           <form id="add-team-form">
+             <div class="form-group" style="margin-bottom:1rem">
+               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Username</label>
+               <input type="text" name="username" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+             </div>
+             <div class="form-group" style="margin-bottom:1rem">
+               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Password</label>
+               <input type="password" name="password" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+             </div>
+             <div class="form-group" style="margin-bottom:1rem">
+               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Role</label>
+               <select name="role" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+                 <option value="staff">Staff (Limited Access)</option>
+                 <option value="manager">Manager</option>
+                 <option value="admin">Admin / Owner</option>
+               </select>
+             </div>
+             <button type="submit" class="btn btn-primary w-100 mt-2" style="width:100%">Create Account</button>
+           </form>
+        </div>
+      </dialog>
       ${this.renderStyles()}
       ${this.renderImportModal()}
     `;
 
     this.attachHandlers(container);
+    this.loadTeamList(container);
+  }
+
+  async loadTeamList(container) {
+    const listContainer = container.querySelector('#team-list');
+    if (!listContainer) return;
+    try {
+      const users = await db.getAll('users');
+      if (!users || users.length === 0) {
+        listContainer.innerHTML = '<p class="text-muted text-sm" style="font-size:0.875rem">No team members found.</p>';
+        return;
+      }
+      listContainer.innerHTML = users.map(u => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; background:var(--bg-secondary); border-radius:6px; margin-bottom:0.5rem">
+          <div>
+            <div style="font-weight:600">${u.username || u.email || 'User'}</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:capitalize">${u.role || 'staff'}</div>
+          </div>
+          <button class="btn btn-sm" style="background:transparent;border:1px solid #ef4444;color:#ef4444;padding:0.25rem 0.5rem" onclick="alert('Account deletion not enabled in demo mode.')">Remove</button>
+        </div>
+      `).join('');
+    } catch {
+      listContainer.innerHTML = '<p style="color:#ef4444;font-size:0.875rem">Error loading team list.</p>';
+    }
   }
 
   attachHandlers(container) {
@@ -249,10 +316,61 @@ class SettingsUI {
 
     container.querySelector('#support-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      alert('📧 Support request sent! We will contact you shortly to switch your vertical.');
+      alert('Support ping sent! We will contact you at your registered email.');
       supportModal.style.display = 'none';
-      wizardModal.style.display = 'flex'; // Re-open wizard
     });
+
+    // Team Management Modal
+    const addTeamModal = container.querySelector('#add-team-modal');
+    container.querySelector('#btn-add-team-member')?.addEventListener('click', () => {
+      addTeamModal.showModal();
+    });
+    container.querySelector('#close-add-team')?.addEventListener('click', () => {
+      addTeamModal.close();
+    });
+
+    // Create Staff Account
+    container.querySelector('#add-team-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentUser = JSON.parse(localStorage.getItem('erp_session') || '{}');
+      const formData = new FormData(e.target);
+      const username = formData.get('username');
+      const password = formData.get('password');
+      const role = formData.get('role');
+
+      try {
+        // Hash password
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const newUser = {
+          username,
+          password: hashedPassword,
+          role,
+          businessName: currentUser.businessName || 'Platform Business',
+          businessType: currentUser.businessType || 'shopowner',
+          createdAt: Date.now()
+        };
+
+        const existing = await db.get('users', username);
+        if (existing) {
+          alert('Username already exists!');
+          return;
+        }
+
+        await db.add('users', newUser);
+        alert('Team member created! They can now log in.');
+        addTeamModal.close();
+        e.target.reset();
+        this.loadTeamList(container);
+      } catch (err) {
+        console.error('Failed to create user:', err);
+        alert('Failed to create account.');
+      }
+    });
+
 
     // Verify & Import
     const importInput = container.querySelector('#file-import-wizard');

@@ -60,10 +60,17 @@ class TrustCircleUI {
 
         this.container.innerHTML = `
       <div class="trustcircle-dashboard">
-        <header class="module-header">
-          <h1><i class="ph-duotone ph-handshake"></i> TrustCircle Syndicates</h1>
-          <p>Result-based cooperation for SMEs</p>
-          <button id="create-syndicate-btn" class="btn btn-primary"><i class="ph ph-plus"></i> New Syndicate</button>
+        <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem">
+          <div>
+            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;"><i class="ph-duotone ph-handshake"></i> TrustCircle Syndicates</h1>
+            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Result-based cooperation for SMEs</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+            <button id="tc-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
+              <i class="ph-duotone ph-robot"></i> AI Insights
+            </button>
+            <button id="create-syndicate-btn" class="btn btn-primary"><i class="ph ph-plus"></i> New Syndicate</button>
+          </div>
         </header>
 
         <div class="stats-overview">
@@ -87,6 +94,59 @@ class TrustCircleUI {
 
         this.container.querySelector('#create-syndicate-btn').addEventListener('click', () => {
             this.loadView('create-syndicate');
+        });
+
+        // AI Insights Button
+        this.container.querySelector('#tc-ai-btn')?.addEventListener('click', async () => {
+            const { default: aiEngine } = await import('../services/aiEngine.js');
+            const members = await db.getAll('members');
+            const contributions = await db.getAll('contributions');
+            const result = aiEngine.analyzeTrustCircle(syndicates, members, contributions);
+
+            const sevColors = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+
+            // Load NL Insights
+            const apiKey = aiEngine.getApiKey();
+            const insights = await aiEngine.getNLInsights(
+                { finance: { score: 50 }, inventory: { score: 50 }, production: { score: 50 }, syndicate: result, sales: { score: 50, status: 'no_data' }, overallScore: result.score },
+                apiKey
+            );
+
+            const insightsHTML = insights.map(ins => `
+                                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                                    <span style="display:block; font-size:0.95rem;">${ins.text}</span>
+                                </li>
+                            `).join('');
+
+            showDetailPanel({
+                title: '🤝 TrustCircle AI Insights',
+                subtitle: `Syndicate Trust Score: ${result.score}/100`,
+                bodyHTML: `
+                    <div class="dp-section">
+                        <div class="dp-section-title">Syndicate Health</div>
+                        <div class="dp-kv-grid">
+                            ${dpKV('Total Syndicates', result.syndicateCount)}
+                            ${dpKV('Total Capital', 'R ' + result.totalPool.toLocaleString())}
+                            ${dpKV('High-Risk Members', result.highRiskCount, result.highRiskCount === 0)}
+                            ${dpKV('Medium-Risk Members', result.medRiskCount, result.medRiskCount === 0)}
+                        </div>
+                    </div>
+
+                    <div class="dp-section">
+                        <div class="dp-section-title">AI Advisor</div>
+                        <ul class="dp-list" style="gap:0.75rem;">
+                            ${insightsHTML}
+                        </ul>
+                    </div>
+
+                    <div class="dp-section">
+                        <div class="dp-section-title">Member Risk Analysis</div>
+                        ${result.memberRisks.length ? result.memberRisks.map(m =>
+                    dpBar(m.name, m.riskScore, 100, m.risk === 'high' ? '#ef4444' : m.risk === 'medium' ? '#f59e0b' : '#10b981', v => v + ' Risk Score')
+                ).join('') : '<div class="dp-empty">No active members found</div>'}
+                    </div>
+                `
+            });
         });
 
         this.container.querySelectorAll('.syndicate-card').forEach(card => {
@@ -113,24 +173,26 @@ class TrustCircleUI {
                 title: 'Active Syndicates',
                 subtitle: `${syndicates.length} syndicates registered`,
                 bodyHTML: syndicates.length ? `
-                    <div class="dp-section">
-                        <div class="dp-section-title">By Type</div>
+            <div class="dp-section">
+            <div class="dp-section-title">By Type</div>
                         ${Object.entries(byType).map(([type, count]) =>
-                    dpBar(type.replace(/_/g, ' '), count, maxType, '#6366f1')).join('')}
+                    dpBar(type.replace(/_/g, ' '), count, maxType, '#6366f1')).join('')
+                    }
                     </div>
-                    <div class="dp-section">
-                        <div class="dp-section-title">Capacity</div>
-                        ${syndicates.map(s => dpBar(s.name, s.currentMembers || 0, s.maxMembers || 1, '#f97316', v => `${v}/${s.maxMembers} members`)).join('')}
-                    </div>` : '<div class="dp-empty">No syndicates yet.</div>'
+                <div class="dp-section">
+                    <div class="dp-section-title">Capacity</div>
+                    ${syndicates.map(s => dpBar(s.name, s.currentMembers || 0, s.maxMembers || 1, '#f97316', v => `${v}/${s.maxMembers} members`)).join('')}
+                </div>` : '<div class="dp-empty">No syndicates yet.</div>'
             },
             capital: {
                 title: 'Capital Pools',
                 subtitle: `Total: R ${totalPool.toLocaleString()} across ${syndicates.length} syndicates`,
                 bodyHTML: syndicates.length ? `
-                    <div class="dp-section">
-                        <div class="dp-section-title">Pool by Syndicate</div>
+            <div class="dp-section">
+            <div class="dp-section-title">Pool by Syndicate</div>
                         ${syndicates.sort((a, b) => (b.totalPool || 0) - (a.totalPool || 0)).map(s =>
-                    dpBar(s.name, s.totalPool || 0, maxPool, '#16a34a', v => 'R ' + v.toLocaleString())).join('')}
+                    dpBar(s.name, s.totalPool || 0, maxPool, '#16a34a', v => 'R ' + v.toLocaleString())).join('')
+                    }
                     </div>` : '<div class="dp-empty">No syndicates yet.</div>'
             }
         };
@@ -139,7 +201,7 @@ class TrustCircleUI {
 
     renderSyndicateCard(syndicate) {
         return `
-      <div class="card syndicate-card" data-id="${syndicate.id}">
+                <div class="card syndicate-card" data-id="${syndicate.id}">
         <div class="card-header">
             <h3>${syndicate.name}</h3>
             <span class="badge ${syndicate.status}">${syndicate.status}</span>
@@ -153,12 +215,12 @@ class TrustCircleUI {
             </div>
         </div>
       </div>
-    `;
+                `;
     }
 
     renderCreateSyndicate() {
         this.container.innerHTML = `
-      <div class="form-container">
+                <div class="form-container">
         <h2>Create New Syndicate</h2>
         <form id="create-syndicate-form">
           <div class="form-group">
@@ -200,7 +262,7 @@ class TrustCircleUI {
           </div>
         </form>
       </div>
-    `;
+                `;
 
         this.container.querySelector('#cancel-btn').addEventListener('click', () => {
             this.loadView('dashboard');
@@ -239,15 +301,16 @@ class TrustCircleUI {
             { key: 'funding-requests', label: '<i class="ph ph-bank"></i> Funding' },
         ];
         return `
-            <nav class="detail-tab-nav">
+                <nav class="detail-tab-nav">
                 ${tabs.map(t => `
                     <button class="detail-tab ${t.key === activeTab ? 'active' : ''}"
                             data-view="${t.key}" data-id="${syndicateId}">
                         ${t.label}
                     </button>
-                `).join('')}
+                `).join('')
+            }
             </nav>
-        `;
+                `;
     }
 
     async renderSyndicateDetail(id) {
@@ -255,7 +318,7 @@ class TrustCircleUI {
         const { syndicate, memberPerformance, insights } = analytics;
 
         this.container.innerHTML = `
-        <div class="syndicate-detail">
+                <div class="syndicate-detail">
             <button class="btn btn-secondary mb-4" id="back-btn">← Back</button>
 
             <header>
@@ -269,60 +332,62 @@ class TrustCircleUI {
             ${this._renderDetailTabs(id, 'syndicate-detail')}
 
             <div class="grid-layout">
-                <div class="main-content">
-                    <section class="pool-visualizer">
-                        <h3><i class="ph-duotone ph-coins"></i> Money Pot</h3>
-                        <div class="pot-circle">
-                            <span class="amount">R ${(syndicate.totalPool || 0).toLocaleString()}</span>
-                            <span class="label">Total Collected</span>
-                        </div>
-                        <button id="record-contribution-btn" class="btn btn-primary mt-4"><i class="ph-duotone ph-money"></i> Record Contribution</button>
-                    </section>
+            <div class="main-content">
+                <section class="pool-visualizer">
+                    <h3><i class="ph-duotone ph-coins"></i> Money Pot</h3>
+                    <div class="pot-circle">
+                        <span class="amount">R ${(syndicate.totalPool || 0).toLocaleString()}</span>
+                        <span class="label">Total Collected</span>
+                    </div>
+                    <button id="record-contribution-btn" class="btn btn-primary mt-4"><i class="ph-duotone ph-money"></i> Record Contribution</button>
+                </section>
 
-                    <section class="members-section">
-                        <h3>Members (${syndicate.currentMembers}/${syndicate.maxMembers})</h3>
-                        <button id="add-member-btn" class="btn btn-sm btn-outline"><i class="ph ph-plus"></i> Add Member</button>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Business</th>
-                                    <th>Risk Score <i class="ph-duotone ph-robot"></i></th>
-                                    <th>Pay Rate</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${memberPerformance.map(m => `
+                <section class="members-section">
+                    <h3>Members (${syndicate.currentMembers}/${syndicate.maxMembers})</h3>
+                    <button id="add-member-btn" class="btn btn-sm btn-outline"><i class="ph ph-plus"></i> Add Member</button>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Business</th>
+                                <th>Trust Score <i class="ph-duotone ph-shield-check"></i></th>
+                                <th>Pay Rate</th>
+                                <th>Borrow Limit</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${memberPerformance.map(m => `
                                     <tr>
                                         <td>${m.businessName}</td>
                                         <td>
-                                            <span class="risk-score ${m.riskScore > 80 ? 'good' : m.riskScore > 50 ? 'medium' : 'bad'}">
+                                            <span class="badge ${m.riskScore >= 80 ? 'success' : m.riskScore >= 50 ? 'warning' : 'danger'}">
                                                 ${m.riskScore}/100
                                             </span>
                                         </td>
                                         <td>${Math.round(m.paymentRate)}%</td>
+                                        <td><span style="color:var(--text-secondary)">R ${(Math.max(0, m.totalContributions * (m.riskScore / 50))).toLocaleString()}</span></td>
                                         <td><button class="btn-icon">View</button></td>
                                     </tr>
                                 `).join('')}
-                            </tbody>
-                        </table>
-                    </section>
+                        </tbody>
+                    </table>
+                </section>
 
-                    <section class="ai-insights">
-                        <h3><i class="ph-duotone ph-robot"></i> TrustCircle AI Insights</h3>
-                        <div class="insights-list">
-                            ${insights.map(i => `
+                <section class="ai-insights">
+                    <h3><i class="ph-duotone ph-robot"></i> TrustCircle AI Insights</h3>
+                    <div class="insights-list">
+                        ${insights.map(i => `
                                 <div class="insight-card ${i.type}">
                                     <p>${i.message}</p>
                                     ${i.action ? `<small>Suggested: ${i.action}</small>` : ''}
                                 </div>
                             `).join('')}
-                        </div>
-                    </section>
-                </div>
+                    </div>
+                </section>
+            </div>
             </div>
         </div>
-     `;
+                `;
 
         this.container.querySelector('#back-btn').addEventListener('click', () => {
             this.loadView('dashboard');
@@ -355,7 +420,7 @@ class TrustCircleUI {
         };
 
         this.container.innerHTML = `
-            <div class="syndicate-detail">
+                <div class="syndicate-detail">
                 <button class="btn btn-secondary mb-4" id="back-btn">← Back</button>
                 <header>
                     <h1>${syndicate?.name || 'Syndicate'}</h1>
@@ -363,11 +428,11 @@ class TrustCircleUI {
 
                 ${this._renderDetailTabs(syndicateId, 'group-buys')}
 
-                <section class="group-buys-section">
-                    <div class="section-header">
-                        <h3><i class="ph-duotone ph-shopping-bag"></i> Group Buys</h3>
-                        <button id="create-group-buy-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Create Group Buy</button>
-                    </div>
+            <section class="group-buys-section">
+            <div class="section-header">
+                <h3><i class="ph-duotone ph-shopping-bag"></i> Group Buys</h3>
+                <button id="create-group-buy-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Create Group Buy</button>
+            </div>
 
                     ${groupBuys.length === 0 ? `
                         <div class="empty-state">
@@ -414,7 +479,7 @@ class TrustCircleUI {
                     `}
                 </section>
             </div>
-        `;
+                `;
 
         this.container.querySelector('#back-btn').addEventListener('click', () => this.loadView('dashboard'));
 
@@ -435,7 +500,7 @@ class TrustCircleUI {
         const modal = document.createElement('dialog');
         modal.className = 'tc-modal';
         modal.innerHTML = `
-            <form id="gb-form">
+                <form id="gb-form">
                 <h3><i class="ph-duotone ph-shopping-bag"></i> Create Group Buy</h3>
 
                 <div class="form-row">
@@ -485,7 +550,7 @@ class TrustCircleUI {
                     <button type="submit" class="btn btn-primary">Create Group Buy</button>
                 </div>
             </form>
-        `;
+                `;
         document.body.appendChild(modal);
         modal.showModal();
         this._attachModalClose(modal);
@@ -549,7 +614,7 @@ class TrustCircleUI {
                     <button type="submit" class="btn btn-primary">Commit to Buy</button>
                 </div>
             </form>
-        `;
+                `;
         document.body.appendChild(modal);
         modal.showModal();
         this._attachModalClose(modal);
@@ -605,11 +670,11 @@ class TrustCircleUI {
 
                 ${this._renderDetailTabs(syndicateId, 'funding-requests')}
 
-                <section class="funding-section">
-                    <div class="section-header">
-                        <h3><i class="ph-duotone ph-bank"></i> Funding Requests</h3>
-                        <button id="request-funding-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Request Funding</button>
-                    </div>
+            <section class="funding-section">
+            <div class="section-header">
+                <h3><i class="ph-duotone ph-bank"></i> Funding Requests</h3>
+                <button id="request-funding-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Request Funding</button>
+            </div>
 
                     ${requests.length === 0 ? `
                         <div class="empty-state">
@@ -652,7 +717,7 @@ class TrustCircleUI {
                     `}
                 </section>
             </div>
-        `;
+                `;
 
         this.container.querySelector('#back-btn').addEventListener('click', () => this.loadView('dashboard'));
 
@@ -670,7 +735,7 @@ class TrustCircleUI {
         const modal = document.createElement('dialog');
         modal.className = 'tc-modal';
         modal.innerHTML = `
-            <form id="fr-form">
+                <form id="fr-form">
                 <h3><i class="ph-duotone ph-bank"></i> Request Syndicate Funding</h3>
 
                 <div class="form-row">
@@ -713,7 +778,7 @@ class TrustCircleUI {
                     <button type="submit" class="btn btn-primary">Submit Request</button>
                 </div>
             </form>
-        `;
+                `;
         document.body.appendChild(modal);
         modal.showModal();
         this._attachModalClose(modal);
@@ -749,28 +814,25 @@ class TrustCircleUI {
         const modal = document.createElement('dialog');
         modal.innerHTML = `
             <form method="dialog">
-                <h3>Add New Member</h3>
+                <h3><i class="ph-duotone ph-user-plus"></i> Add Member</h3>
                 <div class="form-group">
-                    <label>Business Name</label>
-                    <input type="text" name="businessName" required>
+                    <label>Business / Member Name *</label>
+                    <input type="text" name="name" required placeholder="e.g. Jabulani Hardware">
                 </div>
                 <div class="form-group">
-                    <label>Business ID (Simulated)</label>
-                    <input type="text" name="businessId" value="biz_${Date.now()}" readonly>
+                    <label>Contact Number *</label>
+                    <input type="tel" name="phone" required placeholder="e.g. 082 123 4567">
                 </div>
                 <div class="form-group">
-                    <label>Role</label>
-                    <select name="role">
-                        <option value="member">Member</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                    <label>Registration Number (Optional)</label>
+                    <input type="text" name="regNumber" placeholder="K2023...">
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add Member</button>
                 </div>
             </form>
-        `;
+                `;
         document.body.appendChild(modal);
         modal.showModal();
         this._attachModalClose(modal);
@@ -781,9 +843,10 @@ class TrustCircleUI {
             const formData = new FormData(e.target);
             try {
                 await this.module.addMember(syndicateId, {
-                    businessName: formData.get('businessName'),
-                    businessId: formData.get('businessId'),
-                    role: formData.get('role'),
+                    businessName: formData.get('name'), // Changed from businessName to name
+                    businessId: formData.get('regNumber') || `biz_${Date.now()}`, // Use regNumber if provided, otherwise generate
+                    role: 'member', // Default role
+                    phone: formData.get('phone'),
                     businessProfile: { creditScore: Math.floor(Math.random() * 100) }
                 });
                 modal.close();
@@ -799,30 +862,37 @@ class TrustCircleUI {
         const modal = document.createElement('dialog');
         modal.innerHTML = `
             <form method="dialog">
-                <h3>Record Contribution</h3>
+                <h3><i class="ph-duotone ph-money"></i> Record Syndicate Contribution</h3>
+                
                 <div class="form-group">
-                    <label>Member</label>
+                    <label>Member *</label>
                     <select name="memberId" required>
-                        ${members.map(m => `<option value="${m.id}">${m.businessName}</option>`).join('')}
+                        <option value="">Select Member</option>
+                        ${members.map(m => `<option value="${m.id}">${m.businessName || m.name}</option>`).join('')}
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>Amount (R)</label>
-                    <input type="number" name="amount" required>
+                    <label>Amount Paid (R) *</label>
+                    <input type="number" name="amount" min="1" step="0.01" required placeholder="e.g. 1500">
                 </div>
+
                 <div class="form-group">
-                    <label>Type</label>
-                    <select name="type">
-                        <option value="regular">Regular Contribution</option>
-                        <option value="penalty">Penalty / Late Fee</option>
-                    </select>
+                    <label>Reference</label>
+                    <input type="text" name="reference" placeholder="e.g. EFT DEC-24">
                 </div>
+
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="date" required id="contrib-date">
+                </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Record Payment</button>
                 </div>
             </form>
-        `;
+                `;
         document.body.appendChild(modal);
         modal.showModal();
         this._attachModalClose(modal);

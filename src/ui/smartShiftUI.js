@@ -13,8 +13,23 @@ class SmartShiftUI {
   async render() {
     this.container.innerHTML = `
       <div class="smart-shift-layout">
+        <header class="module-header" style="padding: 1rem 1.5rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+              <i class="ph-duotone ph-gear" style="color:var(--primary-color)"></i> SmartShift
+            </h1>
+            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Production & Machine Management</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+            <button id="ss-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
+              <i class="ph-duotone ph-robot"></i> AI Insights
+            </button>
+          </div>
+        </header>
+
         <div class="module-nav">
           <button class="btn-tab active" data-view="dashboard">Dashboard</button>
+          <button class="btn-tab" data-view="scheduler"><i class="ph-duotone ph-calendar"></i> Scheduler</button>
           <button class="btn-tab" data-view="machines">Machines</button>
           <button class="btn-tab" data-view="orders">Production Orders</button>
           <button class="btn-tab" data-view="shifts">Shifts</button>
@@ -39,6 +54,60 @@ class SmartShiftUI {
         this.loadView(e.target.dataset.view);
       });
     });
+
+    // AI Insights Button
+    this.container.querySelector('#ss-ai-btn')?.addEventListener('click', async () => {
+      const { default: aiEngine } = await import('../services/aiEngine.js');
+      const { showDetailPanel, dpKV, dpBar } = await import('./panelHelper.js');
+      const machines = await this.module.getMachines();
+      const orders = await db.getAll('productionOrders');
+      const result = aiEngine.analyzeSmartShift(machines, orders);
+
+      const sevColors = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+
+      // Load NL Insights
+      const apiKey = aiEngine.getApiKey();
+      const insights = await aiEngine.getNLInsights(
+        { finance: { score: 50 }, inventory: { score: 50 }, production: result, syndicate: { score: 50 }, sales: { score: 50, status: 'no_data' }, overallScore: result.score },
+        apiKey
+      );
+
+      const maxScore = 100;
+
+      showDetailPanel({
+        title: '⚙️ SmartShift AI Insights',
+        subtitle: `Production Score: ${result.score}/100`,
+        bodyHTML: `
+          <div class="dp-section">
+            <div class="dp-section-title">Production Health</div>
+            <div class="dp-kv-grid">
+              ${dpKV('Active Machines', `${result.operational} / ${result.totalMachines}`, result.operational === result.totalMachines)}
+              ${dpKV('Avg Utilization', result.avgUtilization + '%')}
+              ${dpKV('Pending Orders', result.pendingOrders)}
+              ${dpKV('Overdue Orders', result.overdueOrders?.length || 0, !(result.overdueOrders?.length > 0))}
+            </div>
+          </div>
+          
+          <div class="dp-section">
+            <div class="dp-section-title">AI Advisor</div>
+            <ul class="dp-list" style="gap:0.75rem;">
+              ${insights.map(ins => `
+                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                  <span style="display:block; font-size:0.95rem;">${ins.text}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+
+          <div class="dp-section">
+            <div class="dp-section-title">Machine Health Scores</div>
+            ${result.machineScores.length ? result.machineScores.map(m =>
+          dpBar(m.name, m.score, maxScore, m.score > 65 ? '#10b981' : m.score > 40 ? '#f59e0b' : '#ef4444', v => v + '/100')
+        ).join('') : '<div class="dp-empty">No machines found</div>'}
+          </div>
+        `
+      });
+    });
   }
 
   async loadView(view) {
@@ -49,6 +118,9 @@ class SmartShiftUI {
     switch (view) {
       case 'dashboard':
         await this.renderDashboard(content);
+        break;
+      case 'scheduler':
+        await this.renderScheduler(content);
         break;
       case 'machines':
         await this.renderMachines(content);
@@ -62,6 +134,155 @@ class SmartShiftUI {
       case 'workers':
         await this.renderWorkers(content);
         break;
+    }
+  }
+
+  async renderScheduler(container) {
+    const machines = await this.module.getMachines();
+    const orders = await this.module.getProductionOrders();
+
+    container.innerHTML = `
+      <div class="action-bar">
+        <h2>Production Scheduler</h2>
+        <div style="display:flex; gap:0.5rem">
+          <button id="auto-schedule-btn" class="btn btn-secondary"><i class="ph-duotone ph-magic-wand"></i> Auto-Schedule</button>
+          <button id="refresh-schedule-btn" class="btn btn-secondary"><i class="ph-duotone ph-arrows-clockwise"></i> Refresh</button>
+        </div>
+      </div>
+      
+      <div class="scheduler-container" style="background:var(--bg-primary); border:1px solid var(--border-color); border-radius:8px; overflow-x:auto;">
+        <div class="timeline" style="display:grid; grid-template-columns: 150px repeat(24, minmax(60px, 1fr)); min-width: 1200px;">
+          <!-- Header Row: Time Slots -->
+          <div class="timeline-cell header-cell" style="position:sticky; left:0; background:var(--bg-secondary); z-index:10; border-right:1px solid var(--border-color); padding:0.5rem; font-weight:bold;">Machine</div>
+          ${Array.from({ length: 24 }).map((_, i) => `
+            <div class="timeline-cell header-cell" style="background:var(--bg-secondary); padding:0.5rem; border-right:1px solid var(--border-color); text-align:center; font-size:0.8rem; color:var(--text-secondary)">
+              ${i.toString().padStart(2, '0')}:00
+            </div>
+          `).join('')}
+
+          <!-- Machine Rows -->
+          ${machines.map(m => {
+      const mOrders = orders.filter(o => o.assignedMachineId === m.id && o.scheduledStartTime);
+
+      return `
+              <div class="timeline-cell machine-cell" style="position:sticky; left:0; background:var(--bg-primary); z-index:10; border-right:1px solid var(--border-color); border-top:1px solid var(--border-color); padding:1rem 0.5rem; font-weight:500;">
+                <div>${m.name}</div>
+                <div style="font-size:0.75rem; color:var(--text-secondary)">${m.type}</div>
+              </div>
+              
+              <div style="grid-column: 2 / span 24; border-top:1px solid var(--border-color); position:relative; background-image: linear-gradient(to right, var(--border-color) 1px, transparent 1px); background-size: calc(100% / 24) 100%;">
+                ${mOrders.map(o => {
+        const startDt = new Date(o.scheduledStartTime);
+        const startHourDecimal = startDt.getHours() + (startDt.getMinutes() / 60);
+        const durationHours = o.estimatedDuration || Math.max(1, Math.floor(o.quantity / 50));
+        const leftPercentage = (startHourDecimal / 24) * 100;
+        const widthPercentage = (durationHours / 24) * 100;
+        const color = o.status === 'in_progress' ? '#3b82f6' : o.status === 'completed' ? '#10b981' : '#6366f1';
+
+        return `
+                    <div class="order-block" title="${o.product} (${o.quantity} units)" style="
+                      position:absolute; 
+                      left: ${leftPercentage}%; 
+                      width: calc(${widthPercentage}% - 2px); 
+                      top: 10px; 
+                      bottom: 10px; 
+                      background: ${color}; 
+                      color: white; 
+                      border-radius: 6px; 
+                      padding: 0.25rem 0.5rem; 
+                      font-size: 0.75rem; 
+                      overflow: hidden; 
+                      text-overflow: ellipsis; 
+                      white-space: nowrap;
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                      cursor: pointer;
+                    ">
+                      <strong>${o.orderNumber || o.product}</strong>
+                      <br/>${o.quantity} qty
+                    </div>
+                  `;
+      }).join('')}
+              </div>
+            `;
+    }).join('')}
+        </div>
+      </div>
+      
+      <div class="unassigned-orders mt-4">
+        <h3>Unassigned Orders</h3>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Due Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.filter(o => !o.assignedMachineId).map(o => `
+                <tr>
+                  <td>${o.product} (${o.quantity})</td>
+                  <td>${new Date(o.dueDate).toLocaleDateString()}</td>
+                  <td><button class="btn-sm btn-primary assign-btn" data-id="${o.id}">Quick Assign</button></td>
+                </tr>
+              `).join('')}
+              ${orders.filter(o => !o.assignedMachineId).length === 0 ? '<tr><td colspan="3" class="text-center text-muted">All orders assigned</td></tr>' : ''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // Handlers
+    container.querySelector('#auto-schedule-btn').addEventListener('click', async () => {
+      await this.autoAssignOrders(orders, machines);
+      this.renderScheduler(container);
+    });
+
+    container.querySelector('#refresh-schedule-btn').addEventListener('click', () => {
+      this.renderScheduler(container);
+    });
+
+    container.querySelectorAll('.assign-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const orderId = Number(e.target.dataset.id);
+        const order = orders.find(o => o.id === orderId);
+        if (order && machines.length > 0) {
+          order.assignedMachineId = machines[Math.floor(Math.random() * machines.length)].id;
+          order.scheduledStartTime = new Date().getTime();
+          order.estimatedDuration = Math.max(1, Math.floor(order.quantity / 50));
+          await db.put('productionOrders', order);
+          this.renderScheduler(container);
+        } else {
+          alert('Please add a machine first.');
+        }
+      });
+    });
+  }
+
+  async autoAssignOrders(orders, machines) {
+    if (machines.length === 0) {
+      alert('No machines available to schedule');
+      return;
+    }
+    const unassigned = orders.filter(o => !o.assignedMachineId);
+    let currentHour = new Date().getHours() + 1;
+
+    for (let i = 0; i < unassigned.length; i++) {
+      const order = unassigned[i];
+      const mId = machines[i % machines.length].id;
+      order.assignedMachineId = mId;
+
+      let dt = new Date();
+      dt.setHours(currentHour, 0, 0, 0);
+      order.scheduledStartTime = dt.getTime();
+      order.estimatedDuration = Math.max(1, Math.floor(order.quantity / 50));
+
+      currentHour += order.estimatedDuration;
+      if (currentHour > 20) currentHour = 8;
+
+      await db.put('productionOrders', order);
     }
   }
 
@@ -88,18 +309,18 @@ class SmartShiftUI {
           <div class="big-number">${metrics.onTimeDeliveryRate}%</div>
         </div>
       </div>
-      
-      <div class="card mt-4">
-        <h3>Recent Insights</h3>
-        <ul class="insight-list">
-          ${metrics.insights.map(i => `
+
+          <div class="card mt-4">
+            <h3>Recent Insights</h3>
+            <ul class="insight-list">
+              ${metrics.insights.map(i => `
             <li class="insight-item ${i.type}">
               <strong>${i.message}</strong>
               ${i.action ? `<p>${i.action}</p>` : ''}
             </li>
           `).join('')}
-        </ul>
-      </div>
+            </ul>
+          </div>
     `;
 
     // Stat card click handlers
@@ -141,12 +362,13 @@ class SmartShiftUI {
       },
       utilization: {
         title: 'Machine Utilization',
-        subtitle: `Average ${metrics.machineUtilization}% across ${machines.length} machines`,
+        subtitle: `Average ${metrics.machineUtilization} % across ${machines.length} machines`,
         bodyHTML: `
-          <div class="dp-section">
-            <div class="dp-section-title">By Machine</div>
+        <div class="dp-section">
+        <div class="dp-section-title">By Machine</div>
             ${machines.length ? machines.sort((a, b) => (b.utilization || 0) - (a.utilization || 0)).map(m =>
-          dpBar(m.name, m.utilization || 0, maxUtil, m.status === 'running' ? '#16a34a' : m.status === 'maintenance' ? '#dc2626' : '#94a3b8', v => v + '%')).join('') : '<div class="dp-empty">No machines registered. Go to the Machines tab to add one.</div>'}
+          dpBar(m.name, m.utilization || 0, maxUtil, m.status === 'running' ? '#16a34a' : m.status === 'maintenance' ? '#dc2626' : '#94a3b8', v => v + '%')).join('') : '<div class="dp-empty">No machines registered. Go to the Machines tab to add one.</div>'
+          }
           </div>
           <div class="dp-section">
             <div class="dp-section-title">Status Breakdown</div>
@@ -160,9 +382,9 @@ class SmartShiftUI {
       },
       delivery: {
         title: 'On-Time Delivery Rate',
-        subtitle: `${metrics.onTimeDeliveryRate}% of orders are completed on schedule`,
+        subtitle: `${metrics.onTimeDeliveryRate} % of orders are completed on schedule`,
         bodyHTML: `<div class="dp-section">
-          <div class="dp-section-title">Performance</div>
+        <div class="dp-section-title">Performance</div>
           ${dpBar('On-Time Rate', metrics.onTimeDeliveryRate, 100, metrics.onTimeDeliveryRate >= 80 ? '#16a34a' : '#f59e0b', v => v + '%')}
           <div class="dp-kv-grid" style="margin-top:1rem">
             ${dpKV('In Progress', metrics.orders.inProgress)}

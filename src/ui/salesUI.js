@@ -4,6 +4,7 @@ import PoolStock from '../modules/PoolStock.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import Customers from '../modules/Customers.js';
 import PaymentService from '../services/payments.js';
+import db, { STORES } from '../db/index.js';
 
 class SalesUI {
   constructor() {
@@ -22,7 +23,19 @@ class SalesUI {
     container.innerHTML = `
       <div class="sales-container">
         ${this.renderStyles()}
-        
+
+        <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; padding-bottom: 1rem;">
+          <div>
+            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;"><i class="ph-duotone ph-shopping-cart"></i> Point of Sale</h1>
+            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Sales, checkout, and receipt printing</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+            <button id="sales-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
+              <i class="ph-duotone ph-robot"></i> AI Insights
+            </button>
+          </div>
+        </header>
+
         <!-- Sales Stats (Compact) -->
         <div class="sales-stats">
           <div class="stat-card today-revenue">
@@ -78,7 +91,7 @@ class SalesUI {
                 <div class="cart-items" id="cart-items">
                   <p class="text-muted text-center" id="empty-cart-msg">Tap items to add</p>
                 </div>
-                
+
                 <div class="cart-summary">
                   <div class="summary-row subtotal-row">
                     <span>Subtotal:</span>
@@ -111,7 +124,6 @@ class SalesUI {
 
                 <div id="mpesa-qr-container" style="display: none; text-align: center; margin-bottom: 1rem; border: 2px dashed #e5e7eb; padding: 1rem; border-radius: 8px;">
                   <p style="margin-bottom: 0.5rem; font-weight: 600;">Scan to Pay with M-Pesa</p>
-                  <!-- Placeholder QR Code -->
                   <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=M-PESA-MERCHANT-123456" alt="M-Pesa QR Code" style="width: 150px; height: 150px;">
                   <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.5rem;">Merchant ID: 123456</p>
                 </div>
@@ -130,8 +142,6 @@ class SalesUI {
   }
 
   renderProductGrid(items) {
-    // Sort: High frequency items first (simulated by reorderLevel for now)
-    // In real app, we'd use sales history frequency
     const sorted = [...items].sort((a, b) => (b.reorderLevel || 0) - (a.reorderLevel || 0));
 
     const openItemBtn = `
@@ -142,68 +152,18 @@ class SalesUI {
       </button>
     `;
 
-    // Modal for Open Item
     const modal = `
-      <dialog id="open-item-modal" style="
-        border: none;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-        width: 300px;
-        background: var(--bg-primary, #1e293b);
-        color: var(--text-primary, #f8fafc);
-      ">
+      <dialog id="open-item-modal" style="border: none; border-radius: 12px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.4); width: 300px; background: var(--bg-primary, #1e293b); color: var(--text-primary, #f8fafc);">
         <h3 style="margin-top: 0; color: var(--text-primary, #f8fafc);">Open Item</h3>
-        <input type="text" id="open-item-name" placeholder="Item Name (Optional)" style="
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid var(--border, #334155);
-          border-radius: 8px;
-          margin-bottom: 1rem;
-          box-sizing: border-box;
-          background: var(--bg-secondary, #0f172a);
-          color: var(--text-primary, #f8fafc);
-          font-size: 0.95rem;
-        ">
-        <input type="number" id="open-item-price" placeholder="Price (R)" style="
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid var(--border, #334155);
-          border-radius: 8px;
-          margin-bottom: 1rem;
-          font-size: 1.5rem;
-          text-align: center;
-          box-sizing: border-box;
-          background: var(--bg-secondary, #0f172a);
-          color: var(--text-primary, #f8fafc);
-        " step="0.01">
+        <input type="text" id="open-item-name" placeholder="Item Name (Optional)" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc); font-size: 0.95rem;">
+        <input type="number" id="open-item-price" placeholder="Price (R)" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; font-size: 1.5rem; text-align: center; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc);" step="0.01">
         <div style="display: flex; gap: 0.5rem;">
-          <button id="cancel-open-item" style="
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border, #334155);
-            background: var(--bg-secondary, #0f172a);
-            color: var(--text-primary, #f8fafc);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-          ">Cancel</button>
-          <button id="add-open-item" style="
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            background: #6366f1;
-            color: white;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.95rem;
-          ">Add</button>
+          <button id="cancel-open-item" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border, #334155); background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc); border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Cancel</button>
+          <button id="add-open-item" style="flex: 1; padding: 0.75rem; border: none; background: #6366f1; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">Add</button>
         </div>
       </dialog>
     `;
 
-    // Always replace the modal so it picks up the current theme (CSS variables)
     const existing = document.getElementById('open-item-modal');
     if (existing) existing.remove();
     document.body.insertAdjacentHTML('beforeend', modal);
@@ -229,6 +189,61 @@ class SalesUI {
     const categoryFilters = container.querySelector('#category-filters');
 
     let cart = [];
+
+    // AI Insights Button
+    container.querySelector('#sales-ai-btn')?.addEventListener('click', async () => {
+      const { default: aiEngine } = await import('../services/aiEngine.js');
+      const { showDetailPanel, dpKV, dpBar } = await import('./panelHelper.js');
+      const salesHistory = await db.getAll(STORES.transactions);
+      const inventoryItems = await db.getAll(STORES.inventory);
+      const result = aiEngine.analyzeSales(salesHistory, inventoryItems);
+
+      const sevColors = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
+
+      const apiKey = aiEngine.getApiKey();
+      const insights = await aiEngine.getNLInsights(
+        { finance: { score: 50 }, inventory: { score: 50 }, production: { score: 50 }, syndicate: { score: 50 }, sales: result, overallScore: result.score },
+        apiKey
+      );
+
+      showDetailPanel({
+        title: '📈 Sales AI Insights',
+        subtitle: `Sales Momentum: ${result.score}/100`,
+        bodyHTML: `
+          <div class="dp-section">
+            <div class="dp-section-title">Revenue Trends</div>
+            <div class="dp-kv-grid">
+              ${dpKV('7-Day Revenue', 'R ' + Math.round(result.revenueThisWeek).toLocaleString())}
+              ${dpKV('Prior 7 Days', 'R ' + Math.round(result.revenuePriorWeek).toLocaleString())}
+              ${dpKV('Trend', result.revenueTrend, parseFloat(result.revTrendPct) >= 0)}
+              ${dpKV('Peak Day', result.peakDay)}
+            </div>
+          </div>
+          <div class="dp-section">
+            <div class="dp-section-title">AI Advisor</div>
+            <ul class="dp-list" style="gap:0.75rem;">
+              ${insights.map(ins => `
+                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                  <span style="display:block; font-size:0.95rem;">${ins.text}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+          <div class="dp-section">
+            <div class="dp-section-title">Top Sellers (7 Days)</div>
+            ${result.topItems.length ? result.topItems.map(item =>
+              dpBar(item.name, item.revenue, result.topItems[0].revenue, '#10b981', v => 'R ' + Math.round(v).toLocaleString())
+            ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
+          </div>
+          <div class="dp-section">
+            <div class="dp-section-title">Slow Movers</div>
+            ${result.slowMovers.length ? result.slowMovers.map(item =>
+              dpBar(item.name, item.revenue, result.topItems[0]?.revenue || 1, '#ef4444', v => 'R ' + Math.round(v).toLocaleString())
+            ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
+          </div>
+        `
+      });
+    });
 
     // Helper: Update Cart UI
     const updateCart = () => {
@@ -272,7 +287,6 @@ class SalesUI {
       checkoutBtn.textContent = `Charge R ${grandTotal.toFixed(2)}`;
       checkoutBtn.disabled = false;
 
-      // Remove handlers
       container.querySelectorAll('.btn-remove-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const idx = parseInt(e.target.dataset.index);
@@ -288,39 +302,25 @@ class SalesUI {
 
     const toggleQR = () => {
       const selected = container.querySelector('input[name="payment"]:checked');
-      if (selected && selected.value === 'mpesa') {
-        qrContainer.style.display = 'block';
-      } else {
-        qrContainer.style.display = 'none';
-      }
+      qrContainer.style.display = (selected && selected.value === 'mpesa') ? 'block' : 'none';
     };
 
-    paymentRadios.forEach(radio => {
-      radio.addEventListener('change', toggleQR);
-    });
-
-    // Initial check
+    paymentRadios.forEach(radio => radio.addEventListener('change', toggleQR));
     toggleQR();
 
     // Filter Items
     categoryFilters.addEventListener('click', (e) => {
       if (e.target.classList.contains('cat-btn')) {
-        // Active state
         container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-
         const cat = e.target.dataset.cat;
-        const filtered = cat === 'all'
-          ? inventory
-          : inventory.filter(i => i.category === cat);
-
+        const filtered = cat === 'all' ? inventory : inventory.filter(i => i.category === cat);
         grid.innerHTML = this.renderProductGrid(filtered);
       }
     });
 
     // Add to Cart (Delegation)
     grid.addEventListener('click', (e) => {
-      // Handle Open Item Click
       if (e.target.closest('.open-item-btn')) {
         const modal = document.getElementById('open-item-modal');
         const priceInput = document.getElementById('open-item-price');
@@ -331,44 +331,31 @@ class SalesUI {
         modal.showModal();
         priceInput.focus();
 
-        // Handle Add
         const confirmBtn = document.getElementById('add-open-item');
         const cancelBtn = document.getElementById('cancel-open-item');
-
-        // Remove old listeners to prevent duplicates
         const newConfirm = confirmBtn.cloneNode(true);
         const newCancel = cancelBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
         cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
 
         newCancel.addEventListener('click', () => modal.close());
-
         newConfirm.addEventListener('click', () => {
           const price = parseFloat(priceInput.value);
           const name = nameInput.value || 'Open Item';
-
           if (price && price > 0) {
-            cart.push({
-              sku: `OPEN-${Date.now()}`,
-              name: name,
-              price: price,
-              quantity: 1,
-              isOpenItem: true
-            });
+            cart.push({ sku: `OPEN-${Date.now()}`, name, price, quantity: 1, isOpenItem: true });
             updateCart();
             modal.close();
           } else {
             alert('Please enter a valid price');
           }
         });
-
         return;
       }
 
       const card = e.target.closest('.product-card');
       if (!card) return;
 
-      // Animation feedback
       card.classList.add('active');
       setTimeout(() => card.classList.remove('active'), 100);
 
@@ -376,14 +363,12 @@ class SalesUI {
       const name = card.dataset.name;
       const price = parseFloat(card.dataset.price);
 
-      // Check existing
       const existing = cart.find(i => i.sku === sku);
       if (existing) {
         existing.quantity++;
       } else {
         cart.push({ sku, name, price, quantity: 1 });
       }
-
       updateCart();
     });
 
@@ -409,7 +394,6 @@ class SalesUI {
         const customerId = customerSelect.value ? parseInt(customerSelect.value) : null;
         const customerName = customerSelect.value ? customerSelect.options[customerSelect.selectedIndex].text : 'Walk-in';
 
-        // Wait for terminal process (Phase 13 Integration)
         if (paymentMethod === 'card') {
           btn.textContent = 'Waiting for Card Tap...';
           await PaymentService.initializeTerminal();
@@ -417,7 +401,6 @@ class SalesUI {
           console.log('Payment Gateway Txn:', result.transactionId);
         } else if (paymentMethod === 'mobile' || paymentMethod === 'mpesa') {
           btn.textContent = 'Awaiting Phone Prompt...';
-          // Mock standard phone number 
           const result = await PaymentService.processMobileMoney(grandTotal, '0821234567');
           console.log('Mobile Money Txn:', result.transactionId);
         }
@@ -602,13 +585,12 @@ class SalesUI {
     return `
       <style>
         .sales-container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
-        
-        /* Stats */
-        .sales-stats { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 1rem; 
-          margin-bottom: 1rem; 
+
+        .sales-stats {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1rem;
         }
         .stat-card {
           background: var(--bg-primary);
@@ -623,27 +605,22 @@ class SalesUI {
         .badge.card { background: #6366f1; color: white; }
         .badge.mobile { background: #f59e0b; color: white; }
         .badge.mpesa { background: #16a34a; color: white; }
-        .today-revenue { 
-          border-left: 4px solid #10b981;
-        }
+        .today-revenue { border-left: 4px solid #10b981; }
         .today-revenue .stat-value { color: #10b981; }
         .stat-value { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-primary); }
         .stat-label { font-size: 0.8rem; margin: 0; color: var(--text-secondary); }
 
-        /* Layout */
         .pos-layout {
           display: grid;
           grid-template-columns: 2fr 1fr;
           gap: 1.5rem;
           height: calc(100vh - 200px);
         }
-
         @media (max-width: 768px) {
           .pos-layout { grid-template-columns: 1fr; height: auto; }
           .cart-section { order: -1; position: sticky; top: 0; z-index: 10; margin-bottom: 1rem; }
         }
 
-        /* Product Grid */
         .category-filters {
           display: flex;
           gap: 0.5rem;
@@ -678,7 +655,6 @@ class SalesUI {
           max-height: calc(100vh - 280px);
           padding-right: 0.5rem;
         }
-
         .product-card {
           background: var(--bg-primary);
           border: 1px solid var(--border, #e5e7eb);
@@ -701,24 +677,17 @@ class SalesUI {
         .prod-stock { font-size: 0.75rem; color: var(--text-secondary); }
         .prod-stock.out-of-stock { color: #ef4444; font-weight: bold; }
 
-        /* Cart */
-        .cart-card { 
-          height: 100%; 
-          display: flex; 
-          flex-direction: column; 
+        .cart-card {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
           border-radius: 12px;
           box-shadow: 0 4px 12px rgba(0,0,0,0.08);
           background: var(--bg-primary);
           border: 1px solid var(--border, #e5e7eb);
         }
-        .cart-body { 
-          flex: 1; 
-          display: flex; 
-          flex-direction: column; 
-          overflow: hidden; 
-        }
+        .cart-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .cart-items { flex: 1; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1rem; }
-        
         .cart-item-row {
           display: flex;
           justify-content: space-between;
@@ -729,21 +698,9 @@ class SalesUI {
         .cart-item-name { display: block; font-weight: 500; color: var(--text-primary); }
         .cart-item-price { font-size: 0.8rem; color: var(--text-secondary); }
         .cart-item-total { font-weight: 600; color: var(--text-primary); }
-        
-        .btn-remove-item {
-          background: none;
-          border: none;
-          color: #ef4444;
-          font-weight: bold;
-          cursor: pointer;
-          padding: 0.5rem;
-        }
+        .btn-remove-item { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0.5rem; }
 
-        .payment-methods {
-          display: flex;
-          gap: 0.5rem;
-          margin-bottom: 1rem;
-        }
+        .payment-methods { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
         .payment-option {
           flex: 1;
           text-align: center;
@@ -756,12 +713,11 @@ class SalesUI {
           transition: border-color 0.15s, background 0.15s;
         }
         .payment-option:has(input:checked) {
-          background: rgba(var(--accent-rgb, 37,99,235), 0.08);
+          background: rgba(37, 99, 235, 0.08);
           border-color: var(--accent-primary, #2563eb);
           color: var(--accent-primary, #2563eb);
         }
 
-        /* Cart summary rows */
         .cart-summary { margin-bottom: 1rem; }
         .summary-row {
           display: flex;
@@ -780,7 +736,6 @@ class SalesUI {
           border-top: 2px solid var(--border, #f3f4f6);
         }
 
-        /* Product toolbar (filters + scan btn) */
         .product-toolbar {
           display: flex;
           align-items: center;
@@ -801,25 +756,12 @@ class SalesUI {
         }
         .scan-btn:hover { background: var(--bg-primary); border-color: var(--accent-primary, #f97316); }
 
-        /* Search bar */
-        .product-search {
-          background: var(--bg-secondary, #f8fafc);
-          border: 1px solid var(--border, #e5e7eb);
-          border-radius: 8px;
-          padding: 0.5rem 0.75rem;
-          color: var(--text-primary);
-          font-size: 0.875rem;
-        }
-        .product-search::placeholder { color: var(--text-secondary); }
-
-        /* Customer selector */
         .customer-selector select {
           background: var(--bg-secondary, #f8fafc);
           border: 1px solid var(--border, #e5e7eb);
           color: var(--text-primary);
         }
 
-        /* Invoice modal */
         .invoice-modal {
           border: none;
           border-radius: 16px;
@@ -853,7 +795,6 @@ class SalesUI {
         .invoice-actions { display: flex; gap: 1rem; }
         .invoice-actions .btn { flex: 1; }
 
-        /* Scanner modal */
         .scanner-modal {
           border: none;
           border-radius: 16px;
@@ -868,37 +809,30 @@ class SalesUI {
         .scanner-content { padding: 1.5rem; }
         .scanner-content h3 { margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
 
-        /* Open Item modal — override browser default dialog white background */
         #open-item-modal {
           background: var(--bg-primary) !important;
           color: var(--text-primary) !important;
           border: 1px solid var(--border, #334155);
         }
-        #open-item-modal::backdrop {
-          background: rgba(0, 0, 0, 0.6);
-        }
+        #open-item-modal::backdrop { background: rgba(0,0,0,0.6); }
         #open-item-modal input {
           background: var(--bg-secondary) !important;
           color: var(--text-primary) !important;
           border-color: var(--border, #334155) !important;
         }
-        #open-item-modal input::placeholder {
-          color: var(--text-secondary, #94a3b8);
-        }
+        #open-item-modal input::placeholder { color: var(--text-secondary, #94a3b8); }
         #open-item-modal #cancel-open-item {
           background: var(--bg-secondary) !important;
           color: var(--text-primary) !important;
           border-color: var(--border, #334155) !important;
         }
 
-        /* M-Pesa QR container */
         #mpesa-qr-container {
           background: var(--bg-secondary, #f8fafc) !important;
           border-color: var(--border, #e5e7eb) !important;
           color: var(--text-primary);
         }
 
-        /* Print styles — hide everything except the invoice */
         @media print {
           body > *:not(.invoice-modal) { display: none !important; }
           .invoice-modal { box-shadow: none; }
