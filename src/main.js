@@ -364,18 +364,19 @@ class IndustrialERPApp {
           <!-- Login Form -->
           <form id="login-form" class="auth-form">
             <h3 class="form-title">Welcome Back</h3>
-            <div class="form-group">
-              <label>Username / Email</label>
-              <input type="text" name="username" placeholder="Username or Email" required autofocus />
+            
+            <div class="form-group" id="login-email-group">
+              <label>Email Address</label>
+              <input type="email" name="email" id="login-email" placeholder="you@example.com" required autofocus />
             </div>
             
-            <div class="form-group">
+            <div class="form-group" id="login-password-group" style="display: none;">
               <label>Password</label>
-              <input type="password" name="password" placeholder="••••••••" required />
+              <input type="password" name="password" id="login-password" placeholder="••••••••" />
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block">
-              <i class="ph-duotone ph-lock-key"></i> Login
+            <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+              Continue
             </button>
             <p class="auth-link">New here? <a href="#" id="show-register">Create Account</a></p>
           </form>
@@ -383,6 +384,16 @@ class IndustrialERPApp {
           <!-- Register Form -->
           <form id="register-form" class="auth-form" style="display: none;">
             <h3 class="form-title">Create Account</h3>
+            
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="you@example.com" required />
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" placeholder="Create password" required />
+            </div>
             
             <div class="form-group">
               <label>Business Name</label>
@@ -398,21 +409,6 @@ class IndustrialERPApp {
                 <option value="warehouse">Warehouse</option>
                 <option value="manufacturer">Manufacturer</option>
               </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Username (Login ID)</label>
-              <input type="text" name="username" placeholder="Pick a username" required />
-            </div>
-
-            <div class="form-group">
-              <label>Email <span style="color:#9ca3af;font-size:0.8rem">(optional — for account recovery)</span></label>
-              <input type="email" name="email" placeholder="you@example.com" />
-            </div>
-
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" name="password" placeholder="Create password" required />
             </div>
 
             <div class="form-group">
@@ -499,79 +495,104 @@ class IndustrialERPApp {
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     };
 
-    // Handle Login
+    // Handle Login (Email -> Passkey OR Password)
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = loginForm.querySelector('button');
+      const btn = document.getElementById('login-submit-btn');
+      const emailInput = document.getElementById('login-email');
+      const passwordGroup = document.getElementById('login-password-group');
+      const passwordInput = document.getElementById('login-password');
+
+      const email = emailInput.value.trim().toLowerCase();
+
+      // Step 1: Identify Email
+      if (passwordGroup.style.display === 'none') {
+        btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Checking...';
+        btn.disabled = true;
+
+        try {
+          // Check if user exists locally AND has a passkey
+          const allUsers = await db.getAll('users').catch(() => []);
+          const localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
+
+          if (localUser && localUser.passkeyId && window.PublicKeyCredential) {
+            // Attempt Passkey Login
+            try {
+              const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+
+              const credential = await navigator.credentials.get({
+                publicKey: {
+                  challenge: challenge,
+                  allowCredentials: [{
+                    id: Uint8Array.from(atob(localUser.passkeyId), c => c.charCodeAt(0)),
+                    type: 'public-key',
+                    transports: ['internal', 'usb', 'ble', 'nfc'],
+                  }],
+                  userVerification: "preferred"
+                }
+              });
+
+              if (credential) {
+                // Passkey Success! Log them in immediately.
+                await this.completeLogin(localUser);
+                return;
+              }
+            } catch (pkErr) {
+              console.warn('Passkey login cancelled or failed:', pkErr);
+              // Fall through to password prompt
+            }
+          }
+
+          // No passkey or it failed/was cancelled. Show Password field.
+          passwordGroup.style.display = 'block';
+          passwordInput.required = true;
+          passwordInput.focus();
+          btn.innerHTML = 'Login';
+          btn.disabled = false;
+
+        } catch (err) {
+          console.error("Error during identity check:", err);
+          btn.innerHTML = 'Continue';
+          btn.disabled = false;
+        }
+        return;
+      }
+
+      // Step 2: Password Login
       const originalHTML = btn.innerHTML;
       btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Verifying...';
       btn.disabled = true;
 
       try {
-        const formData = new FormData(loginForm);
-        const identifier = (formData.get('username') || '').trim(); // accepts username OR email
-        const password = formData.get('password');
+        const password = passwordInput.value;
         const hashedPassword = await hashPassword(password);
 
-        // ── Step 1: Try local IndexedDB first (fast, works offline) ──────────
-        let localUser = await db.get('users', identifier).catch(() => null);
-
-        // Also try looking up by email if username lookup missed
-        if (!localUser) {
-          const allUsers = await db.getAll('users').catch(() => []);
-          localUser = allUsers.find(u => u.email && u.email.toLowerCase() === identifier.toLowerCase()) || null;
-        }
+        // Try local IndexedDB first
+        const allUsers = await db.getAll('users').catch(() => []);
+        const localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
 
         if (localUser && localUser.password === hashedPassword) {
-          // Local auth passed — log in immediately
-          localUser.lastLogin = Date.now();
-          this.currentUser = localUser;
-          localStorage.setItem('erp_session', JSON.stringify(localUser));
-          await db.update('users', localUser);
-          // Background Supabase sync
-          if (isSupabaseEnabled() && localUser.email) {
-            supabaseClient.auth.signInWithPassword({ email: localUser.email, password })
-              .then(({ data }) => { if (data?.user) initSync(); })
-              .catch(err => console.warn('Supabase bg-sync skipped:', err.message));
-          }
-          this.render();
-          initSync();
+          await this.completeLogin(localUser, password);
           return;
         }
 
-        // ── Step 2: IDB miss or wrong password — try Supabase (online fallback) ─
+        // Try Supabase (online fallback)
         if (!isSupabaseEnabled()) {
-          alert('Invalid username or password.');
-          btn.innerHTML = originalHTML;
-          btn.disabled = false;
-          return;
-        }
-
-        // Determine email: if identifier looks like an email use it directly,
-        // otherwise try to find it from a partial username match in IDB
-        const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(identifier);
-        const emailToTry = looksLikeEmail ? identifier : (localUser?.email || null);
-
-        if (!emailToTry) {
-          alert('Invalid username or password. If you registered with an email, try logging in with it directly.');
-          btn.innerHTML = originalHTML;
-          btn.disabled = false;
-          return;
+          alert('Invalid email or password.');
+          throw new Error('Local auth failed and Supabase is disabled.');
         }
 
         const { data: sbData, error: sbError } = await supabaseClient.auth.signInWithPassword({
-          email: emailToTry,
+          email: email,
           password,
         });
 
         if (sbError || !sbData?.user) {
-          alert('Invalid username or password.');
-          btn.innerHTML = originalHTML;
-          btn.disabled = false;
-          return;
+          alert('Invalid email or password.');
+          throw new Error('Supabase auth failed.');
         }
 
-        // Supabase auth passed — rebuild local profile from profiles table
+        // Supabase auth passed — rebuild local profile
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
@@ -579,9 +600,9 @@ class IndustrialERPApp {
           .maybeSingle();
 
         const rebuiltUser = {
-          username: profile?.username || emailToTry.split('@')[0],
-          password: hashedPassword, // store so next offline login works
-          email: emailToTry,
+          username: profile?.username || email.split('@')[0],
+          password: hashedPassword,
+          email: email,
           businessName: profile?.business_name || '',
           businessType: profile?.business_type || 'shop',
           ownerName: profile?.owner_name || '',
@@ -592,22 +613,68 @@ class IndustrialERPApp {
           createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
         };
 
-        // Upsert into local IDB so future offline logins work
         try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
         await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
 
-        this.currentUser = rebuiltUser;
-        localStorage.setItem('erp_session', JSON.stringify(rebuiltUser));
-        this.render();
-        initSync();
+        await this.completeLogin(rebuiltUser, password);
 
       } catch (err) {
         console.error('Login error:', err);
-        alert('Login failed: ' + err.message);
         btn.innerHTML = originalHTML;
         btn.disabled = false;
       }
     });
+
+    // Helper: Finalize Login & Optionally Create Passkey
+    this.completeLogin = async (user, passwordStr = null) => {
+      user.lastLogin = Date.now();
+
+      // Setup Background Supabase Sync if password is known
+      if (passwordStr && isSupabaseEnabled() && user.email) {
+        supabaseClient.auth.signInWithPassword({ email: user.email, password: passwordStr })
+          .then(({ data }) => { if (data?.user) initSync(); })
+          .catch(err => console.warn('Supabase bg-sync skipped:', err.message));
+      } else {
+        initSync();
+      }
+
+      // Check if we should prompt for Passkey setup
+      if (window.PublicKeyCredential && !user.passkeyId && confirm('Would you like to set up a Passkey for faster, secure logins?')) {
+        try {
+          const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+          const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+
+          const credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: challenge,
+              rp: { name: "Industrial ERP Platform" },
+              user: {
+                id: userId,
+                name: user.email,
+                displayName: user.businessName || user.email
+              },
+              pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+              authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+              timeout: 60000
+            }
+          });
+
+          if (credential) {
+            // Store the raw ID base64'd
+            user.passkeyId = btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId)));
+            alert('Passkey successfully registered!');
+          }
+        } catch (pkErr) {
+          console.warn("Passkey setup failed or cancelled:", pkErr);
+        }
+      }
+
+      this.currentUser = user;
+      localStorage.setItem('erp_session', JSON.stringify(user));
+      await db.update('users', user);
+
+      this.render();
+    };
 
 
     // Handle Register
@@ -680,13 +747,8 @@ class IndustrialERPApp {
           }
         }
 
-
         // Always store locally for offline operation
         await db.add('users', userData);
-
-        // Set session
-        localStorage.setItem('erp_session', JSON.stringify(userData));
-        this.currentUser = userData;
 
         // Also save settings for backward compatibility
         await db.update('settings', {
@@ -694,8 +756,7 @@ class IndustrialERPApp {
           ...userData
         });
 
-        this.render();
-        initSync();
+        await this.completeLogin(userData, password);
 
       } catch (err) {
         console.error('Registration error:', err);
