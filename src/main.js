@@ -2449,6 +2449,46 @@ class IndustrialERPApp {
 
     // PWA Install
     this.initPWA();
+
+    // Offline Status Monitoring
+    this.setupOfflineMonitoring();
+  }
+
+  setupOfflineMonitoring() {
+    const syncWidget = document.getElementById('sync-status-widget');
+    if (!syncWidget) return;
+
+    const updateStatus = async () => {
+      const isOnline = navigator.onLine;
+      let pendingCount = 0;
+
+      try {
+        const pendingItems = await db.getPendingSyncItems();
+        pendingCount = Array.isArray(pendingItems) ? pendingItems.length : 0;
+      } catch (e) {
+        console.warn('Could not fetch pending sync items for HUD');
+      }
+
+      if (!isOnline) {
+        syncWidget.className = 'offline';
+        syncWidget.innerHTML = `<i class="ph-bold ph-wifi-slash"></i> Offline ${pendingCount > 0 ? `(${pendingCount} pending)` : ''}`;
+      } else if (pendingCount > 0) {
+        syncWidget.className = 'syncing';
+        syncWidget.innerHTML = `<i class="ph-bold ph-arrows-clockwise ph-spin"></i> Syncing ${pendingCount}...`;
+      } else {
+        syncWidget.className = '';
+        syncWidget.innerHTML = `<i class="ph-bold ph-cloud-check"></i> Connected`;
+      }
+    };
+
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+
+    // Poll for queue changes every few seconds while online
+    setInterval(updateStatus, 3000);
+
+    // Initial check
+    updateStatus();
   }
 
   showInstallButton() {
@@ -2479,12 +2519,6 @@ class IndustrialERPApp {
     const savedTheme = localStorage.getItem('erp_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     this.updateThemeIcons(savedTheme);
-
-    // Desktop theme toggle
-    document.getElementById('desktop-theme-toggle')?.addEventListener('click', () => this.toggleTheme());
-
-    // Mobile theme toggle
-    document.getElementById('theme-toggle')?.addEventListener('click', () => this.toggleTheme());
   }
 
   toggleTheme() {

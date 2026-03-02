@@ -466,10 +466,16 @@ class TrustCircleUI {
                                             <td class="text-success">R ${(gb.savingsPerUnit || 0).toFixed(2)}</td>
                                             <td>${gb.totalQuantity || 0}</td>
                                             <td>${gb.minQuantity}</td>
-                                            <td><span class="badge ${statusBadge(gb.status)}">${gb.status}</span></td>
+                                            <td>
+                                              ${gb.status === 'funds_secured'
+                ? `<span class="badge" style="background:#10b981; color:white;"><i class="ph-bold ph-lock-key"></i> Funds Secured</span>`
+                : `<span class="badge ${statusBadge(gb.status)}">${gb.status}</span>`
+            }
+                                            </td>
                                             <td>${gb.deadline ? new Date(gb.deadline).toLocaleDateString() : '—'}</td>
                                             <td>
                                                 ${gb.status === 'open' ? `<button class="btn btn-sm btn-outline join-gb-btn" data-id="${gb.id}">Join</button>` : ''}
+                                                ${gb.status === 'funds_secured' ? `<button class="btn btn-sm btn-primary release-escrow-btn" data-id="${gb.id}"><i class="ph-bold ph-check"></i> Mark Delivered</button>` : ''}
                                             </td>
                                         </tr>
                                     `).join('')}
@@ -489,6 +495,25 @@ class TrustCircleUI {
 
         this.container.querySelectorAll('.join-gb-btn').forEach(btn => {
             btn.addEventListener('click', () => this.renderJoinGroupBuyModal(btn.dataset.id, syndicateId));
+        });
+
+        // The Moat: Hook up Escrow Release
+        this.container.querySelectorAll('.release-escrow-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = parseInt(e.currentTarget.dataset.id, 10);
+                if (confirm('Are you sure the goods have been delivered? This will irrevocably release Escrow funds to the supplier.')) {
+                    try {
+                        e.currentTarget.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Releasing...';
+                        e.currentTarget.disabled = true;
+                        await this.module.releaseEscrow(id);
+                        this.loadView('group-buys', syndicateId);
+                    } catch (err) {
+                        alert('Failed to release escrow: ' + err.message);
+                        e.currentTarget.innerHTML = '<i class="ph-bold ph-check"></i> Mark Delivered';
+                        e.currentTarget.disabled = false;
+                    }
+                }
+            });
         });
 
         this.container.querySelectorAll('.detail-tab').forEach(btn => {

@@ -8,9 +8,19 @@ class ReportsUI {
     this.dateRange = 'week'; // week, month, custom
     this.activeFilter = { type: 'all', value: null }; // { type: 'all' | 'category' | 'sku', value: string }
     this.poolStock = new PoolStock();
+    this.currentView = 'financials'; // 'financials' or 'traceability'
   }
 
   async render(container) {
+    this.container = container; // save reference for re-renders
+    if (this.currentView === 'financials') {
+      await this.renderFinancials(container);
+    } else if (this.currentView === 'traceability') {
+      await this.renderTraceability(container);
+    }
+  }
+
+  async renderFinancials(container) {
     const { startDate, endDate } = this.getDateRange();
 
     // Fetch inventory for mapping SKUs to Categories
@@ -33,6 +43,11 @@ class ReportsUI {
     container.innerHTML = `
       <div class="reports-container">
         ${this.renderStyles()}
+
+        <div class="module-nav" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+          <button class="btn-tab active" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials & KPIs</button>
+          <button class="btn-tab" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
+        </div>
         
         <!-- Date Range Selector -->
         <div class="report-controls">
@@ -216,6 +231,151 @@ class ReportsUI {
     `;
 
     this.attachHandlers(container, financialData, inventoryData, advancedStats);
+  }
+
+  async renderTraceability(container) {
+    container.innerHTML = `
+      <div class="reports-container">
+        ${this.renderStyles()}
+
+        <div class="module-nav" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+          <button class="btn-tab" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials & KPIs</button>
+          <button class="btn-tab active" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <h3><i class="ph-duotone ph-magnifying-glass"></i> Product Genealogy Search</h3>
+          </div>
+          <div class="card-body" style="display: flex; gap: 1rem; align-items: flex-end;">
+            <div style="flex: 1;">
+              <label style="display:block; margin-bottom:0.5rem; color:var(--text-secondary); font-size:0.875rem;">Production Order ID</label>
+              <input type="number" id="trace-order-id" class="form-input" placeholder="Enter Order ID (e.g., 1)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px;" />
+            </div>
+            <button id="btn-trace" class="btn btn-primary" style="height: 40px; padding: 0 1.5rem;"><i class="ph-bold ph-arrow-right"></i> Trace History</button>
+          </div>
+        </div>
+
+        <div id="trace-results">
+            <!-- Results injected here -->
+            <div class="empty-state" style="text-align:center; padding: 3rem; color: var(--text-secondary);">
+                <i class="ph-duotone ph-barcode" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>Enter an Order ID to trace its manufacturing history.</p>
+            </div>
+        </div>
+
+      </div>
+    `;
+
+    this.attachTraceHandlers(container);
+  }
+
+  attachTraceHandlers(container) {
+    // Shared Navigation
+    container.querySelectorAll('.btn-tab').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        this.currentView = e.currentTarget.dataset.view;
+        this.render(this.container);
+      });
+    });
+
+    const btnTrace = container.querySelector('#btn-trace');
+    const inputOrder = container.querySelector('#trace-order-id');
+    const resultsDiv = container.querySelector('#trace-results');
+
+    if (btnTrace) {
+      btnTrace.addEventListener('click', async () => {
+        const orderId = parseInt(inputOrder.value, 10);
+        if (!orderId) return;
+
+        btnTrace.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Tracing...';
+        btnTrace.disabled = true;
+
+        try {
+          // Dynamic import of SmartShift to avoid circular deps if they exist, or just import it at top
+          const { default: SmartShift } = await import('../modules/SmartShift.js');
+          const shiftModule = new SmartShift();
+          const data = await shiftModule.traceProduct(orderId);
+
+          resultsDiv.innerHTML = this.renderTraceTimeline(data);
+        } catch (err) {
+          resultsDiv.innerHTML = `
+            <div class="alert alert-danger" style="padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 6px;">
+              <i class="ph-fill ph-warning-circle"></i> Error tracing product: ${err.message}
+            </div>
+          `;
+        } finally {
+          btnTrace.innerHTML = '<i class="ph-bold ph-arrow-right"></i> Trace History';
+          btnTrace.disabled = false;
+        }
+      });
+    }
+  }
+
+  renderTraceTimeline(trace) {
+    if (!trace || trace.shifts.length === 0) {
+      return `
+        <div class="alert" style="padding: 1rem; background: var(--bg-secondary); border-radius: 6px;">
+          Product has no completed manufacturing history yet.
+        </div>
+      `;
+    }
+
+    return `
+      <div class="card">
+        <div class="card-header" style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color); padding: 1rem;">
+          <h2 style="margin:0; font-size:1.25rem;">Traceability Passport</h2>
+          <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+            <div>
+              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Product</span>
+              <strong>${trace.product} (Order #${trace.orderNumber})</strong>
+            </div>
+            <div>
+              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Total QA Approved</span>
+              <strong>${trace.quantityProduced} units</strong>
+            </div>
+            <div>
+              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Total Labor Time</span>
+              <strong>${trace.totalLaborHours.toFixed(2)} hrs</strong>
+            </div>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 2rem;">
+          <div class="timeline" style="position:relative; margin-left: 1rem; border-left: 2px solid var(--border-color); padding-left: 2rem;">
+            ${trace.shifts.map((s, idx) => `
+              <div class="timeline-item" style="position:relative; margin-bottom: 2rem;">
+                <div style="position:absolute; left: -2.6rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary-color); border: 4px solid var(--bg-primary);"></div>
+                
+                <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                  <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <h4 style="margin:0;"><i class="ph-fill ph-gear"></i> ${s.machineEmployed}</h4>
+                    <span style="font-size:0.8rem; color:var(--text-secondary);">${s.date}</span>
+                  </div>
+                  <p style="margin:0 0 1rem 0; font-size:0.9rem;">Operated by <strong>${s.workerEmployed}</strong> for ${s.durationHours} hrs. Produced ${s.outputGenerated} units.</p>
+                  
+                  <div style="background: var(--bg-primary); padding: 1rem; border-radius: 6px; border: 1px dashed var(--border-color);">
+                    <h5 style="margin: 0 0 0.5rem 0; font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Raw Materials Consumed</h5>
+                    ${s.rawMaterialBatches && s.rawMaterialBatches.length > 0 ? `
+                      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        ${s.rawMaterialBatches.map(b => `<span class="badge" style="background:var(--bg-secondary); font-family:monospace; border:1px solid var(--border-color);">${b}</span>`).join('')}
+                      </div>
+                    ` : `
+                      <span class="text-muted" style="font-size:0.8rem;">No specific batch numbers logged for this shift.</span>
+                    `}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+            
+            <div class="timeline-item" style="position:relative;">
+                <div style="position:absolute; left: -2.6rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--success); border: 4px solid var(--bg-primary);"></div>
+                <h3 style="margin:0; color:var(--success);"><i class="ph-fill ph-check-circle"></i> Manufacturing Complete</h3>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   getDateRange() {
