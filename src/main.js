@@ -357,74 +357,76 @@ class IndustrialERPApp {
       <div class="auth-container">
         <div class="auth-card">
           <div class="auth-header">
-            <h1><i class="ph-duotone ph-chart-bar"></i> Business Platform</h1>
-            <p>AI-Powered Operations</p>
+            <h1>Log in or sign up</h1>
+            <p>You'll get smarter operations and can upload files, records, and more.</p>
           </div>
           
-          <!-- Login Form -->
-          <form id="login-form" class="auth-form">
-            <h3 class="form-title">Welcome Back</h3>
-            
-            <div class="form-group" id="login-email-group">
-              <label>Email Address</label>
-              <input type="email" name="email" id="login-email" placeholder="you@example.com" required autofocus />
-            </div>
-            
-            <div class="form-group" id="login-password-group" style="display: none;">
-              <label>Password</label>
-              <input type="password" name="password" id="login-password" placeholder="••••••••" />
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
-              Continue
-            </button>
-            <p class="auth-link">New here? <a href="#" id="show-register">Create Account</a></p>
-          </form>
+          <div id="auth-social-buttons">
+             <button class="btn btn-social" type="button">
+                <i class="ph-fill ph-google-logo" style="color: #ea4335;"></i> Continue with Google
+             </button>
+             <button class="btn btn-social" type="button">
+                <i class="ph-fill ph-apple-logo" style="color: #ffffff;"></i> Continue with Apple
+             </button>
+             <button class="btn btn-social" type="button">
+                <i class="ph-duotone ph-phone"></i> Continue with phone
+             </button>
+          </div>
 
-          <!-- Register Form -->
-          <form id="register-form" class="auth-form" style="display: none;">
-            <h3 class="form-title">Create Account</h3>
-            
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" name="email" placeholder="you@example.com" required />
+          <div class="auth-divider" id="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <form id="unified-auth-form" class="auth-form">
+            <!-- STEP 1: Email -->
+            <div id="step-1-email">
+              <div class="form-group">
+                <input type="email" name="email" id="unified-email" placeholder="Email address" required autofocus />
+              </div>
+              <button type="button" class="btn btn-primary btn-block" id="continue-email-btn">
+                Continue
+              </button>
             </div>
 
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" name="password" placeholder="Create password" required />
-            </div>
-            
-            <div class="form-group">
-              <label>Business Name</label>
-              <input type="text" name="businessName" placeholder="e.g., Thabo's Shop" required />
-            </div>
-            
-            <div class="form-group">
-              <label>Business Type</label>
-              <select name="businessType" required>
-                <option value="">Select type...</option>
-                <option value="shopowner">Storefront / Spaza</option>
-                <option value="trader">Distributor</option>
-                <option value="warehouse">Warehouse</option>
-                <option value="manufacturer">Manufacturer</option>
-              </select>
-            </div>
+            <!-- STEP 2: Login or Register Fields (Injected dynamically) -->
+            <div id="step-2-fields" style="display: none;">
+              <!-- Back button / Email display -->
+              <div class="auth-email-display" id="auth-email-display">
+                <button type="button" id="back-to-email-btn" class="back-btn">Edit</button>
+                <span id="display-email-text"></span>
+              </div>
 
-            <div class="form-group">
-              <label>Your Name</label>
-              <input type="text" name="ownerName" placeholder="Full Name" required />
-            </div>
+              <!-- General Password -->
+              <div class="form-group">
+                <input type="password" name="password" id="unified-password" placeholder="Password" />
+              </div>
 
-            <div class="form-group">
-              <label>Phone (Optional)</label>
-              <input type="tel" name="phone" placeholder="072 123 4567" />
-            </div>
+              <!-- Registration Only Fields -->
+              <div id="register-only-fields" style="display: none;">
+                <div class="form-group">
+                  <input type="text" name="businessName" id="reg-biz-name" placeholder="Business Name" />
+                </div>
+                <div class="form-group">
+                  <select name="businessType" id="reg-biz-type">
+                    <option value="" disabled selected>Business Type...</option>
+                    <option value="shopowner">Storefront / Spaza</option>
+                    <option value="trader">Distributor</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="manufacturer">Manufacturer</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <input type="text" name="ownerName" id="reg-owner-name" placeholder="Your Name" />
+                </div>
+                <div class="form-group">
+                  <input type="tel" name="phone" id="reg-phone" placeholder="Phone (Optional)" />
+                </div>
+              </div>
 
-            <button type="submit" class="btn btn-primary btn-block">
-              <i class="ph-duotone ph-rocket-launch"></i> Get Started
-            </button>
-            <p class="auth-link">Already have an account? <a href="#" id="show-login">Login</a></p>
+              <button type="submit" class="btn btn-primary btn-block" id="final-submit-btn">
+                Continue
+              </button>
+            </div>
           </form>
           
           <div class="auth-footer">
@@ -457,9 +459,9 @@ class IndustrialERPApp {
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 20px;
-          padding: 2.5rem 2rem;
-          max-width: 420px;
+          border-radius: 24px;
+          padding: 2.5rem 2.5rem;
+          max-width: 440px;
           width: 100%;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
           color: white;
@@ -477,85 +479,115 @@ class IndustrialERPApp {
 
         .auth-header { text-align: center; margin-bottom: 2rem; }
         .auth-header h1 { 
-          font-size: 2.2rem; 
+          font-size: 2rem; 
           margin-bottom: 0.5rem; 
           color: #ffffff;
-          font-weight: 800;
-          letter-spacing: -0.5px;
+          font-weight: 700;
         }
-        .auth-header p { color: #cbd5e1; font-size: 1.1rem; }
-        
-        .form-title { 
-          margin-bottom: 1.5rem; 
-          text-align: center; 
-          color: #e2e8f0; 
-          font-weight: 600;
-        }
+        .auth-header p { color: #cbd5e1; font-size: 1rem; line-height: 1.4; }
 
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { 
-          display: block; 
-          margin-bottom: 0.5rem; 
-          font-weight: 500; 
-          color: #e2e8f0; 
-          font-size: 0.95rem;
+        .btn-social {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          border-radius: 9999px;
+          padding: 0.85rem;
+          margin-bottom: 0.75rem;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
         }
+        .btn-social:hover { background: rgba(255, 255, 255, 0.1); }
+        .btn-social i { font-size: 1.25rem; }
+
+        .auth-divider {
+          display: flex;
+          align-items: center;
+          text-align: center;
+          margin: 1.5rem 0;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 0.85rem;
+        }
+        .auth-divider::before, .auth-divider::after {
+          content: '';
+          flex: 1;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .auth-divider span { padding: 0 10px; }
+
+        .form-group { margin-bottom: 1rem; }
         .form-group input, .form-group select { 
           width: 100%; 
-          padding: 0.85rem 1rem; 
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2); 
+          padding: 1rem 1.2rem; 
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3); 
           color: white;
-          border-radius: 10px; 
+          border-radius: 9999px; 
           font-size: 1rem; 
           transition: all 0.3s ease;
         }
-        .form-group input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        /* Make select have rounded look, but standard options styling */
+        .form-group select option { background: #1e293b; color: white; }
+        
+        .form-group input::placeholder { color: rgba(255, 255, 255, 0.6); }
         .form-group input:focus, .form-group select:focus { 
           outline: none; 
           border-color: #60a5fa; 
-          background: rgba(255, 255, 255, 0.15);
-          box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2); 
+          box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3); 
         }
-        .form-group select option { background: #1e293b; color: white; }
 
-        .btn { 
-          padding: 0.85rem 1.5rem; 
+        .btn-primary { 
+          width: 100%;
+          padding: 1rem 1.2rem; 
           border: none; 
-          border-radius: 10px; 
+          border-radius: 9999px; 
           font-size: 1rem; 
           font-weight: 600; 
-          letter-spacing: 0.5px;
           cursor: pointer; 
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .btn-primary { 
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
-          color: white; 
-          box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+          background: white; 
+          color: #1a1a1a; 
         }
         .btn-primary:hover { 
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+          background: #f1f5f9;
+          transform: scale(1.02);
         }
-        .btn-primary:active { transform: translateY(0); }
-        .btn-block { width: 100%; }
-        
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .auth-email-display {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 9999px;
+          padding: 0.5rem 1.2rem;
+          margin-bottom: 1.5rem;
+          font-size: 0.95rem;
+        }
+        .back-btn {
+          background: transparent;
+          color: #60a5fa;
+          border: none;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+        .back-btn:hover { text-decoration: underline; }
+
         .auth-footer { 
-          margin-top: 2rem; 
+          margin-top: 1.5rem; 
           text-align: center; 
-          color: rgba(255, 255, 255, 0.6); 
-          font-size: 0.85rem; 
+          color: rgba(255, 255, 255, 0.4); 
+          font-size: 0.8rem; 
         }
-        .auth-link { margin-top: 1.5rem; text-align: center; font-size: 0.95rem; color: #cbd5e1; }
-        .auth-link a { 
-          color: #60a5fa; 
-          text-decoration: none; 
-          font-weight: 600; 
-          margin-left: 0.5rem;
-          transition: color 0.2s;
-        }
-        .auth-link a:hover { color: #93c5fd; }
       </style>
     `;
   }
@@ -583,23 +615,19 @@ class IndustrialERPApp {
   }
 
   attachLoginHandlers() {
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const showRegisterBtn = document.getElementById('show-register');
-    const showLoginBtn = document.getElementById('show-login');
+    const form = document.getElementById('unified-auth-form');
+    const step1Div = document.getElementById('step-1-email');
+    const step2Div = document.getElementById('step-2-fields');
+    const emailInput = document.getElementById('unified-email');
+    const continueEmailBtn = document.getElementById('continue-email-btn');
+    const backBtn = document.getElementById('back-to-email-btn');
+    const displayEmailText = document.getElementById('display-email-text');
+    const passwordInput = document.getElementById('unified-password');
+    const regFieldsDiv = document.getElementById('register-only-fields');
+    const finalSubmitBtn = document.getElementById('final-submit-btn');
 
-    // Toggle Forms
-    showRegisterBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      loginForm.style.display = 'none';
-      registerForm.style.display = 'block';
-    });
-
-    showLoginBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      registerForm.style.display = 'none';
-      loginForm.style.display = 'block';
-    });
+    let currentAction = 'login'; // 'login' or 'register'
+    let localUser = null;
 
     // Helper: Hash Password
     const hashPassword = async (password) => {
@@ -609,133 +637,190 @@ class IndustrialERPApp {
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     };
 
-    // Handle Login (Email -> Passkey OR Password)
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('login-submit-btn');
-      const emailInput = document.getElementById('login-email');
-      const passwordGroup = document.getElementById('login-password-group');
-      const passwordInput = document.getElementById('login-password');
+    // Go back to Step 1
+    backBtn?.addEventListener('click', () => {
+      step2Div.style.display = 'none';
+      regFieldsDiv.style.display = 'none';
+      step1Div.style.display = 'block';
+      passwordInput.value = '';
+      passwordInput.required = false;
+      document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = false);
+    });
 
-      const email = emailInput.value.trim().toLowerCase();
-
-      // Step 1: Identify Email
-      if (passwordGroup.style.display === 'none') {
-        btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Checking...';
-        btn.disabled = true;
-
-        try {
-          // Check if user exists locally AND has a passkey
-          const allUsers = await db.getAll('users').catch(() => []);
-          const localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
-
-          if (localUser && localUser.passkeyId && window.PublicKeyCredential) {
-            // Attempt Passkey Login
-            try {
-              const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
-
-              const credential = await navigator.credentials.get({
-                publicKey: {
-                  challenge: challenge,
-                  allowCredentials: [{
-                    id: Uint8Array.from(atob(localUser.passkeyId), c => c.charCodeAt(0)),
-                    type: 'public-key',
-                    transports: ['internal', 'usb', 'ble', 'nfc'],
-                  }],
-                  userVerification: "preferred"
-                }
-              });
-
-              if (credential) {
-                // Passkey Success! Log them in immediately.
-                await this.completeLogin(localUser);
-                return;
-              }
-            } catch (pkErr) {
-              console.warn('Passkey login cancelled or failed:', pkErr);
-              // Fall through to password prompt
-            }
-          }
-
-          // No passkey or it failed/was cancelled. Show Password field.
-          passwordGroup.style.display = 'block';
-          passwordInput.required = true;
-          passwordInput.focus();
-          btn.innerHTML = 'Login';
-          btn.disabled = false;
-
-        } catch (err) {
-          console.error("Error during identity check:", err);
-          btn.innerHTML = 'Continue';
-          btn.disabled = false;
-        }
+    // Step 1: Identify Email
+    continueEmailBtn?.addEventListener('click', async () => {
+      if (!emailInput.checkValidity()) {
+        emailInput.reportValidity();
         return;
       }
 
-      // Step 2: Password Login
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Verifying...';
-      btn.disabled = true;
+      const email = emailInput.value.trim().toLowerCase();
+      const originalHTML = continueEmailBtn.innerHTML;
+      continueEmailBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Checking...';
+      continueEmailBtn.disabled = true;
 
       try {
-        const password = passwordInput.value;
-        const hashedPassword = await hashPassword(password);
-
-        // Try local IndexedDB first
         const allUsers = await db.getAll('users').catch(() => []);
-        const localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
+        localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
 
-        if (localUser && localUser.password === hashedPassword) {
-          await this.completeLogin(localUser, password);
-          return;
+        // If returning user with a passkey, try Passkey login first
+        if (localUser && localUser.passkeyId && window.PublicKeyCredential) {
+          try {
+            const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+            const credential = await navigator.credentials.get({
+              publicKey: {
+                challenge: challenge,
+                allowCredentials: [{
+                  id: Uint8Array.from(atob(localUser.passkeyId), c => c.charCodeAt(0)),
+                  type: 'public-key',
+                  transports: ['internal', 'usb', 'ble', 'nfc'],
+                }],
+                userVerification: "preferred"
+              }
+            });
+
+            if (credential) {
+              await this.completeLogin(localUser);
+              return; // logged in!
+            }
+          } catch (pkErr) {
+            console.warn('Passkey cancelled/failed, falling back to password...', pkErr);
+          }
         }
 
-        // Try Supabase (online fallback)
-        if (!isSupabaseEnabled()) {
-          alert('Invalid email or password.');
-          throw new Error('Local auth failed and Supabase is disabled.');
+        // Setup Step 2 UI
+        step1Div.style.display = 'none';
+        step2Div.style.display = 'block';
+        displayEmailText.textContent = email;
+        passwordInput.required = true;
+
+        if (localUser) {
+          // Returning User (Local) -> Login Flow
+          currentAction = 'login';
+          regFieldsDiv.style.display = 'none';
+          document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = false);
+          setTimeout(() => passwordInput.focus(), 100);
+        } else {
+          // New User -> Registration Flow
+          currentAction = 'register';
+          regFieldsDiv.style.display = 'block';
+          document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = true);
+          // Phone is optional
+          document.getElementById('reg-phone').required = false;
+          setTimeout(() => passwordInput.focus(), 100);
         }
-
-        const { data: sbData, error: sbError } = await supabaseClient.auth.signInWithPassword({
-          email: email,
-          password,
-        });
-
-        if (sbError || !sbData?.user) {
-          alert('Invalid email or password.');
-          throw new Error('Supabase auth failed.');
-        }
-
-        // Supabase auth passed — rebuild local profile
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('*')
-          .eq('id', sbData.user.id)
-          .maybeSingle();
-
-        const rebuiltUser = {
-          username: profile?.username || email.split('@')[0],
-          password: hashedPassword,
-          email: email,
-          businessName: profile?.business_name || '',
-          businessType: profile?.business_type || 'shop',
-          ownerName: profile?.owner_name || '',
-          phone: profile?.phone || '',
-          supabaseId: sbData.user.id,
-          role: profile?.role || 'admin',
-          lastLogin: Date.now(),
-          createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
-        };
-
-        try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
-        await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
-
-        await this.completeLogin(rebuiltUser, password);
 
       } catch (err) {
-        console.error('Login error:', err);
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
+        console.error("Identity check error:", err);
+      } finally {
+        continueEmailBtn.innerHTML = originalHTML;
+        continueEmailBtn.disabled = false;
+      }
+    });
+
+    // Step 2: Form Submit (Login or Register)
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      const originalHTML = finalSubmitBtn.innerHTML;
+      finalSubmitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Processing...';
+      finalSubmitBtn.disabled = true;
+
+      try {
+        const hashedPassword = await hashPassword(password);
+
+        if (currentAction === 'login') {
+          // LOGIN PATH
+          if (localUser && localUser.password === hashedPassword) {
+            await this.completeLogin(localUser, password);
+            return;
+          }
+
+          if (!isSupabaseEnabled()) {
+            throw new Error('Invalid email or password. (Supabase disabled)');
+          }
+
+          const { data: sbData, error: sbError } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (sbError || !sbData?.user) throw new Error('Invalid email or password.');
+
+          const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', sbData.user.id).maybeSingle();
+
+          const rebuiltUser = {
+            username: profile?.username || email.split('@')[0],
+            password: hashedPassword,
+            email: email,
+            businessName: profile?.business_name || '',
+            businessType: profile?.business_type || 'shopowner',
+            ownerName: profile?.owner_name || '',
+            phone: profile?.phone || '',
+            supabaseId: sbData.user.id,
+            role: profile?.role || 'admin',
+            lastLogin: Date.now(),
+            createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+          };
+
+          try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
+          await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
+          await this.completeLogin(rebuiltUser, password);
+
+        } else {
+          // REGISTER PATH
+          const username = email.split('@')[0] + Math.floor(Math.random() * 1000); // generate safety username
+          const userData = {
+            username,
+            password: hashedPassword,
+            businessName: document.getElementById('reg-biz-name').value,
+            businessType: document.getElementById('reg-biz-type').value,
+            ownerName: document.getElementById('reg-owner-name').value,
+            phone: document.getElementById('reg-phone').value || '',
+            email: email,
+            createdAt: Date.now(),
+            role: 'admin'
+          };
+
+          // Basic email validation for Supabase
+          const emailIsValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) &&
+            !email.endsWith('@test.com') && !email.endsWith('@example.com') &&
+            !email.includes('test@') && !email.includes('fake@');
+
+          if (isSupabaseEnabled() && emailIsValid) {
+            try {
+              const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { emailRedirectTo: null, data: { username, business_name: userData.businessName } }
+              });
+              if (!error && data?.user) {
+                await supabaseClient.from('profiles').upsert({
+                  id: data.user.id,
+                  username,
+                  business_name: userData.businessName,
+                  business_type: userData.businessType,
+                  owner_name: userData.ownerName,
+                  phone: userData.phone,
+                  email,
+                  role: 'admin',
+                  created_at: new Date().toISOString()
+                });
+                userData.supabaseId = data.user.id;
+              }
+            } catch (sbErr) { console.warn('Supabase signUp failed:', sbErr.message); }
+          }
+
+          // Always store locally for offline operation
+          await db.add('users', userData);
+          await db.update('settings', { key: 'businessProfile', ...userData });
+          await this.completeLogin(userData, password);
+        }
+
+      } catch (err) {
+        console.error('Auth error:', err);
+        alert(err.message || 'Authentication failed');
+        finalSubmitBtn.innerHTML = originalHTML;
+        finalSubmitBtn.disabled = false;
       }
     });
 
@@ -804,95 +889,6 @@ class IndustrialERPApp {
 
       await finishAuth();
     };
-
-    // Handle Register
-    registerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = registerForm.querySelector('button');
-      btn.textContent = 'Creating Account...';
-      btn.disabled = true;
-
-      try {
-        const formData = new FormData(registerForm);
-        const username = formData.get('username');
-
-        // Check availability
-        const existing = await db.get('users', username);
-        if (existing) {
-          alert('Username already taken');
-          btn.innerHTML = '<i class="ph-duotone ph-rocket-launch"></i> Get Started';
-          btn.disabled = false;
-          return;
-        }
-
-        const password = formData.get('password');
-        const email = formData.get('email')?.trim() || '';
-        // Only use email with Supabase if it looks genuinely valid (has @ and a real TLD)
-        const emailIsValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) &&
-          !email.endsWith('@test.com') && !email.endsWith('@example.com') &&
-          !email.includes('test@') && !email.includes('fake@');
-        const hashedPassword = await hashPassword(password);
-
-        const userData = {
-          username,
-          password: hashedPassword,
-          businessName: formData.get('businessName'),
-          businessType: formData.get('businessType'),
-          ownerName: formData.get('ownerName'),
-          phone: formData.get('phone') || '',
-          email: email, // Always preserve the typed email in local database so login lookups work!
-          createdAt: Date.now(),
-          role: 'admin'
-        };
-
-        if (isSupabaseEnabled() && emailIsValid) {
-          // --- Supabase auth path (only when email is provably real) ---
-          try {
-            const { data, error } = await supabaseClient.auth.signUp({
-              email,
-              password,
-              options: {
-                emailRedirectTo: null,
-                data: { username, business_name: userData.businessName }
-              }
-            });
-            if (!error && data?.user) {
-              await supabaseClient.from('profiles').upsert({
-                id: data.user.id,
-                username,
-                business_name: userData.businessName,
-                business_type: userData.businessType,
-                owner_name: userData.ownerName,
-                phone: userData.phone,
-                email,
-                role: 'admin',
-                created_at: new Date().toISOString()
-              });
-              userData.supabaseId = data.user.id;
-            }
-          } catch (supabaseErr) {
-            console.warn('Supabase signUp failed, continuing with local account:', supabaseErr.message);
-          }
-        }
-
-        // Always store locally for offline operation
-        await db.add('users', userData);
-
-        // Also save settings for backward compatibility
-        await db.update('settings', {
-          key: 'businessProfile',
-          ...userData
-        });
-
-        await this.completeLogin(userData, password);
-
-      } catch (err) {
-        console.error('Registration error:', err);
-        alert('Registration failed: ' + err.message);
-        btn.innerHTML = '<i class="ph-duotone ph-rocket-launch"></i> Get Started';
-        btn.disabled = false;
-      }
-    });
   }
 
   renderDashboard() {
