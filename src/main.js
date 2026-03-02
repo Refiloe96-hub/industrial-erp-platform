@@ -2494,11 +2494,11 @@ class IndustrialERPApp {
     try {
       // Lazy-load missing dependencies (happens if user just logged in without page refresh)
       if (!this.pocketBooks) {
-        const { default: PocketBooks } = await import('./modules/pocketBooks.js');
+        const { default: PocketBooks } = await import('./modules/PocketBooks.js');
         this.pocketBooks = new PocketBooks();
       }
       if (!this.poolStock) {
-        const { default: PoolStock } = await import('./modules/poolStock.js');
+        const { default: PoolStock } = await import('./modules/PoolStock.js');
         this.poolStock = new PoolStock(db);
       }
       if (!db) console.error('❌ DB is missing');
