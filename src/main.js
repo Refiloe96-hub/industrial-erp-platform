@@ -468,6 +468,28 @@ class IndustrialERPApp {
     `;
   }
 
+  renderPasskeySetup() {
+    return `
+      <div class="auth-container">
+        <div class="auth-card" style="text-align: center; padding: 3rem 2rem;">
+          <div class="auth-header" style="margin-bottom: 2rem;">
+            <i class="ph-duotone ph-fingerprint" style="font-size: 5rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h1 style="font-size: 1.8rem;">Secure Your Account</h1>
+            <p style="margin-top: 1rem; line-height: 1.5;">Set up a Passkey for faster, passwordless logins using your fingerprint, face, or device PIN.</p>
+          </div>
+          
+          <button id="setup-passkey-btn" class="btn btn-primary btn-block" style="margin-bottom: 1rem; font-size: 1.1rem; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="ph-bold ph-plus"></i> Create Passkey
+          </button>
+          
+          <button id="skip-passkey-btn" class="btn btn-block" style="background: transparent; color: #6b7280; border: 1px solid #d1d5db; padding: 1rem;">
+            Skip for now
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   attachLoginHandlers() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
@@ -638,44 +660,58 @@ class IndustrialERPApp {
         initSync();
       }
 
+      const finishAuth = async () => {
+        this.currentUser = user;
+        localStorage.setItem('erp_session', JSON.stringify(user));
+        await db.update('users', user);
+        this.render();
+      };
+
       // Check if we should prompt for Passkey setup
-      if (window.PublicKeyCredential && !user.passkeyId && confirm('Would you like to set up a Passkey for faster, secure logins?')) {
-        try {
-          const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
-          const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+      if (window.PublicKeyCredential && !user.passkeyId) {
+        document.getElementById('app').innerHTML = this.renderPasskeySetup();
 
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: challenge,
-              rp: { name: "Industrial ERP Platform" },
-              user: {
-                id: userId,
-                name: user.email,
-                displayName: user.businessName || user.email
-              },
-              pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-              authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
-              timeout: 60000
+        document.getElementById('setup-passkey-btn').addEventListener('click', async (e) => {
+          const btn = e.target.closest('button');
+          btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Waiting for Device...';
+          btn.disabled = true;
+          try {
+            const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+            const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+
+            const credential = await navigator.credentials.create({
+              publicKey: {
+                challenge: challenge,
+                rp: { name: window.location.hostname || "Industrial ERP" },
+                user: {
+                  id: userId,
+                  name: user.email,
+                  displayName: user.businessName || user.email
+                },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                timeout: 60000
+              }
+            });
+
+            if (credential) {
+              user.passkeyId = btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId)));
             }
-          });
-
-          if (credential) {
-            // Store the raw ID base64'd
-            user.passkeyId = btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId)));
-            alert('Passkey successfully registered!');
+          } catch (pkErr) {
+            console.warn("Passkey setup failed or cancelled:", pkErr);
           }
-        } catch (pkErr) {
-          console.warn("Passkey setup failed or cancelled:", pkErr);
-        }
+          await finishAuth();
+        });
+
+        document.getElementById('skip-passkey-btn').addEventListener('click', async () => {
+          await finishAuth();
+        });
+
+        return; // Halt here until the user interacts with the Passkey UI
       }
 
-      this.currentUser = user;
-      localStorage.setItem('erp_session', JSON.stringify(user));
-      await db.update('users', user);
-
-      this.render();
+      await finishAuth();
     };
-
 
     // Handle Register
     registerForm.addEventListener('submit', async (e) => {
