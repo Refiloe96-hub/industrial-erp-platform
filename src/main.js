@@ -619,7 +619,7 @@ class IndustrialERPApp {
           businessType: formData.get('businessType'),
           ownerName: formData.get('ownerName'),
           phone: formData.get('phone') || '',
-          email: emailIsValid ? email : '',
+          email: email, // Always preserve the typed email in local database so login lookups work!
           createdAt: Date.now(),
           role: 'admin'
         };
