@@ -355,11 +355,12 @@ class DatabaseManager {
   }
 
   async update(storeName, data) {
+    // The Moat: CRDT Base State Tracking
+    // Wait for async 'get' BEFORE opening the transaction, or it will auto-commit
+    const existing = await this.get(storeName, data.id || data.sku || data.key || data.username);
+
     const tx = this.db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
-
-    // The Moat: CRDT Base State Tracking
-    const existing = await this.get(storeName, data.id || data.sku || data.key || data.username);
 
     const dataWithMeta = {
       ...data,
