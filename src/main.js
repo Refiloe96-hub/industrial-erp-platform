@@ -439,31 +439,123 @@ class IndustrialERPApp {
           align-items: center;
           justify-content: center;
           padding: 1rem;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          /* Animated deep vibrant gradient */
+          background: linear-gradient(-45deg, #0f172a, #1e3a8a, #312e81, #4c1d95);
+          background-size: 400% 400%;
+          animation: gradientBG 15s ease infinite;
         }
+
+        @keyframes gradientBG {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
         .auth-card {
-          background: white;
-          border-radius: 12px;
-          padding: 2rem;
-          max-width: 400px;
+          /* Premium Glassmorphism */
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 20px;
+          padding: 2.5rem 2rem;
+          max-width: 420px;
           width: 100%;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          color: white;
+          animation: floatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transform: translateY(20px);
+          opacity: 0;
         }
+
+        @keyframes floatIn {
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
         .auth-header { text-align: center; margin-bottom: 2rem; }
-        .auth-header h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #1a1a1a; }
-        .auth-header p { color: #6b7280; }
+        .auth-header h1 { 
+          font-size: 2.2rem; 
+          margin-bottom: 0.5rem; 
+          color: #ffffff;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+        }
+        .auth-header p { color: #cbd5e1; font-size: 1.1rem; }
+        
+        .form-title { 
+          margin-bottom: 1.5rem; 
+          text-align: center; 
+          color: #e2e8f0; 
+          font-weight: 600;
+        }
+
         .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151; }
-        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1e40af; }
+        .form-group label { 
+          display: block; 
+          margin-bottom: 0.5rem; 
+          font-weight: 500; 
+          color: #e2e8f0; 
+          font-size: 0.95rem;
+        }
+        .form-group input, .form-group select { 
+          width: 100%; 
+          padding: 0.85rem 1rem; 
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2); 
+          color: white;
+          border-radius: 10px; 
+          font-size: 1rem; 
+          transition: all 0.3s ease;
+        }
+        .form-group input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .form-group input:focus, .form-group select:focus { 
+          outline: none; 
+          border-color: #60a5fa; 
+          background: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2); 
+        }
+        .form-group select option { background: #1e293b; color: white; }
+
+        .btn { 
+          padding: 0.85rem 1.5rem; 
+          border: none; 
+          border-radius: 10px; 
+          font-size: 1rem; 
+          font-weight: 600; 
+          letter-spacing: 0.5px;
+          cursor: pointer; 
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .btn-primary { 
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+          color: white; 
+          box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+        .btn-primary:hover { 
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+        .btn-primary:active { transform: translateY(0); }
         .btn-block { width: 100%; }
-        .auth-footer { margin-top: 2rem; text-align: center; color: #6b7280; font-size: 0.875rem; }
-        .auth-link { margin-top: 1rem; text-align: center; font-size: 0.9rem; }
-        .auth-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
-        .form-title { margin-bottom: 1rem; text-align: center; color: var(--text-secondary); }
+        
+        .auth-footer { 
+          margin-top: 2rem; 
+          text-align: center; 
+          color: rgba(255, 255, 255, 0.6); 
+          font-size: 0.85rem; 
+        }
+        .auth-link { margin-top: 1.5rem; text-align: center; font-size: 0.95rem; color: #cbd5e1; }
+        .auth-link a { 
+          color: #60a5fa; 
+          text-decoration: none; 
+          font-weight: 600; 
+          margin-left: 0.5rem;
+          transition: color 0.2s;
+        }
+        .auth-link a:hover { color: #93c5fd; }
       </style>
     `;
   }
