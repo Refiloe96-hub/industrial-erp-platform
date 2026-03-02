@@ -252,7 +252,7 @@ class SmartShift {
   }
 
   // Complete shift
-  async completeShift(shiftId, output) {
+  async completeShift(shiftId, output, params = {}) {
     const shift = await db.get(STORES.shifts, shiftId);
 
     if (!shift) {
@@ -263,6 +263,10 @@ class SmartShift {
     shift.actualEndTime = Date.now();
     shift.actualHours = (shift.actualEndTime - shift.actualStartTime) / (1000 * 60 * 60);
     shift.output = output;
+
+    // Traceability: Log raw material batches used
+    shift.consumedBatches = params.consumedBatches || [];
+
     await db.update(STORES.shifts, shift);
 
     // Update production order progress
@@ -314,40 +318,91 @@ class SmartShift {
     return shift;
   }
 
+  // The Moat: Deep Traceability & QC Genealogy
+  // Fetch full manufacturing history for an order to assist with QC audits
+  async traceProduct(orderId) {
+    const order = await db.get(STORES.productionOrders, orderId);
+    if (!order) throw new Error('Order not found');
+
+    const allShifts = await db.getAll(STORES.shifts);
+    const orderShifts = allShifts.filter(s => s.orderId === orderId && s.status === 'completed');
+
+    const [machines, workers] = await Promise.all([
+      db.getAll(STORES.machines),
+      db.getAll(STORES.workers)
+    ]);
+
+    const genealogyTree = {
+      orderNumber: order.orderNumber,
+      product: order.product,
+      quantityProduced: orderShifts.reduce((sum, s) => sum + (s.output || 0), 0),
+      totalLaborHours: orderShifts.reduce((sum, s) => sum + (s.actualHours || 0), 0),
+      shifts: orderShifts.map(s => {
+        const machine = machines.find(m => m.id === s.machineId);
+        const worker = workers.find(w => w.id === s.workerId);
+        return {
+          shiftId: s.id,
+          date: new Date(s.actualStartTime).toLocaleString(),
+          durationHours: s.actualHours.toFixed(2),
+          machineEmployed: machine ? machine.name : 'Unknown',
+          workerEmployed: worker ? worker.name : 'Unknown',
+          outputGenerated: s.output,
+          rawMaterialBatches: s.consumedBatches || [] // Critical Traceability point
+        };
+      })
+    };
+
+    return genealogyTree;
+  }
+
   // Integration: Check materials
   async checkMaterials(product, quantity) {
     try {
       const inventory = await db.getAll(STORES.inventory);
-      // Find raw materials or parts
-      const material = inventory.find(i =>
-        (i.category === 'Raw Materials' || i.category === 'Parts') &&
-        i.quantity >= quantity
-      );
-      return !!material;
+
+      // Simple mapped BOM mapping (mocked for demo)
+      const bom = {
+        'Steel Pipes': [{ rawCode: 'RM-STEEL', qtyPerUnit: 2.5 }],
+        'Widget A': [{ rawCode: 'RM-PLASTIC', qtyPerUnit: 0.5 }, { rawCode: 'RM-SCREWS', qtyPerUnit: 4 }],
+      };
+
+      const required = bom[product];
+      if (!required) return true; // No BOM defined, assume ok
+
+      for (const req of required) {
+        // We use string match since sku/names might vary in demo data
+        const item = inventory.find(i => i.sku === req.rawCode || i.name.toLowerCase().includes(req.rawCode.toLowerCase().replace('rm-', '')));
+        if (!item || item.quantity < (req.qtyPerUnit * quantity)) {
+          return false;
+        }
+      }
+      return true;
     } catch (e) {
-      return true; // Fail open if inventory generic check fails
+      return true;
     }
   }
 
-  // Integration: Deduct materials
-  async deductMaterials(product, quantity) {
+  // Integration: Deduct consumed materials
+  async deductMaterials(product, quantityProduced) {
     try {
       const inventory = await db.getAll(STORES.inventory);
-      // Find first available raw material to consume
-      // In real app, this would use BOM
-      const material = inventory.find(i =>
-        (i.category === 'Raw Materials' || i.category === 'Parts') &&
-        i.quantity > 0
-      );
+      const bom = {
+        'Steel Pipes': [{ rawCode: 'RM-STEEL', qtyPerUnit: 2.5 }],
+        'Widget A': [{ rawCode: 'RM-PLASTIC', qtyPerUnit: 0.5 }, { rawCode: 'RM-SCREWS', qtyPerUnit: 4 }],
+      };
 
-      if (material) {
-        const consumed = quantity;
-        material.quantity = Math.max(0, material.quantity - consumed);
-        await db.update(STORES.inventory, material);
-        console.log(`📉 Integrated: Consumed ${consumed} of ${material.name}`); // Log for demo
+      const required = bom[product];
+      if (!required) return;
+
+      for (const req of required) {
+        const item = inventory.find(i => i.sku === req.rawCode || i.name.toLowerCase().includes(req.rawCode.toLowerCase().replace('rm-', '')));
+        if (item) {
+          item.quantity = Math.max(0, item.quantity - (req.qtyPerUnit * quantityProduced));
+          await db.update(STORES.inventory, item);
+        }
       }
-    } catch (err) {
-      console.warn('Inventory deduction failed:', err);
+    } catch (e) {
+      console.error("Failed to deduct materials", e);
     }
   }
 

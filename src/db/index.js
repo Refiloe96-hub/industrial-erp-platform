@@ -358,11 +358,34 @@ class DatabaseManager {
     const tx = this.db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
 
+    // The Moat: CRDT Base State Tracking
+    const existing = await this.get(storeName, data.id || data.sku || data.key || data.username);
+
     const dataWithMeta = {
       ...data,
       synced: false,
       localTimestamp: Date.now()
     };
+
+    // If making an offline mutation to a synced record, save the original state to calculate Deltas
+    if (existing) {
+      // Inventory Quantity
+      if (storeName === STORES.inventory && dataWithMeta.quantity !== undefined && existing.synced) {
+        dataWithMeta._offlineOriginalQuantity = existing.quantity;
+      }
+      // Account/Wallet Balances
+      if ((storeName === STORES.accounts || storeName === STORES.wallets) && dataWithMeta.balance !== undefined && existing.synced) {
+        dataWithMeta._offlineOriginalBalance = existing.balance;
+      }
+
+      // Preserve original state if making subsequent offline edits before a sync
+      if (existing._offlineOriginalQuantity !== undefined && !existing.synced) {
+        dataWithMeta._offlineOriginalQuantity = existing._offlineOriginalQuantity;
+      }
+      if (existing._offlineOriginalBalance !== undefined && !existing.synced) {
+        dataWithMeta._offlineOriginalBalance = existing._offlineOriginalBalance;
+      }
+    }
 
     const result = await this._promisify(store.put(dataWithMeta));
 

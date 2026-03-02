@@ -349,15 +349,40 @@ class TrustCircle {
     groupBuy.participants.push(participant);
     groupBuy.totalQuantity += data.quantity;
 
-    // Check if min quantity reached
+    // The Moat: Financial Escrow Logic
     if (groupBuy.totalQuantity >= groupBuy.minQuantity && groupBuy.status === 'open') {
-      groupBuy.status = 'committed';
+      groupBuy.status = 'funds_secured';
       groupBuy.committedAt = Date.now();
+      await this.lockEscrow(groupBuy); // Initiate programmatic lock
     }
 
     await db.update(STORES.groupBuys, groupBuy);
     console.log('✅ Joined group buy:', groupBuyId);
 
+    return groupBuy;
+  }
+
+  // The Moat: Escrow Simulation
+  async lockEscrow(groupBuy) {
+    console.log(`🔒 ESCROW LOCKED: Funds secured for Group Buy ${groupBuy.id}. Holding R${groupBuy.totalQuantity * groupBuy.bulkPrice}`);
+    // In a real system, this calls a Mobile Money API to lock funds.
+  }
+
+  // The Moat: Escrow Release
+  async releaseEscrow(groupBuyId) {
+    const groupBuy = await db.get(STORES.groupBuys, groupBuyId);
+    if (!groupBuy || groupBuy.status !== 'funds_secured') {
+      throw new Error('Group Buy is not in a releasable escrow state');
+    }
+
+    groupBuy.status = 'delivered';
+    groupBuy.deliveredAt = Date.now();
+    await db.update(STORES.groupBuys, groupBuy);
+
+    console.log(`🔓 ESCROW RELEASED: Transferred R${groupBuy.totalQuantity * groupBuy.bulkPrice} to Supplier ${groupBuy.supplier}`);
+
+    // Auto-update pool stock inventory for participants locally
+    // (Simulating the goods arriving)
     return groupBuy;
   }
 

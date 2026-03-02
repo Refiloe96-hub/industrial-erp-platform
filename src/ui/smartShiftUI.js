@@ -2,11 +2,13 @@
 import SmartShift from '../modules/SmartShift.js';
 import db from '../db/index.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
+import IoTService from '../services/iotService.js';
 
 class SmartShiftUI {
   constructor(container, aiEngine, pocketBooks) {
     this.container = container;
     this.module = new SmartShift(aiEngine, pocketBooks);
+    this.iotService = new IoTService(this.module);
     this.currentView = 'dashboard';
   }
 
@@ -408,6 +410,10 @@ class SmartShiftUI {
               <div class="fill" style="width: ${m.utilization}%"></div>
             </div>
             <p><small>${m.utilization}% Utilization</small></p>
+            <div class="iot-controls" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+              <button class="btn btn-sm btn-outline-success sim-start-btn" data-id="${m.id}" title="Simulate Sensor ON"><i class="ph ph-power"></i> Sensor ON</button>
+              <button class="btn btn-sm btn-outline-danger sim-stop-btn" data-id="${m.id}" title="Simulate Sensor OFF"><i class="ph ph-power"></i> Sensor OFF</button>
+            </div>
           </div>
         `).join('')}
       </div>
@@ -432,6 +438,33 @@ class SmartShiftUI {
     const openBtn = container.querySelector('#add-machine-btn');
     const cancelBtn = modal.querySelector('.cancel-btn');
     const saveBtn = modal.querySelector('.save-btn');
+
+    // IoT Simulator bindings
+    container.querySelectorAll('.sim-start-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const btnEl = e.currentTarget;
+        const originalHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+        const sensor = this.iotService.attachSimulatedSensor(btnEl.dataset.id);
+        await sensor.triggerOn();
+        btnEl.innerHTML = originalHtml;
+        await this.loadView('machines');
+      });
+    });
+
+    container.querySelectorAll('.sim-stop-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const btnEl = e.currentTarget;
+        const originalHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+        const sensor = this.iotService.attachSimulatedSensor(btnEl.dataset.id);
+        // Prompt for simulated output to pass down into the system
+        const produced = prompt('Simulated completion: Enter units produced', '100');
+        await sensor.triggerOff(produced ? parseInt(produced, 10) : 0);
+        btnEl.innerHTML = originalHtml;
+        await this.loadView('machines');
+      });
+    });
 
     openBtn.addEventListener('click', () => modal.showModal());
     cancelBtn.addEventListener('click', () => modal.close());
