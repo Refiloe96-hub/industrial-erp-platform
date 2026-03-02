@@ -789,17 +789,6 @@ class IndustrialERPApp {
   renderDashboardContent(bottomNavItems) {
     return `
       <div class="dashboard-grid">
-        <!-- AI Supervisor Alert -->
-        <div class="card ai-alert">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-robot"></i> AI Supervisor</h3>
-          </div>
-          <div class="card-body">
-            <p class="alert-text">System is analyzing your operations...</p>
-            <button class="btn btn-primary btn-sm">View Insights</button>
-          </div>
-        </div>
-        
         <!-- Quick Stats: 2-column sub-grid on mobile -->
         <div class="dashboard-stats-row">
           <div class="card stat-card" data-card="cashflow" style="cursor:pointer" title="Click for details">
@@ -2503,8 +2492,15 @@ class IndustrialERPApp {
     console.log('🔄 updateDashboardStats: Starting...');
 
     try {
-      if (!this.pocketBooks) console.warn('⚠️ this.pocketBooks is missing');
-      if (!this.poolStock) console.warn('⚠️ this.poolStock is missing');
+      // Lazy-load missing dependencies (happens if user just logged in without page refresh)
+      if (!this.pocketBooks) {
+        const { default: PocketBooks } = await import('./modules/pocketBooks.js');
+        this.pocketBooks = new PocketBooks();
+      }
+      if (!this.poolStock) {
+        const { default: PoolStock } = await import('./modules/poolStock.js');
+        this.poolStock = new PoolStock(db);
+      }
       if (!db) console.error('❌ DB is missing');
 
       // 1. Cash Flow
