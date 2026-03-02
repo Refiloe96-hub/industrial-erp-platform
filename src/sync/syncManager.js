@@ -299,6 +299,11 @@ class SyncManager {
     try {
       const tableName = this.storeToTable(item.store);
 
+      // We do not sync local browser settings to Supabase
+      if (item.store === STORES.settings || tableName === 'settings') {
+        return { success: true, timestamp: Date.now() }; // bypass safely
+      }
+
       if (item.action === 'create' || item.action === 'update') {
         // --- OFFLINE CONFLICT RESOLUTION (Phase 13) ---
         // Before blindly overwriting the server, fetch the row to see if it changed while we were offline
@@ -309,6 +314,18 @@ class SyncManager {
           .single();
 
         let finalData = { ...item.data };
+
+        // Handle user -> profile column mapping (camelCase to snake_case)
+        if (tableName === 'profiles') {
+          if (finalData.businessName) finalData.business_name = finalData.businessName;
+          if (finalData.businessType) finalData.business_type = finalData.businessType;
+          if (finalData.ownerName) finalData.owner_name = finalData.ownerName;
+
+          delete finalData.businessName;
+          delete finalData.businessType;
+          delete finalData.ownerName;
+          delete finalData.password; // Never sync local password hash back to Supabase auth/profiles
+        }
 
         if (serverRecord && serverRecord.local_timestamp > item.data.local_timestamp) {
           console.log(`⚠️ Conflict Detected on ${tableName}! Server is newer than local offline edit.`);
