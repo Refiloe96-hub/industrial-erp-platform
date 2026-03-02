@@ -320,10 +320,13 @@ class SyncManager {
           if (finalData.businessName) finalData.business_name = finalData.businessName;
           if (finalData.businessType) finalData.business_type = finalData.businessType;
           if (finalData.ownerName) finalData.owner_name = finalData.ownerName;
+          if (finalData.createdAt) finalData.created_at = new Date(finalData.createdAt).toISOString();
 
           delete finalData.businessName;
           delete finalData.businessType;
           delete finalData.ownerName;
+          delete finalData.createdAt;
+          delete finalData.passkeyId; // Passkeys are for local device IDB only
           delete finalData.password; // Never sync local password hash back to Supabase auth/profiles
         }
 
