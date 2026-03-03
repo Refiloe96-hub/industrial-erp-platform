@@ -323,13 +323,60 @@ class IndustrialERPApp {
   }
 
   async checkAuth() {
-    // Check for stored session
+    // 1. Process Supabase OAuth Redirects (Listen for auth changes)
+    if (isSupabaseEnabled()) {
+      supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const email = session.user.email;
+          const supabaseId = session.user.id;
+
+          // Rebuild or fetch user profile
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', supabaseId)
+            .maybeSingle();
+
+          const rebuiltUser = {
+            username: profile?.username || email.split('@')[0],
+            email: email,
+            businessName: profile?.business_name || 'My Business',
+            businessType: profile?.business_type || 'shopowner',
+            ownerName: profile?.owner_name || session.user.user_metadata?.full_name || '',
+            phone: profile?.phone || '',
+            supabaseId: supabaseId,
+            role: profile?.role || 'admin',
+            lastLogin: Date.now(),
+            createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+          };
+
+          // Save locally
+          try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
+          await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
+
+          this.currentUser = rebuiltUser;
+          localStorage.setItem('erp_session', JSON.stringify(rebuiltUser));
+
+          // Force UI refresh, remove hash fragments from URL (cleanup)
+          window.history.replaceState({}, document.title, window.location.pathname);
+          this.render();
+          initSync(); // Start background sync
+          console.log('✅ OAuth user authenticated via Supabase');
+        } else if (event === 'SIGNED_OUT') {
+          this.currentUser = null;
+          localStorage.removeItem('erp_session');
+          this.render();
+        }
+      });
+    }
+
+    // 2. Check for stored local session
     const session = localStorage.getItem('erp_session');
 
     if (session) {
       try {
         this.currentUser = JSON.parse(session);
-        console.log('✅ User authenticated:', this.currentUser.businessName);
+        console.log('✅ User authenticated locally:', this.currentUser.businessName);
       } catch (error) {
         console.error('Invalid session:', error);
         localStorage.removeItem('erp_session');
