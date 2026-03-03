@@ -362,13 +362,13 @@ class IndustrialERPApp {
           </div>
           
           <div id="auth-social-buttons">
-             <button class="btn btn-social" type="button">
+             <button class="btn btn-social" type="button" id="btn-google">
                 <i class="ph-fill ph-google-logo" style="color: #ea4335;"></i> Continue with Google
              </button>
-             <button class="btn btn-social" type="button">
+             <button class="btn btn-social" type="button" id="btn-apple">
                 <i class="ph-fill ph-apple-logo" style="color: #ffffff;"></i> Continue with Apple
              </button>
-             <button class="btn btn-social" type="button">
+             <button class="btn btn-social" type="button" id="btn-phone">
                 <i class="ph-duotone ph-phone"></i> Continue with phone
              </button>
           </div>
@@ -628,6 +628,41 @@ class IndustrialERPApp {
 
     let currentAction = 'login'; // 'login' or 'register'
     let localUser = null;
+
+    // --- Social & OAuth Login Handlers ---
+    document.getElementById('btn-google')?.addEventListener('click', async () => {
+      if (!isSupabaseEnabled()) return alert('Google login requires cloud sync to be enabled.');
+      try {
+        const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+        if (error) throw error;
+      } catch (err) { alert('Google login failed: ' + err.message); }
+    });
+
+    document.getElementById('btn-apple')?.addEventListener('click', async () => {
+      if (!isSupabaseEnabled()) return alert('Apple login requires cloud sync to be enabled.');
+      try {
+        const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin } });
+        if (error) throw error;
+      } catch (err) { alert('Apple login failed: ' + err.message); }
+    });
+
+    document.getElementById('btn-phone')?.addEventListener('click', async () => {
+      if (!isSupabaseEnabled()) return alert('Phone login requires cloud sync to be enabled.');
+      const phone = prompt("Enter your phone number (e.g. +1234567890):");
+      if (!phone) return;
+      try {
+        const { error } = await supabaseClient.auth.signInWithOtp({ phone });
+        if (error) throw error;
+
+        const token = prompt("Enter the 6-digit code sent to " + phone + ":");
+        if (!token) return;
+
+        const { error: verifyError } = await supabaseClient.auth.verifyOtp({ phone, token, type: 'sms' });
+        if (verifyError) throw verifyError;
+        // The onAuthStateChange listener should pick up the session now.
+      } catch (err) { alert('Phone verification failed: ' + err.message); }
+    });
+    // -------------------------------------
 
     // Helper: Hash Password
     const hashPassword = async (password) => {
