@@ -591,9 +591,10 @@ class SalesUI {
           <div class="inv-row inv-grand"><span>Total</span><span>R ${(sale.total || 0).toFixed(2)}</span></div>
         </div>
         </div>
-        <div class="invoice-actions">
-          <button id="print-invoice-btn" class="btn btn-secondary"><i class="ph ph-printer"></i> Print Receipt</button>
-          <button id="wa-invoice-btn" class="btn" style="background:var(--success, #10b981); color:white; border:none"><i class="ph ph-whatsapp-logo"></i> Send via WhatsApp</button>
+        <div class="invoice-actions" style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+          <button id="print-invoice-btn" class="btn btn-secondary"><i class="ph ph-printer"></i> Print</button>
+          <button id="wa-invoice-btn" class="btn" style="background:#10b981; color:white; border:none"><i class="ph ph-whatsapp-logo"></i> WhatsApp</button>
+          <button id="coc-invoice-btn" class="btn btn-secondary" title="Enterprise QA: Generate Certificate of Conformance"><i class="ph ph-file-pdf"></i> QA CoC</button>
           <button id="close-invoice-btn" class="btn btn-primary">New Sale</button>
         </div>
       </div>
@@ -610,6 +611,42 @@ class SalesUI {
 
       const encodedText = encodeURIComponent(waText);
       window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+    });
+
+    modal.querySelector('#coc-invoice-btn').addEventListener('click', async (e) => {
+      try {
+        const btnHtml = e.currentTarget.innerHTML;
+        e.currentTarget.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+
+        // Dynamically load SmartShift to avoid circular deps if needed
+        const { default: SmartShift } = await import('../modules/SmartShift.js');
+        const smartShiftInstance = new SmartShift(null, null);
+
+        // Find if any item in the sale has a traceable production order
+        // In a real system, products would link to their specific production batch IDs.
+        // For the demo moat, we just look up any completed production order that matches the sold product name.
+        const orders = await smartShiftInstance.getProductionOrders({ status: 'completed' });
+
+        let foundOrderId = null;
+        for (const line of sale.items) {
+          const match = orders.find(o => o.product === line.name);
+          if (match) {
+            foundOrderId = match.id;
+            break;
+          }
+        }
+
+        if (foundOrderId) {
+          await smartShiftInstance.generateCoC(foundOrderId);
+        } else {
+          alert('Enterprise QA: No traceable manufacturing genealogy found for the items in this invoice.');
+        }
+        e.currentTarget.innerHTML = btnHtml;
+      } catch (err) {
+        console.error('CoC Generation failed:', err);
+        alert('Failed to generate Certificate of Conformance.');
+        e.currentTarget.innerHTML = '<i class="ph ph-file-pdf"></i> QA CoC';
+      }
     });
 
     modal.querySelector('#print-invoice-btn').addEventListener('click', async () => {

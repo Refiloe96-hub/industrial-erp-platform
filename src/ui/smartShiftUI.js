@@ -522,10 +522,10 @@ class SmartShiftUI {
               <th>Due Date</th>
               <th>Status</th>
               <th>Progress</th>
+              <th>Document</th>
             </tr>
           </thead>
           <tbody>
-            ${orders.map(o => `
               <tr>
                 <td>${o.orderNumber}</td>
                 <td>${o.product}</td>
@@ -533,23 +533,29 @@ class SmartShiftUI {
                 <td>${new Date(o.dueDate).toLocaleDateString()}</td>
                 <td><span class="badge ${o.status}">${o.status}</span></td>
                 <td>${Math.round(o.progress)}%</td>
+                <td>
+                  ${o.status === 'completed'
+        ? `<button class="btn-sm btn-outline-primary generate-coc-btn" data-id="${o.id}"><i class="ph ph-file-pdf"></i> CoC</button>`
+        : '-'}
+                </td>
               </tr>
-            `).join('')}
+            `).join('')
+  }
           </tbody>
-        </table>
-      </div>
-      
-      <dialog id="add-order-modal">
-         <form method="dialog">
-          <h3>New Production Order</h3>
-          <input type="text" name="product" placeholder="Product Name" required />
-          <input type="number" name="quantity" placeholder="Quantity" required />
-          <input type="date" name="dueDate" required />
-          <button value="cancel">Cancel</button>
-          <button value="save" class="btn btn-primary">Create</button>
-        </form>
-      </dialog>
-    `;
+        </table >
+      </div >
+
+  <dialog id="add-order-modal">
+    <form method="dialog">
+      <h3>New Production Order</h3>
+      <input type="text" name="product" placeholder="Product Name" required />
+      <input type="number" name="quantity" placeholder="Quantity" required />
+      <input type="date" name="dueDate" required />
+      <button value="cancel">Cancel</button>
+      <button value="save" class="btn btn-primary">Create</button>
+    </form>
+  </dialog>
+`;
 
     container.querySelector('#add-order-btn').addEventListener('click', () => {
       const modal = container.querySelector('#add-order-modal');
@@ -576,6 +582,21 @@ class SmartShiftUI {
         }
       }, { once: true });
     });
+
+    container.querySelectorAll('.generate-coc-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = Number(e.currentTarget.dataset.id);
+        const btnHtml = e.currentTarget.innerHTML;
+        try {
+          e.currentTarget.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+          await this.module.generateCoC(id);
+        } catch (err) {
+          alert('Failed to generate Certificate of Conformance.');
+        } finally {
+          e.currentTarget.innerHTML = btnHtml;
+        }
+      });
+    });
   }
   async renderShifts(container) {
     const shifts = await this.module.getShifts();
@@ -583,13 +604,13 @@ class SmartShiftUI {
     const workers = await this.module.getWorkers();
 
     container.innerHTML = `
-      <div class="action-bar">
+  < div class="action-bar" >
         <h2>Shift Schedule</h2>
         <div style="display: flex; gap: 0.5rem;">
           <button id="optimize-btn" class="btn btn-secondary"><i class="ph-duotone ph-magic-wand"></i> Optimize Schedule</button>
           <button id="add-shift-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Schedule Shift</button>
         </div>
-      </div>
+      </div >
       
       <div class="table-container">
         <table class="data-table">
@@ -651,7 +672,7 @@ class SmartShiftUI {
           </div>
         </form>
       </dialog>
-    `;
+`;
 
     // Add Shift Handler
     // Optimize Handler
@@ -667,9 +688,9 @@ class SmartShiftUI {
           alert('No optimization possible. ' + (result?.insights?.message || 'Check orders/resources.'));
         } else {
           const confirmed = confirm(
-            `AI generated ${result.schedule.length} shifts.\n` +
-            `Blocked orders: ${result.insights.blocked}\n\n` +
-            `Apply this schedule?`
+            `AI generated ${ result.schedule.length } shifts.\n` +
+            `Blocked orders: ${ result.insights.blocked } \n\n` +
+            `Apply this schedule ? `
           );
 
           if (confirmed) {
@@ -724,7 +745,7 @@ class SmartShiftUI {
         e.target.disabled = true;
 
         try {
-          const startTime = new Date(`${date}T${time}`).getTime();
+          const startTime = new Date(`${ date }T${ time } `).getTime();
           await this.module.createShift({
             date,
             startTime,
@@ -771,10 +792,10 @@ class SmartShiftUI {
     const workers = await this.module.getWorkers();
 
     container.innerHTML = `
-      <div class="action-bar">
+  < div class="action-bar" >
         <h2>Workers</h2>
         <button id="add-worker-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Worker</button>
-      </div>
+      </div >
       
       <div class="machine-grid">
         ${workers.map(w => `
@@ -802,7 +823,7 @@ class SmartShiftUI {
           </div>
         </form>
       </dialog>
-    `;
+`;
 
     const modal = container.querySelector('#add-worker-modal');
     const openBtn = container.querySelector('#add-worker-btn');
@@ -858,127 +879,127 @@ class SmartShiftUI {
     const style = document.createElement('style');
     style.id = 'smartshift-styles';
     style.textContent = `
-        /* Machine Card Styles */
-        .machine-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--border-color);
-            transition: transform 0.2s, border-color 0.2s;
-        }
+  /* Machine Card Styles */
+  .machine - card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop - filter: blur(16px);
+  -webkit - backdrop - filter: blur(16px);
+  border - radius: var(--radius - lg);
+  padding: 1.5rem;
+  box - shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border - color);
+  border - left: 4px solid var(--border - color);
+  transition: transform 0.2s, border - color 0.2s;
+}
 
-        .machine-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent-primary);
-        }
+        .machine - card:hover {
+  transform: translateY(-2px);
+  border - color: var(--accent - primary);
+}
 
-        .machine-card.operational { border-left-color: #10a37f; }
-        .machine-card.maintenance { border-left-color: #f59e0b; }
-        .machine-card.offline { border-left-color: #ef4444; }
+        .machine - card.operational { border - left - color: #10a37f; }
+        .machine - card.maintenance { border - left - color: #f59e0b; }
+        .machine - card.offline { border - left - color: #ef4444; }
 
-        .machine-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
+        .machine - header {
+  display: flex;
+  justify - content: space - between;
+  align - items: center;
+  margin - bottom: 0.5rem;
+}
 
-        .progress-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
+        .progress - bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border - radius: 3px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
 
-        .progress-bar .fill {
-            height: 100%;
-            background: var(--accent-primary);
-        }
+        .progress - bar.fill {
+  height: 100 %;
+  background: var(--accent - primary);
+}
 
         /* Insight List */
-        .insight-list {
-            list-style: none;
-            padding: 0;
-        }
+        .insight - list {
+  list - style: none;
+  padding: 0;
+}
 
-        .insight-item {
-            padding: 1rem;
-            border-bottom: 1px dashed var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
+        .insight - item {
+  padding: 1rem;
+  border - bottom: 1px dashed var(--border - color);
+  display: flex;
+  flex - direction: column;
+  gap: 0.25rem;
+}
 
-        .insight-item:last-child {
-            border-bottom: none;
-        }
+        .insight - item: last - child {
+  border - bottom: none;
+}
 
-        .insight-item.warning { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-        .insight-item.efficiency { border-left: 3px solid #10a37f; background: rgba(16, 163, 127, 0.05); }
+        .insight - item.warning { border - left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+        .insight - item.efficiency { border - left: 3px solid #10a37f; background: rgba(16, 163, 127, 0.05); }
 
         /* Dialogs */
         dialog {
-            background: var(--bg-primary);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: var(--shadow-lg);
-        }
+  background: var(--bg - primary);
+  backdrop - filter: blur(16px);
+  -webkit - backdrop - filter: blur(16px);
+  color: var(--text - primary);
+  border: 1px solid var(--border - color);
+  border - radius: var(--radius - lg);
+  padding: 2.5rem;
+  max - width: 500px;
+  width: 90 %;
+  box - shadow: var(--shadow - lg);
+}
 
-        dialog::backdrop {
-            background: rgba(0, 0, 0, 0.7);
-        }
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
 
         dialog input, dialog select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            margin-bottom: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-        }
+  width: 100 %;
+  padding: 0.75rem;
+  border: 1px solid var(--border - color);
+  border - radius: var(--radius - md);
+  margin - bottom: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text - primary);
+}
 
         dialog h3 {
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-        }
+  margin - top: 0;
+  margin - bottom: 1.5rem;
+  font - size: 1.5rem;
+}
 
         /* Tables */
-        .smart-shift-layout table {
-            background: transparent !important;
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .smart - shift - layout table {
+  background: transparent!important;
+  width: 100 %;
+  border - collapse: collapse;
+}
 
-        .smart-shift-layout tr {
-            background: transparent;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border-color);
-        }
+        .smart - shift - layout tr {
+  background: transparent;
+  color: var(--text - primary);
+  border - bottom: 1px solid var(--border - color);
+}
 
-        .smart-shift-layout tr:hover {
-            background: rgba(255, 255, 255, 0.02) !important;
-        }
+        .smart - shift - layout tr:hover {
+  background: rgba(255, 255, 255, 0.02)!important;
+}
 
-        .smart-shift-layout td, 
-        .smart-shift-layout th {
-            padding: 1rem;
-            text-align: left;
-            border-color: var(--border-color);
-        }
-    `;
+        .smart - shift - layout td, 
+        .smart - shift - layout th {
+  padding: 1rem;
+  text - align: left;
+  border - color: var(--border - color);
+}
+`;
     document.head.appendChild(style);
   }
 }

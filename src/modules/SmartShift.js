@@ -355,6 +355,138 @@ class SmartShift {
     return genealogyTree;
   }
 
+  // The Moat: Document Generation
+  // Generates a verifiable Certificate of Conformance (CoC)
+  async generateCoC(orderId) {
+    try {
+      const genealogy = await this.traceProduct(orderId);
+      const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
+      const businessName = currentUser.businessName || 'Industrial ERP Co.';
+
+      const printWindow = window.open('', '_blank');
+
+      const shiftsHtml = genealogy.shifts.map(s => `
+        <div class="shift-block">
+          <strong>Process Date:</strong> ${s.date} <br>
+          <strong>Machine:</strong> ${s.machineEmployed} <br>
+          <strong>Operator:</strong> ${s.workerEmployed} <br>
+          <strong>Hours Logged:</strong> ${s.durationHours} hrs <br>
+          <strong>Yield:</strong> ${s.outputGenerated} units <br>
+          <strong>Traceable Materials Consumed:</strong>
+          <ul>
+            ${s.rawMaterialBatches.length > 0
+          ? s.rawMaterialBatches.map(b => `<li><code>${b}</code></li>`).join('')
+          : '<li><em>No raw material batches explicitly logged.</em></li>'}
+          </ul>
+        </div>
+      `).join('');
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Certificate of Conformance - ${genealogy.orderNumber}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #111; max-width: 800px; margin: auto; line-height: 1.6; }
+            .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo-placeholder { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+            .cert-title { text-align: right; }
+            .cert-title h1 { margin: 0; font-size: 28px; text-transform: uppercase; color: #000; }
+            .cert-title p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+            h2 { font-size: 18px; text-transform: uppercase; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 30px; }
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+            .data-box { background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; }
+            .data-box label { display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+            .data-box val { display: block; font-size: 16px; font-weight: 500; color: #0f172a; }
+            .shift-block { border-left: 3px solid #000; padding-left: 15px; margin-bottom: 20px; background: #fafafa; padding: 15px 15px 15px 20px; }
+            .shift-block ul { margin-top: 8px; margin-bottom: 0; padding-left: 20px; }
+            .shift-block code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+            
+            /* The Mock 2D Barcode (CSS Representation) */
+            .compliance-footer { margin-top: 60px; padding-top: 20px; border-top: 2px solid #000; display: flex; justify-content: space-between; align-items: flex-end; }
+            .qr-mock { width: 80px; height: 80px; background: 
+              linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+              linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000); 
+              background-size: 10px 10px; background-position: 0 0, 5px 5px; border: 4px solid #000; border-radius: 4px; padding: 4px; box-sizing: content-box; position:relative; }
+            .qr-mock::after { content: ''; position:absolute; inset: 10px; background: #fff; z-index:1; }
+            .qr-mock::before { content: ''; position:absolute; inset: 15px; background: repeating-linear-gradient(90deg, #000, #000 4px, transparent 4px, transparent 8px); z-index:2; }
+            
+            .signature { text-align: center; }
+            .sig-line { width: 250px; border-bottom: 1px solid #000; margin-bottom: 5px; height: 40px; }
+            .sig-text { font-size: 12px; color: #666; text-transform: uppercase; }
+            
+            .print-btn-wrap { text-align: center; margin-top: 40px; }
+            .print-btn { background: #000; color: #fff; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; }
+            @media print { .print-btn-wrap { display: none !important; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo-placeholder">${businessName}</div>
+            <div class="cert-title">
+              <h1>Certificate of Conformance</h1>
+              <p>ISO/SABS Compliance Traceability Document</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="data-box">
+              <label>Production Order No.</label>
+              <val>${genealogy.orderNumber}</val>
+            </div>
+            <div class="data-box">
+              <label>Product Issued</label>
+              <val>${genealogy.product}</val>
+            </div>
+            <div class="data-box">
+              <label>Total Yield / Quantity</label>
+              <val>${genealogy.quantityProduced} units</val>
+            </div>
+            <div class="data-box">
+              <label>Date of Issue</label>
+              <val>${new Date().toLocaleDateString('en-ZA')}</val>
+            </div>
+          </div>
+
+          <h2>Statement of Compliance</h2>
+          <p style="font-size: 13px; color: #444; text-align: justify;">
+            This document certifies that the aforementioned product was manufactured, inspected, and tested in accordance 
+            with all applicable quality assurance protocols and engineering specifications governed by ${businessName}. 
+            The materials and processes used comply with standard regulatory requirements.
+          </p>
+
+          <h2>Manufacturing Genealogy</h2>
+          ${shiftsHtml || '<p style="color:#666;font-style:italic;">No recorded production shifts.</p>'}
+
+          <div class="compliance-footer">
+            <div style="display:flex; gap:15px; align-items:center;">
+              <div class="qr-mock" title="Scannable Asset Tag"></div>
+              <div style="font-size:11px; color:#666; max-width: 200px;">
+                <strong>Verifiable Asset</strong><br>
+                Scan code or reference <code>${genealogy.orderNumber.split('-')[1] || '0000'}</code> in QA portal.
+              </div>
+            </div>
+            
+            <div class="signature">
+              <div class="sig-line"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30'><path d='M10 20 Q 30 5 50 25 T 90 10' stroke='black' fill='transparent' stroke-width='2'/></svg>" height="30" style="opacity:0.6; transform:translateY(10px);"/></div>
+              <div class="sig-text">Authorized QA Manager</div>
+            </div>
+          </div>
+
+          <div class="print-btn-wrap">
+            <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      return true;
+    } catch (err) {
+      console.error('Failed to generate CoC:', err);
+      throw err;
+    }
+  }
+
   // Integration: Check materials
   async checkMaterials(product, quantity) {
     try {
