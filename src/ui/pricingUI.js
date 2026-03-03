@@ -285,7 +285,7 @@ export default class PricingUI {
         .pricing-container {
           padding: 2rem;
           color: var(--text-primary);
-          max-width: 1600px;
+          max-width: 1200px;
           margin: 0 auto;
         }
 
@@ -297,13 +297,13 @@ export default class PricingUI {
         .pricing-header h1 {
           font-size: 2.5rem;
           margin-bottom: 1rem;
-          background: linear-gradient(to right, #fff, #94a3b8);
+          background: linear-gradient(to right, #ffffff, rgba(255,255,255,0.6));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
 
         .pricing-header p {
-          color: #94a3b8;
+          color: var(--text-secondary);
           font-size: 1.1rem;
         }
 
@@ -317,36 +317,47 @@ export default class PricingUI {
         .pricing-card {
           flex: 1 1 260px;
           max-width: 350px;
-          background: var(--bg-primary);
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           border: 1px solid var(--border-color);
-          border-radius: 16px;
-          padding: 2rem;
+          border-radius: var(--radius-lg);
+          padding: 2.5rem 2rem;
           display: flex;
           flex-direction: column;
           position: relative;
-          transition: transform 0.2s, border-color 0.2s;
+          transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+          box-shadow: var(--shadow-md);
         }
 
         .pricing-card:hover {
           transform: translateY(-5px);
-          border-color: #6366f1;
+          border-color: var(--accent-primary);
         }
 
         .plan-btn {
           cursor: pointer;
+          border-radius: var(--radius-full);
+          padding: 0.75rem 1.5rem;
+          font-weight: 500;
+          transition: all 0.2s;
         }
 
         .pricing-card.highlight {
-          background: linear-gradient(145deg, #1e293b, #0f172a);
-          border: 1px solid #6366f1;
-          box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+          background: linear-gradient(145deg, rgba(99, 102, 241, 0.05), rgba(0, 0, 0, 0.2));
+          border: 1px solid var(--accent-primary);
+          box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+        }
+
+        .pricing-card.highlight:hover {
+          box-shadow: 0 0 40px rgba(99, 102, 241, 0.25);
         }
 
         .pricing-tag {
           position: absolute;
           top: -12px;
           right: 20px;
-          background: #6366f1;
+          background: var(--accent-primary);
           color: white;
           padding: 4px 12px;
           border-radius: 20px;
@@ -375,7 +386,7 @@ export default class PricingUI {
         }
 
         .period {
-          color: #94a3b8;
+          color: var(--text-secondary);
           margin-left: 0.5rem;
           font-size: 0.9rem;
         }
@@ -403,25 +414,41 @@ export default class PricingUI {
         }
 
         .check {
-          color: #6366f1;
+          color: var(--accent-primary);
         }
 
         .btn-white {
-          background: white;
-          color: black;
+          background: rgba(255, 255, 255, 0.9);
+          color: #000;
+          border: none;
         }
 
         .btn-white:hover {
-          background: #f1f5f9;
+          background: #ffffff;
+          transform: translateY(-1px);
+        }
+
+        .btn-primary {
+          background: var(--accent-primary);
+          color: #fff;
+          border: none;
+        }
+
+        .btn-primary:hover {
+          background: var(--accent-hover);
+          transform: translateY(-1px);
         }
 
         .btn-secondary {
-          background: #334155;
-          color: white;
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+          backdrop-filter: blur(8px);
         }
 
         .btn-secondary:hover {
-          background: #475569;
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.3);
         }
 
         @media (max-width: 768px) {

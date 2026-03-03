@@ -177,35 +177,58 @@ class PocketWalletUI {
         style.id = 'pocketwallet-styles';
         style.textContent = `
         .wallet-card {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: var(--text-primary);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .balance-section .label { opacity: 0.8; font-size: 0.9rem; }
-        .balance-section .balance { font-size: 2.5rem; margin: 0.5rem 0; }
-        .balance-section .wallet-id { font-family: monospace; background: rgba(0,0,0,0.2); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block; }
+        .balance-section .label { color: var(--text-secondary); font-size: 0.9rem; }
+        .balance-section .balance { font-size: 2.5rem; margin: 0.5rem 0; color: var(--text-primary); }
+        .balance-section .wallet-id { font-family: monospace; background: rgba(255,255,255,0.05); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); display: inline-block; color: var(--text-secondary); border: 1px solid var(--border-color); }
 
         .actions { display: flex; gap: 1rem; }
-        .btn-light { background: white; color: #059669; border: none; }
-        .btn-outline-light { background: transparent; border: 1px solid white; color: white; }
+        .btn-light { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); backdrop-filter: blur(8px); }
+        .btn-light:hover { background: rgba(16, 185, 129, 0.2); }
+        .btn-outline-light { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); backdrop-filter: blur(8px); }
+        .btn-outline-light:hover { border-color: var(--text-primary); }
 
-        .tx-list { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .tx-item { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #f3f4f6; }
-        .tx-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 1rem; }
-        .tx-icon.credit { background: #d1fae5; color: #065f46; }
-        .tx-icon.debit { background: #fee2e2; color: #991b1b; }
+        .tx-list { background: transparent; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+        .tx-item { display: flex; align-items: center; padding: 1.25rem; border-bottom: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .tx-item:last-child { border-bottom: none; }
+        .tx-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 1.25rem; }
+        .tx-icon.credit { background: rgba(16, 185, 129, 0.1); color: #10a37f; }
+        .tx-icon.debit { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
         .tx-details { flex: 1; }
-        .tx-desc { display: block; font-weight: 500; }
-        .tx-date { font-size: 0.8rem; color: #6b7280; }
-        .tx-amount { font-weight: 600; }
-        .tx-amount.credit { color: #059669; }
-        .tx-amount.debit { color: #dc2626; }
+        .tx-desc { display: block; font-weight: 500; color: var(--text-primary); }
+        .tx-date { font-size: 0.8rem; color: var(--text-secondary); }
+        .tx-amount { font-weight: 600; font-size: 1.1rem; }
+        .tx-amount.credit { color: #10a37f; }
+        .tx-amount.debit { color: #ef4444; }
+
+        /* Dialog overrides */
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+        .form-container h2 { margin-top: 0; margin-bottom: 2rem; color: var(--text-primary); }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500; }
+        .form-group input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.05); color: var(--text-primary); margin-bottom: 1.25rem; }
+        .form-group small { color: var(--text-secondary); }
       `;
         document.head.appendChild(style);
     }

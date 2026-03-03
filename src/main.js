@@ -1957,93 +1957,194 @@ class IndustrialERPApp {
             min-height: 160px;
         }
 
-        /* ========== THEME VARIABLES ========== */
-        :root {
+        /* ========== THEME VARIABLES (OpenAI Glass) ========== */
+        :root, [data-theme="dark"], [data-theme="light"] {
             font-size: 81.25%; /* ~13px base size (80% zoom emulation) */
             
-            /* Light Theme (DeepPCB Style) */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;     /* Very Light Slate */
-            --bg-sidebar: #ffffff;       /* White Sidebar */
-            --text-primary: #0f172a;     /* Slate 900 */
-            --text-secondary: #64748b;   /* Slate 500 */
-            --border-color: #e2e8f0;     /* Slate 200 */
+            /* Global OLED Glass Theme */
+            --bg-primary: rgba(255, 255, 255, 0.03); /* Glass Cards */
+            --bg-secondary: transparent;             /* Page Bg (handled by body gradient) */
+            --bg-sidebar: rgba(20, 20, 25, 0.6);     /* Frosty Sidebar */
+            --text-primary: #ffffff;
+            --text-secondary: #c5c5d2;
+            --border-color: rgba(255, 255, 255, 0.08);
             
-            /* DeepPCB Brand Colors */
-            --accent-primary: #f97316;   /* DeepPCB Orange */
-            --accent-hover: #ea580c;     
-            --accent-success: #10b981;
+            --accent-primary: #ffffff;   /* Pure white buttons */
+            --accent-hover: #e5e5e5;     
+            --accent-success: #10a37f;
             --accent-warning: #f59e0b;
             --accent-danger: #ef4444;
             
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-md: 9999px; /* Pill inputs */
+            --radius-lg: 24px;   /* Deeply rounded cards */
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
         }
 
-        [data-theme="dark"] {
-            --bg-primary: #334155;       /* Slate 700 - Cards/Headers (Lighter) */
-            --bg-secondary: #0f172a;     /* Slate 900 - Main BG (Darkest) - WAIT User said NO BLACK */
-            /* User said: "make the dark theme to be the same theme as that on the navigation bar" */
-            /* Navbar is --bg-sidebar. Let's make bg-secondary match bg-sidebar */
-             
-            --bg-primary: #1e293b;       /* Slate 800 - Cards (Matches Sidebar) */
-            --bg-secondary: #0f172a;     /* Slate 900 - Page Background */
-            /* Re-reading request: "make the dark theme to be the same theme as that on the navigation bar" */
-            /* Sidebar is using var(--bg-sidebar). */
-            /* Currently Sidebar is #1e293b. Main content is #0f172a. User dislikes "black" on pages. */
-            /* So Main Content should be #1e293b. */
-            /* If Main Content is #1e293b, then Sidebar #1e293b. They blend. */
-            /* Then Cards need to be lighter: #334155 (Slate 700). */
-            
-            --bg-sidebar: #1e293b;       /* Slate 800 */
-            --bg-secondary: #1e293b;     /* Slate 800 - Match Sidebar */
-            --bg-primary: #334155;       /* Slate 700 - Cards */
-            
-            --text-primary: #f8fafc;     /* Slate 50 */
-            --text-secondary: #cbd5e1;   /* Slate 300 */
-            --border-color: #475569;     /* Slate 600 */
-            --accent-primary: #fb923c;   /* Lighter Orange */
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: var(--bg-primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
         }
 
-        /* ========== COMPONENT STYLES ========== */
-        
-        /* Buttons */
-        .btn {
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            padding: 0.6rem 1.2rem;
+        /* ========== LAYOUT ========== */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent; /* Let body gradient show through */
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+            z-index: 40;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.5rem;
+            margin: 0.2rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
             transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 9999px; /* Pill shaped nav items */
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: transparent;
+        }
+
+        .top-header {
+            height: 70px;
+            background: rgba(20, 20, 25, 0.4);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 30;
+        }
+
+        /* ========== COMPONENTS ========== */
+        .card {
+            background: var(--bg-primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--radius-md); /* Pill shape */
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.95rem;
         }
 
         .btn-primary {
             background: var(--accent-primary);
-            color: white;
-            border: none;
+            color: #000000; /* Dark text on white button (OpenAI style) */
         }
 
         .btn-primary:hover {
             background: var(--accent-hover);
-            transform: translateY(-1px);
         }
 
-        /* Inputs */
-        input, select, textarea {
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 0.6rem 1rem;
-            background: var(--bg-primary);
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
-            transition: border-color 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border-color);
         }
 
-        input:focus, select:focus {
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Form Elements - Pill geometry */
+        input, select, textarea {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); /* Pill */
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05); /* Ghost input */
+            color: var(--text-primary);
+        }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
-
         /* Tables (DeepPCB Style) */
         .table-container {
             background: var(--bg-primary);
@@ -2138,7 +2239,10 @@ class IndustrialERPApp {
             left: 0;
             right: 0;
             height: 56px;
-            background: var(--bg-sidebar);
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
             color: white;
             z-index: 1000;
             padding: 0 1rem;
@@ -2167,20 +2271,23 @@ class IndustrialERPApp {
             left: 0;
             right: 0;
             height: 60px;
-            background: var(--bg-sidebar);
+            background: rgba(20, 20, 25, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-color);
             z-index: 1000;
             padding: 0;
         }
 
         .bottom-nav-items {
             display: flex;
-            justify-content: space-between; /* Spread items evenly */
+            justify-content: space-around;
             align-items: center;
             height: 100%;
             list-style: none;
             margin: 0;
-            padding: 0 0.5rem; /* Add padding to prevent edge hugging */
-            overflow-x: auto; /* Prevent squishing on tiny screens */
+            padding: 0 0.5rem;
+            overflow-x: auto;
             flex-wrap: nowrap;
             gap: 0.25rem;
         }
@@ -2190,13 +2297,23 @@ class IndustrialERPApp {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #9ca3af;
+            color: var(--text-secondary);
             font-size: 0.65rem;
             cursor: pointer;
             padding: 0.5rem 0.25rem;
-            flex: 1; /* Allow items to stretch evenly */
+            flex: 1;
             text-align: center;
-            min-width: 0; /* Prevent flex blowout */
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        
+        .bottom-nav-item:hover {
+            color: var(--text-primary);
+        }
+        
+        .bottom-nav-item.active {
+            color: var(--accent-primary);
+        }
         }
 
         .bottom-nav-item.active {
@@ -2531,26 +2648,32 @@ class IndustrialERPApp {
     const style = document.createElement('style');
     style.textContent = `
       .onboarding-modal {
-        border: none; border-radius: 20px; padding: 0;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        border: 1px solid var(--border-color); 
+        border-radius: var(--radius-lg); 
+        padding: 0;
+        background: var(--bg-primary); /* Glassmorphism inherited */
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: var(--shadow-lg);
         width: 540px; max-width: 96vw; max-height: 90vh;
+        color: var(--text-primary);
       }
-      .onboarding-modal::backdrop { background: rgba(0,0,0,0.55); }
-      .ob-content { padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+      .onboarding-modal::backdrop { background: rgba(0,0,0,0.7); }
+      .ob-content { padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
       .ob-header { display: flex; justify-content: space-between; align-items: center; }
-      .ob-step-label { font-size: 0.8rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-      .ob-skip { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 0.875rem; text-decoration: underline; }
-      .ob-skip:hover { color: #374151; }
-      .ob-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
-      .ob-body { color: #4b5563; line-height: 1.7; max-height: 50vh; overflow-y: auto; }
+      .ob-step-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+      .ob-skip { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.875rem; text-decoration: underline; }
+      .ob-skip:hover { color: var(--text-primary); }
+      .ob-title { margin: 0; font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+      .ob-body { color: var(--text-secondary); line-height: 1.7; max-height: 50vh; overflow-y: auto; font-size: 1.05rem; }
       .ob-body p { margin: 0 0 0.5rem; }
       .ob-modules-list { display: flex; flex-direction: column; gap: 0.75rem; }
-      .ob-module-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: #f9fafb; border-radius: 10px; }
-      .ob-module-item p { margin: 0.15rem 0 0; font-size: 0.85rem; color: #6b7280; }
-      .ob-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #f3f4f6; }
-      .ob-dots { display: flex; gap: 0.5rem; align-items: center; }
-      .ob-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb; transition: background 0.2s; }
-      .ob-dot.active { background: #2563eb; width: 24px; border-radius: 4px; }
+      .ob-module-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+      .ob-module-item p { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--text-secondary); }
+      .ob-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+      .ob-dots { display: flex; gap: 0.5rem; }
+      .ob-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); transition: all 0.3s; }
+      .ob-dot.active { background: var(--accent-primary); width: 24px; border-radius: 9999px; }
       .ob-nav-btns { display: flex; gap: 0.75rem; }
     `;
     document.head.appendChild(style);

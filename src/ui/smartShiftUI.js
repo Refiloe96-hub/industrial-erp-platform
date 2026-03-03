@@ -860,15 +860,23 @@ class SmartShiftUI {
     style.textContent = `
         /* Machine Card Styles */
         .machine-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
             border-left: 4px solid var(--border-color);
-            transition: transform 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
         }
 
         .machine-card:hover {
             transform: translateY(-2px);
+            border-color: var(--accent-primary);
         }
 
-        .machine-card.operational { border-left-color: #10b981; }
+        .machine-card.operational { border-left-color: #10a37f; }
         .machine-card.maintenance { border-left-color: #f59e0b; }
         .machine-card.offline { border-left-color: #ef4444; }
 
@@ -881,7 +889,7 @@ class SmartShiftUI {
 
         .progress-bar {
             height: 6px;
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 3px;
             overflow: hidden;
             margin: 0.5rem 0;
@@ -889,7 +897,7 @@ class SmartShiftUI {
 
         .progress-bar .fill {
             height: 100%;
-            background: #6366f1;
+            background: var(--accent-primary);
         }
 
         /* Insight List */
@@ -900,7 +908,7 @@ class SmartShiftUI {
 
         .insight-item {
             padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px dashed var(--border-color);
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
@@ -911,36 +919,40 @@ class SmartShiftUI {
         }
 
         .insight-item.warning { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-        .insight-item.efficiency { border-left: 3px solid #10b981; background: rgba(16, 185, 129, 0.05); }
+        .insight-item.efficiency { border-left: 3px solid #10a37f; background: rgba(16, 163, 127, 0.05); }
 
         /* Dialogs */
         dialog {
             background: var(--bg-primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
             max-width: 500px;
             width: 90%;
+            box-shadow: var(--shadow-lg);
         }
 
         dialog::backdrop {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
         }
 
         dialog input, dialog select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             margin-bottom: 1rem;
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-primary);
         }
 
         dialog h3 {
             margin-top: 0;
             margin-bottom: 1.5rem;
+            font-size: 1.5rem;
         }
 
         /* Tables */
@@ -957,13 +969,14 @@ class SmartShiftUI {
         }
 
         .smart-shift-layout tr:hover {
-            background: var(--bg-secondary) !important;
+            background: rgba(255, 255, 255, 0.02) !important;
         }
 
         .smart-shift-layout td, 
         .smart-shift-layout th {
             padding: 1rem;
             text-align: left;
+            border-color: var(--border-color);
         }
     `;
     document.head.appendChild(style);

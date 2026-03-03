@@ -232,14 +232,14 @@ class SalesUI {
           <div class="dp-section">
             <div class="dp-section-title">Top Sellers (7 Days)</div>
             ${result.topItems.length ? result.topItems.map(item =>
-              dpBar(item.name, item.revenue, result.topItems[0].revenue, '#10b981', v => 'R ' + Math.round(v).toLocaleString())
-            ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
+          dpBar(item.name, item.revenue, result.topItems[0].revenue, '#10b981', v => 'R ' + Math.round(v).toLocaleString())
+        ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
           </div>
           <div class="dp-section">
             <div class="dp-section-title">Slow Movers</div>
             ${result.slowMovers.length ? result.slowMovers.map(item =>
-              dpBar(item.name, item.revenue, result.topItems[0]?.revenue || 1, '#ef4444', v => 'R ' + Math.round(v).toLocaleString())
-            ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
+          dpBar(item.name, item.revenue, result.topItems[0]?.revenue || 1, '#ef4444', v => 'R ' + Math.round(v).toLocaleString())
+        ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
           </div>
         `
       });
@@ -593,11 +593,13 @@ class SalesUI {
           margin-bottom: 1rem;
         }
         .stat-card {
-          background: var(--bg-primary);
-          border: 1px solid var(--border, #e5e7eb);
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid var(--border-color);
           padding: 1rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+          border-radius: var(--radius-lg);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
           display: flex;
           align-items: center;
         }
@@ -631,91 +633,38 @@ class SalesUI {
         }
         .cat-btn {
           padding: 0.5rem 1rem;
-          background: var(--bg-secondary, #f8fafc);
-          border: 1px solid var(--border, #e5e7eb);
-          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.05); /* Ghost base */
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md); /* Pill shape */
           white-space: nowrap;
           cursor: pointer;
           transition: all 0.2s;
           color: var(--text-secondary);
           font-size: 0.875rem;
         }
-        .cat-btn:hover { border-color: var(--accent-primary, #f97316); color: var(--accent-primary, #f97316); }
+        .cat-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(255,255,255,0.1); }
         .cat-btn.active {
-          background: var(--accent-primary, #2563eb);
-          color: white;
-          border-color: var(--accent-primary, #2563eb);
+          background: var(--accent-primary);
+          color: #000;
+          border-color: var(--accent-primary);
         }
 
-        .product-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 1rem;
-          overflow-y: auto;
-          max-height: calc(100vh - 280px);
-          padding-right: 0.5rem;
-        }
-        .product-card {
-          background: var(--bg-primary);
-          border: 1px solid var(--border, #e5e7eb);
-          border-radius: 12px;
-          padding: 1rem;
-          text-align: left;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-          cursor: pointer;
-          transition: transform 0.1s, border-color 0.15s;
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-          height: 120px;
-          position: relative;
-        }
-        .product-card:hover { border-color: var(--accent-primary, #f97316); }
-        .product-card:active { transform: scale(0.96); }
-        .prod-name { font-weight: 600; font-size: 1rem; line-height: 1.2; color: var(--text-primary); }
-        .prod-price { font-size: 1.25rem; font-weight: 700; color: var(--accent-primary, #2563eb); margin-top: auto; }
-        .prod-stock { font-size: 0.75rem; color: var(--text-secondary); }
-        .prod-stock.out-of-stock { color: #ef4444; font-weight: bold; }
-
-        .cart-card {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-          background: var(--bg-primary);
-          border: 1px solid var(--border, #e5e7eb);
-        }
-        .cart-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .cart-items { flex: 1; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1rem; }
-        .cart-item-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem 0;
-          border-bottom: 1px solid var(--border, #f3f4f6);
-        }
-        .cart-item-name { display: block; font-weight: 500; color: var(--text-primary); }
-        .cart-item-price { font-size: 0.8rem; color: var(--text-secondary); }
-        .cart-item-total { font-weight: 600; color: var(--text-primary); }
-        .btn-remove-item { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0.5rem; }
-
-        .payment-methods { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
         .payment-option {
           flex: 1;
           text-align: center;
           padding: 0.75rem;
-          border: 1px solid var(--border, #e5e7eb);
-          border-radius: 8px;
+          border: 1px solid var(--border-color);
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: var(--radius-md); /* Pill shape */
           cursor: pointer;
           font-size: 1.25rem;
           color: var(--text-secondary);
           transition: border-color 0.15s, background 0.15s;
         }
         .payment-option:has(input:checked) {
-          background: rgba(37, 99, 235, 0.08);
-          border-color: var(--accent-primary, #2563eb);
-          color: var(--accent-primary, #2563eb);
+          background: rgba(255, 255, 255, 0.1);
+          border-color: var(--accent-primary);
+          color: var(--accent-primary);
         }
 
         .cart-summary { margin-bottom: 1rem; }
@@ -733,7 +682,7 @@ class SalesUI {
           color: var(--text-primary);
           padding-top: 0.75rem;
           margin-top: 0.5rem;
-          border-top: 2px solid var(--border, #f3f4f6);
+          border-top: 1px solid var(--border-color);
         }
 
         .product-toolbar {
@@ -745,37 +694,40 @@ class SalesUI {
         .product-toolbar .category-filters { flex: 1; margin-bottom: 0; }
         .scan-btn {
           flex-shrink: 0;
-          background: var(--bg-secondary, #f8fafc);
-          border: 1px solid var(--border, #e5e7eb);
-          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.05); /* Ghost button */
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md); /* Pill shape */
           padding: 0.5rem 0.75rem;
           font-size: 1.25rem;
           cursor: pointer;
           color: var(--text-secondary);
           transition: background 0.2s;
         }
-        .scan-btn:hover { background: var(--bg-primary); border-color: var(--accent-primary, #f97316); }
+        .scan-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
 
         .customer-selector select {
-          background: var(--bg-secondary, #f8fafc);
-          border: 1px solid var(--border, #e5e7eb);
+          background: rgba(255,255,255,0.05);
+          border: 1px solid var(--border-color);
           color: var(--text-primary);
+          border-radius: var(--radius-md);
         }
 
         .invoice-modal {
-          border: none;
-          border-radius: 16px;
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
           padding: 0;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+          box-shadow: var(--shadow-lg);
           width: 420px;
           max-width: 95vw;
           background: var(--bg-primary);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           color: var(--text-primary);
         }
-        .invoice-modal::backdrop { background: rgba(0,0,0,0.5); }
-        .invoice-content { padding: 2rem; }
+        .invoice-modal::backdrop { background: rgba(0,0,0,0.7); }
+        .invoice-content { padding: 2.5rem; }
         .invoice-header { text-align: center; margin-bottom: 1.5rem; }
-        .invoice-header h2 { margin: 0 0 0.25rem; font-size: 1.5rem; color: var(--text-primary); }
+        .invoice-header h2 { margin: 0 0 0.25rem; font-size: 1.75rem; color: var(--text-primary); }
         .invoice-meta {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -783,15 +735,15 @@ class SalesUI {
           font-size: 0.875rem;
           margin-bottom: 1.5rem;
           padding-bottom: 1rem;
-          border-bottom: 1px dashed var(--border, #e5e7eb);
+          border-bottom: 1px dashed var(--border-color);
           color: var(--text-secondary);
         }
         .invoice-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-bottom: 1rem; }
-        .invoice-table th { background: var(--bg-secondary, #f9fafb); padding: 0.5rem; text-align: left; font-weight: 600; color: var(--text-primary); }
-        .invoice-table td { padding: 0.5rem; border-bottom: 1px solid var(--border, #f3f4f6); color: var(--text-primary); }
-        .invoice-totals { border-top: 2px solid var(--border, #e5e7eb); padding-top: 1rem; margin-bottom: 1.5rem; }
+        .invoice-table th { background: rgba(255,255,255,0.05); padding: 0.75rem 0.5rem; text-align: left; font-weight: 600; color: var(--text-primary); }
+        .invoice-table td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        .invoice-totals { border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.5rem; }
         .inv-row { display: flex; justify-content: space-between; padding: 0.25rem 0; color: var(--text-secondary); font-size: 0.9rem; }
-        .inv-grand { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); padding-top: 0.5rem; margin-top: 0.25rem; border-top: 1px solid var(--border, #e5e7eb); }
+        .inv-grand { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); padding-top: 0.75rem; margin-top: 0.5rem; border-top: 1px solid var(--border-color); }
         .invoice-actions { display: flex; gap: 1rem; }
         .invoice-actions .btn { flex: 1; }
 

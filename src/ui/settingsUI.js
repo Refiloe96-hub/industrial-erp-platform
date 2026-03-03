@@ -473,13 +473,18 @@ class SettingsUI {
       <style>
         .settings-container {
           padding: 1rem;
-          max-width: 800px;
+          max-width: 900px;
           margin: 0 auto;
+          color: var(--text-primary);
         }
 
         .settings-header {
             margin-bottom: 2rem;
             text-align: center;
+        }
+        
+        .settings-header p {
+            color: var(--text-secondary);
         }
 
         .settings-grid {
@@ -491,37 +496,82 @@ class SettingsUI {
 
         .settings-card {
             height: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .settings-card .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.01);
+        }
+        
+        .settings-card .card-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .settings-card .card-body {
+            padding: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: #374151;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .settings-footer {
             text-align: center;
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--border-color);
         }
 
         .data-actions button {
             text-align: left;
             padding-left: 1rem;
+        }
+        
+        /* Modal overrides for settings forms */
+        dialog {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        dialog form {
+            color: var(--text-primary);
         }
       </style>
     `;

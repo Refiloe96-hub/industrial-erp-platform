@@ -1108,31 +1108,59 @@ class PoolStockUI {
 
             /* Stats */
             /* Stats */
+            .stat-card {
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-radius: var(--radius-lg);
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                border: 1px solid var(--border-color);
+                border-left: 4px solid var(--border-color);
+                transition: transform 0.2s, border-color 0.2s;
+            }
+            .stat-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+
             .stat-card.primary { border-left-color: #6366f1; }
-            .stat-card.warning { 
-                border-left-color: #f59e0b; 
-                background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, var(--bg-primary) 100%); 
+            .stat-card.warning { border-left-color: #f59e0b; }
+            .stat-card.danger { border-left-color: #ef4444; }
+            .stat-card.success { border-left-color: #10a37f; }
+
+            .stat-content {
+                display: flex;
+                flex-direction: column;
             }
-            .stat-card.danger { 
-                border-left-color: #ef4444; 
-                background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--bg-primary) 100%); 
+
+            .stat-label {
+                font-size: 0.875rem;
+                color: var(--text-secondary);
             }
-            .stat-card.success { 
-                border-left-color: #10b981; 
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-primary) 100%); 
+
+            .stat-value {
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: var(--text-primary);
             }
 
             .stat-card.warning .stat-value { color: #f59e0b; }
             .stat-card.danger .stat-value { color: #ef4444; }
-            .stat-card.success .stat-value { color: #10b981; }
+            .stat-card.success .stat-value { color: #10a37f; }
+            
+            .stat-icon {
+                font-size: 2.5rem;
+                color: var(--text-primary);
+            }
 
             /* Filters */
             .filter-group.search input {
                 padding: 0.5rem 1rem;
                 border: 1px solid var(--border-color);
-                border-radius: 6px;
+                border-radius: var(--radius-md);
                 min-width: 200px;
-                background: var(--bg-secondary);
+                background: rgba(255, 255, 255, 0.05);
                 color: var(--text-primary);
             }
 
@@ -1186,11 +1214,18 @@ class PoolStockUI {
             .item-modal {
                 max-width: 550px;
                 width: 95%;
-                padding: 2rem;
-                border-radius: 12px;
+                padding: 2.5rem;
+                border-radius: var(--radius-lg);
                 background: var(--bg-primary);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
                 color: var(--text-primary);
                 border: 1px solid var(--border-color);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .item-modal::backdrop {
+                background: rgba(0,0,0,0.7);
             }
 
             .item-modal h2 {
@@ -1198,7 +1233,7 @@ class PoolStockUI {
             }
 
             .item-modal input[readonly] {
-                background: var(--bg-secondary);
+                background: rgba(255, 255, 255, 0.05); /* Ghost base */
                 color: var(--text-secondary);
             }
 
@@ -1207,15 +1242,15 @@ class PoolStockUI {
                 width: 40px;
                 height: 40px;
                 object-fit: cover;
-                border-radius: 6px;
+                border-radius: var(--radius-sm);
                 border: 1px solid var(--border-color);
             }
 
             .product-thumb-placeholder {
                 width: 40px;
                 height: 40px;
-                background: var(--bg-secondary);
-                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: var(--radius-sm);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1248,7 +1283,7 @@ class PoolStockUI {
                 gap: .4rem;
                 transition: color .2s, border-color .2s;
             }
-            .ps-tab.active { color: var(--accent, #6366f1); border-bottom-color: var(--accent, #6366f1); font-weight: 600; }
+            .ps-tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); font-weight: 600; }
             .ps-tab:hover { color: var(--text-primary); }
 
             /* Search with scan */
@@ -1260,16 +1295,22 @@ class PoolStockUI {
             .po-modal {
                 max-width: 680px;
                 width: 95%;
-                padding: 2rem;
-                border-radius: 12px;
+                padding: 2.5rem;
+                border-radius: var(--radius-lg);
                 background: var(--bg-primary);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
                 color: var(--text-primary);
                 border: 1px solid var(--border-color);
+                box-shadow: var(--shadow-lg);
+            }
+            .po-modal::backdrop {
+                background: rgba(0,0,0,0.7);
             }
             .po-items-section { margin: 1.5rem 0; }
             .po-items-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
             .po-total-row { text-align: right; margin-top: .75rem; font-size: 1.1rem; }
-            .po-lines-table select, .po-lines-table input { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; padding: .25rem .5rem; color: var(--text-primary); }
+            .po-lines-table select, .po-lines-table input { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 4px; padding: .25rem .5rem; color: var(--text-primary); }
 
             /* Scanner Modal */
             .scanner-modal { padding: 1.5rem; border-radius: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); max-width: 400px; width: 95%; }

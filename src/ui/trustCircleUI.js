@@ -11,7 +11,174 @@ class TrustCircleUI {
     }
 
     async render() {
+        this.injectStyles();
         await this.loadView(this.currentView);
+    }
+
+    injectStyles() {
+        if (document.getElementById('trustcircle-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'trustcircle-styles';
+        style.textContent = `
+            /* Detail Tabs */
+            .detail-tab-nav {
+                display: flex;
+                gap: 0;
+                border-bottom: 2px solid var(--border-color);
+                margin-bottom: 1.5rem;
+            }
+            .detail-tab {
+                padding: .6rem 1.25rem;
+                background: none;
+                border: none;
+                border-bottom: 2px solid transparent;
+                margin-bottom: -2px;
+                cursor: pointer;
+                font-size: .95rem;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: .4rem;
+                transition: color .2s, border-color .2s;
+            }
+            .detail-tab.active {
+                color: var(--accent-primary);
+                border-bottom-color: var(--accent-primary);
+                font-weight: 600;
+            }
+            .detail-tab:hover {
+                color: var(--text-primary);
+            }
+
+            /* Main Layout Grid */
+            .trustcircle-dashboard .grid-layout,
+            .syndicate-detail .grid-layout {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            @media(min-width: 1024px) {
+                .trustcircle-dashboard .grid-layout,
+                .syndicate-detail .grid-layout {
+                    grid-template-columns: 3fr 1fr;
+                }
+            }
+
+            /* Custom Sections */
+            .pool-visualizer, .members-section, .ai-insights, .group-buys-section, .funding-section {
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-radius: var(--radius-lg);
+                padding: 1.5rem;
+                border: 1px solid var(--border-color);
+                box-shadow: var(--shadow-md);
+                margin-bottom: 1.5rem;
+            }
+
+            .pool-visualizer { text-align: center; }
+            .pot-circle {
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                border: 8px solid var(--accent-primary);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin: 2rem auto;
+                background: rgba(255,255,255,0.02);
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+            }
+            .pot-circle .amount { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
+            .pot-circle .label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; }
+
+            /* Insight Cards */
+            .insight-card {
+                padding: 1rem;
+                border-radius: var(--radius-md);
+                margin-bottom: 0.75rem;
+                border-left: 3px solid var(--border-color);
+            }
+            .insight-card.warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
+            .insight-card.danger { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
+            .insight-card.success { border-left-color: #10a37f; background: rgba(16, 163, 127, 0.05); }
+            .insight-card.info { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+            .insight-card p { margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.95rem; }
+            .insight-card small { color: var(--text-secondary); }
+
+            /* TC specific Dialog overrides if not caught by global */
+            .tc-modal {
+                max-width: 600px;
+                width: 95%;
+                padding: 2.5rem;
+                border-radius: var(--radius-lg);
+                background: var(--bg-primary);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .tc-modal::backdrop, dialog::backdrop {
+                background: rgba(0,0,0,0.7);
+            }
+
+            .tc-modal h3, dialog h3 {
+                margin-top: 0;
+                margin-bottom: 1.5rem;
+            }
+
+            .tc-modal .form-row {
+                display: flex;
+                gap: 1rem;
+            }
+            .tc-modal .form-row .form-group {
+                flex: 1;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: var(--text-secondary);
+                font-weight: 500;
+                font-size: 0.9rem;
+            }
+
+            .form-group input, .form-group select, .form-group textarea, dialog input, dialog select {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                background: rgba(255, 255, 255, 0.05);
+                color: var(--text-primary);
+                font-family: inherit;
+                margin-bottom: 1.25rem;
+            }
+            
+            .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                outline: none;
+                border-color: var(--accent-primary);
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            }
+
+            .form-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: rgba(255,255,255,0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-radius: var(--radius-lg);
+                padding: 2rem;
+                border: 1px solid var(--border-color);
+            }
+            .form-container h2 {
+                margin-top: 0;
+                margin-bottom: 1.5rem;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     async loadView(view, data = null) {
@@ -59,6 +226,93 @@ class TrustCircleUI {
         const totalPool = syndicates.reduce((sum, s) => sum + (s.totalPool || 0), 0);
 
         this.container.innerHTML = `
+      <style>
+        .trustcircle-dashboard .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .trustcircle-dashboard .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .trustcircle-dashboard .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+        }
+        .trustcircle-dashboard .stat-card h3 {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .trustcircle-dashboard .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0.5rem;
+        }
+        .syndicates-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .syndicate-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+        .syndicate-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+        }
+        .syndicate-card .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .syndicate-card .card-header h3 {
+            margin: 0;
+            font-size: 1.125rem;
+            color: var(--text-primary);
+        }
+        .syndicate-card .card-body {
+            padding: 1.5rem;
+        }
+        .syndicate-card p {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-secondary);
+        }
+        .syndicate-card strong {
+            color: var(--text-primary);
+        }
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background: var(--accent-primary);
+        }
+      </style>
       <div class="trustcircle-dashboard">
         <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem">
           <div>

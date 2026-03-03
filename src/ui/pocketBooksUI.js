@@ -555,31 +555,30 @@ class PocketBooksUI {
             }
 
             .stat-card {
-                background: var(--bg-primary);
-                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-radius: var(--radius-lg);
                 padding: 1.5rem;
                 display: flex;
                 align-items: center;
                 gap: 1rem;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                border: 1px solid var(--border-color);
                 border-left: 4px solid var(--border-color);
+                transition: transform 0.2s, border-color 0.2s;
             }
+            .stat-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
 
-            .stat-card.income { border-left-color: #10b981; }
+            .stat-card.income { border-left-color: #10a37f; }
             .stat-card.expense { border-left-color: #ef4444; }
-            /* Use transparent gradients so they look good on both light (white bg) and dark (dark bg) */
-            .stat-card.positive { 
-                border-left-color: #10b981; 
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-primary) 100%); 
-            }
-            .stat-card.negative { 
-                border-left-color: #ef4444; 
-                background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--bg-primary) 100%); 
-            }
-            .stat-card.neutral { border-left-color: #6366f1; }
+            .stat-card.positive { border-left-color: #10a37f; }
+            .stat-card.negative { border-left-color: #ef4444; }
+            .stat-card.neutral { border-left-color: #f59e0b; }
 
             .stat-icon {
-                font-size: 2rem;
+                font-size: 2.5rem;
+                color: var(--text-primary);
             }
 
             .stat-content {
@@ -593,12 +592,13 @@ class PocketBooksUI {
             }
 
             .stat-value {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
                 font-weight: 700;
+                color: var(--text-primary);
             }
 
-            .stat-card.positive .stat-value { color: #059669; }
-            .stat-card.negative .stat-value { color: #dc2626; }
+            .stat-card.positive .stat-value { color: #10a37f; }
+            .stat-card.negative .stat-value { color: #ef4444; }
 
             /* Filters */
             .filters-bar {
@@ -606,10 +606,13 @@ class PocketBooksUI {
                 gap: 1.5rem;
                 flex-wrap: wrap;
                 padding: 1rem 1.5rem;
-                background: var(--bg-primary);
-                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
                 margin-bottom: 1.5rem;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             }
 
             .filter-group {
@@ -639,13 +642,16 @@ class PocketBooksUI {
             }
 
             .table-container {
-                background: var(--bg-primary);
-                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
                 overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             }
 
-            .transaction-row.income { background: rgba(16, 185, 129, 0.03); }
+            .transaction-row.income { background: rgba(16, 163, 127, 0.03); } /* #10a37f */
             .transaction-row.expense { background: rgba(239, 68, 68, 0.03); }
 
             .amount {
@@ -653,7 +659,7 @@ class PocketBooksUI {
                 text-align: right;
             }
 
-            .amount.income { color: #10b981; } /* Brighter green for dark mode visibility */
+            .amount.income { color: #10a37f; } /* Brighter green for dark mode visibility */
             .amount.expense { color: #ef4444; } /* Brighter red */
 
             .transactions-section table {
@@ -684,11 +690,18 @@ class PocketBooksUI {
             .transaction-modal {
                 max-width: 500px;
                 width: 95%;
-                padding: 2rem;
-                border-radius: 12px;
-                background: var(--bg-primary);
+                padding: 2.5rem;
+                border-radius: var(--radius-lg);
+                background: var(--bg-primary); /* Inherited body gradient or set manually */
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
                 color: var(--text-primary);
                 border: 1px solid var(--border-color);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .transaction-modal::backdrop {
+                background: rgba(0,0,0,0.7);
             }
 
             .transaction-modal h2 {
