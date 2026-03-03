@@ -160,18 +160,18 @@ class PocketBooksUI {
 
             // VAT calculation (assuming South African 15% standard rate for moat demonstration)
             const vatCollected = totalVatableIncome * 0.15;
-            const period = this.dateRange === 0 ? 'All Time' : \`Last \${this.dateRange} Days\`;
-            
+            const period = this.dateRange === 0 ? 'All Time' : `Last ${this.dateRange} Days`;
+
             const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
             const businessName = currentUser.businessName || 'My Business';
             const ownerName = currentUser.ownerName || 'Owner';
 
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(\`
+            printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Tax Export - \${businessName}</title>
+                    <title>Tax Export - ${businessName}</title>
                     <style>
                         body { font-family: 'Inter', sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: auto; }
                         h1 { font-size: 1.5rem; margin-bottom: 0.2rem; }
@@ -191,18 +191,18 @@ class PocketBooksUI {
                     </style>
                 </head>
                 <body>
-                    <h1>\${businessName} - VAT/Tax Report</h1>
+                    <h1>${businessName} - VAT/Tax Report</h1>
                     <div class="meta">
-                        Owner: \${ownerName} <br>
-                        Period: \${period} <br>
-                        Generated: \${new Date().toLocaleString('en-ZA')}
+                        Owner: ${ownerName} <br>
+                        Period: ${period} <br>
+                        Generated: ${new Date().toLocaleString('en-ZA')}
                     </div>
 
                     <div class="totals-box">
-                        <div class="tot-row"><span>Total Gross Income:</span> <span>R \${totalIncome.toFixed(2)}</span></div>
-                        <div class="tot-row"><span>Total Expenses:</span> <span>R \${totalExpenses.toFixed(2)}</span></div>
-                        <div class="tot-row"><span>Taxable Sales:</span> <span>R \${totalVatableIncome.toFixed(2)}</span></div>
-                        <div class="tot-row grand"><span>Estimated VAT Collected (15%):</span> <span>R \${vatCollected.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Total Gross Income:</span> <span>R ${totalIncome.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Total Expenses:</span> <span>R ${totalExpenses.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Taxable Sales:</span> <span>R ${totalVatableIncome.toFixed(2)}</span></div>
+                        <div class="tot-row grand"><span>Estimated VAT Collected (15%):</span> <span>R ${vatCollected.toFixed(2)}</span></div>
                     </div>
 
                     <h2>Transaction Log</h2>
@@ -216,14 +216,14 @@ class PocketBooksUI {
                             </tr>
                         </thead>
                         <tbody>
-                            \${transactions.map(t => \`
+                            ${transactions.map(t => `
                                 <tr>
-                                    <td>\${new Date(t.date).toLocaleDateString('en-ZA')}</td>
-                                    <td>\${t.category}</td>
-                                    <td>\${t.description}</td>
-                                    <td class="right">\${t.type === 'income' ? '+' : '-'} \${t.amount.toFixed(2)}</td>
+                                    <td>${new Date(t.date).toLocaleDateString('en-ZA')}</td>
+                                    <td>${t.category}</td>
+                                    <td>${t.description}</td>
+                                    <td class="right">${t.type === 'income' ? '+' : '-'} ${t.amount.toFixed(2)}</td>
                                 </tr>
-                            \`).join('')}
+                            `).join('')}
                         </tbody>
                     </table>
 
@@ -232,7 +232,7 @@ class PocketBooksUI {
                     </div>
                 </body>
                 </html>
-            \`);
+            `);
             printWindow.document.close();
             // Optional: Auto-print
             // setTimeout(() => { printWindow.print(); }, 500);
@@ -286,7 +286,7 @@ class PocketBooksUI {
                 const h = Math.round((v / maxFc) * 40);
                 return `< rect x = "${i * 14 + 2}" y = "${44 - h}" width = "11" height = "${h}" rx = "2" fill = "#6366f1" opacity = "0.7" /> `;
             }).join('');
-            const fcSvg = `< svg width = "210" height = "46" viewBox = "0 0 210 46" style = "display:block;margin:0.5rem 0" > ${ fcBars }</svg > `;
+            const fcSvg = `< svg width = "210" height = "46" viewBox = "0 0 210 46" style = "display:block;margin:0.5rem 0" > ${fcBars}</svg > `;
 
             // NL Insights
             const apiKey = aiEngine.getApiKey();
@@ -297,8 +297,8 @@ class PocketBooksUI {
 
             showDetailPanel({
                 title: '💰 PocketBooks AI Insights',
-                subtitle: `Financial score: ${ result.score }/100 — ${result.trend} trend`,
-            bodyHTML: `
+                subtitle: `Financial score: ${result.score}/100 — ${result.trend} trend`,
+                bodyHTML: `
                     <div class="dp-section">
                         <div class="dp-section-title">Financial Health</div>
                         <div class="dp-kv-grid">
@@ -319,85 +319,85 @@ class PocketBooksUI {
                         ${insights.map(ins => `<div style="padding:0.5rem 0.75rem;border-radius:8px;background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#6366f1'};margin-bottom:0.5rem;font-size:0.875rem;">${ins.text}</div>`).join('')}
                     </div>
                 `
+            });
         });
-    });
 
         // Row click → detail panel
         this.container.querySelector('#transactions-table tbody').addEventListener('click', async (e) => {
-        const row = e.target.closest('tr[data-id]');
-        if (!row) return;
-        const all = await this.module.getTransactions();
-        const t = all.find(x => String(x.id) === row.dataset.id);
-        if (t) this.showTransactionDetail(t);
-    });
+            const row = e.target.closest('tr[data-id]');
+            if (!row) return;
+            const all = await this.module.getTransactions();
+            const t = all.find(x => String(x.id) === row.dataset.id);
+            if (t) this.showTransactionDetail(t);
+        });
 
-// Stat card click → drill-down panel
-this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
-    card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
-});
+        // Stat card click → drill-down panel
+        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+            card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
+        });
 
-// Filters
-this.container.querySelector('#category-filter').addEventListener('change', () => this.applyFilters());
-this.container.querySelector('#type-filter').addEventListener('change', () => this.applyFilters());
-this.container.querySelector('#period-filter').addEventListener('change', (e) => {
-    this.dateRange = parseInt(e.target.value);
-    this.loadDashboard();
-});
+        // Filters
+        this.container.querySelector('#category-filter').addEventListener('change', () => this.applyFilters());
+        this.container.querySelector('#type-filter').addEventListener('change', () => this.applyFilters());
+        this.container.querySelector('#period-filter').addEventListener('change', (e) => {
+            this.dateRange = parseInt(e.target.value);
+            this.loadDashboard();
+        });
     }
 
     async applyFilters() {
-    const categoryFilter = this.container.querySelector('#category-filter').value;
-    const typeFilter = this.container.querySelector('#type-filter').value;
+        const categoryFilter = this.container.querySelector('#category-filter').value;
+        const typeFilter = this.container.querySelector('#type-filter').value;
 
-    const filters = {};
-    if (categoryFilter !== 'all') filters.category = categoryFilter;
-    if (typeFilter !== 'all') filters.type = typeFilter;
+        const filters = {};
+        if (categoryFilter !== 'all') filters.category = categoryFilter;
+        if (typeFilter !== 'all') filters.type = typeFilter;
 
-    const transactions = await this.module.getTransactions(filters);
-    const tbody = this.container.querySelector('#transactions-table tbody');
-    tbody.innerHTML = this.renderTransactionRows(transactions);
-}
+        const transactions = await this.module.getTransactions(filters);
+        const tbody = this.container.querySelector('#transactions-table tbody');
+        tbody.innerHTML = this.renderTransactionRows(transactions);
+    }
 
     async showStatPanel(card) {
-    const transactions = await this.module.getTransactions();
-    const cashFlow = await this.module.calculateCashFlow();
+        const transactions = await this.module.getTransactions();
+        const cashFlow = await this.module.calculateCashFlow();
 
-    const incomeByCategory = {};
-    const expenseByCategory = {};
-    transactions.forEach(t => {
-        if (t.type === 'income') incomeByCategory[t.category || 'Other'] = (incomeByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
-        if (t.type === 'expense') expenseByCategory[t.category || 'Other'] = (expenseByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
-    });
-    const incomeCount = transactions.filter(t => t.type === 'income').length;
-    const expenseCount = transactions.filter(t => t.type === 'expense').length;
-    const maxIncome = Math.max(...Object.values(incomeByCategory), 1);
-    const maxExpense = Math.max(...Object.values(expenseByCategory), 1);
+        const incomeByCategory = {};
+        const expenseByCategory = {};
+        transactions.forEach(t => {
+            if (t.type === 'income') incomeByCategory[t.category || 'Other'] = (incomeByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
+            if (t.type === 'expense') expenseByCategory[t.category || 'Other'] = (expenseByCategory[t.category || 'Other'] || 0) + (t.amount || 0);
+        });
+        const incomeCount = transactions.filter(t => t.type === 'income').length;
+        const expenseCount = transactions.filter(t => t.type === 'expense').length;
+        const maxIncome = Math.max(...Object.values(incomeByCategory), 1);
+        const maxExpense = Math.max(...Object.values(expenseByCategory), 1);
 
-    const panels = {
-        income: {
-            title: 'Total Income Breakdown',
-            subtitle: `R ${cashFlow.income.toLocaleString()} across ${incomeCount} income entries`,
-            bodyHTML: Object.keys(incomeByCategory).length ? `
+        const panels = {
+            income: {
+                title: 'Total Income Breakdown',
+                subtitle: `R ${cashFlow.income.toLocaleString()} across ${incomeCount} income entries`,
+                bodyHTML: Object.keys(incomeByCategory).length ? `
                     <div class="dp-section">
                         <div class="dp-section-title">Income by Category</div>
                         ${Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
-                dpBar(cat, amt, maxIncome, '#16a34a', v => `R ${v.toLocaleString()}`)).join('')}
+                    dpBar(cat, amt, maxIncome, '#16a34a', v => `R ${v.toLocaleString()}`)).join('')}
                     </div>` : '<div class="dp-empty">No income recorded yet.</div>'
-        },
-        expenses: {
-            title: 'Total Expenses Breakdown',
-            subtitle: `R ${cashFlow.expenses.toLocaleString()} across ${expenseCount} expense entries`,
-            bodyHTML: Object.keys(expenseByCategory).length ? `
+            },
+            expenses: {
+                title: 'Total Expenses Breakdown',
+                subtitle: `R ${cashFlow.expenses.toLocaleString()} across ${expenseCount} expense entries`,
+                bodyHTML: Object.keys(expenseByCategory).length ? `
                     <div class="dp-section">
                         <div class="dp-section-title">Expenses by Category</div>
                         ${Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
-                dpBar(cat, amt, maxExpense, '#dc2626', v => `R ${v.toLocaleString()}`)).join('')}
+                    dpBar(cat, amt, maxExpense, '#dc2626', v => `R ${v.toLocaleString()}`)).join('')}
                     </div>` : '<div class="dp-empty">No expenses recorded yet.</div>'
-        },
-        net: {
-            title: 'Net Cash Flow',
-            subtitle: cashFlow.netCashFlow >= 0 ? 'Positive — you are earning more than you spend' : 'Negative — expenses exceed income',
-            bodyHTML: `
+            },
+            net: {
+                title: 'Net Cash Flow',
+                subtitle: cashFlow.netCashFlow >= 0 ? 'Positive — you are earning more than you spend' : 'Negative — expenses exceed income',
+                bodyHTML: `
                     <div class="dp-section">
                         <div class="dp-section-title">Overview</div>
                         <div class="dp-kv-grid">
@@ -411,11 +411,11 @@ this.container.querySelector('#period-filter').addEventListener('change', (e) =>
                         ${dpBar('Income', cashFlow.income, Math.max(cashFlow.income, cashFlow.expenses, 1), '#16a34a', v => 'R ' + v.toLocaleString())}
                         ${dpBar('Expenses', cashFlow.expenses, Math.max(cashFlow.income, cashFlow.expenses, 1), '#dc2626', v => 'R ' + v.toLocaleString())}
                     </div>`
-        },
-        count: {
-            title: 'Transaction Summary',
-            subtitle: `${transactions.length} total entries`,
-            bodyHTML: `
+            },
+            count: {
+                title: 'Transaction Summary',
+                subtitle: `${transactions.length} total entries`,
+                bodyHTML: `
                     <div class="dp-section">
                         <div class="dp-section-title">By Type</div>
                         ${dpBar('Income', incomeCount, Math.max(incomeCount, expenseCount, 1), '#16a34a')}
@@ -430,29 +430,29 @@ this.container.querySelector('#period-filter').addEventListener('change', (e) =>
                             </li>`).join('') || '<li>No transactions yet.</li>'}
                         </ul>
                     </div>`
-        }
-    };
-    showDetailPanel(panels[card]);
-}
+            }
+        };
+        showDetailPanel(panels[card]);
+    }
 
-showTransactionDetail(t) {
-    // Remove existing panel if open
-    document.querySelector('.tx-detail-panel')?.remove();
-    document.querySelector('.tx-detail-overlay')?.remove();
+    showTransactionDetail(t) {
+        // Remove existing panel if open
+        document.querySelector('.tx-detail-panel')?.remove();
+        document.querySelector('.tx-detail-overlay')?.remove();
 
-    const isIncome = t.type === 'income';
-    const amountColor = isIncome ? '#16a34a' : '#dc2626';
-    const dateStr = new Date(t.date).toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const isIncome = t.type === 'income';
+        const amountColor = isIncome ? '#16a34a' : '#dc2626';
+        const dateStr = new Date(t.date).toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    const overlay = document.createElement('div');
-    overlay.className = 'tx-detail-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
+        const overlay = document.createElement('div');
+        overlay.className = 'tx-detail-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
 
-    const panel = document.createElement('div');
-    panel.className = 'tx-detail-panel';
-    panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
+        const panel = document.createElement('div');
+        panel.className = 'tx-detail-panel';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
 
-    panel.innerHTML = `
+        panel.innerHTML = `
             <style>
                 @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
                 .tx-detail-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border,#e5e7eb); display:flex; align-items:center; justify-content:space-between; }
@@ -516,19 +516,19 @@ showTransactionDetail(t) {
             </div>
         `;
 
-    document.body.appendChild(overlay);
-    document.body.appendChild(panel);
+        document.body.appendChild(overlay);
+        document.body.appendChild(panel);
 
-    const close = () => { panel.remove(); overlay.remove(); };
-    panel.querySelector('#close-tx-panel').addEventListener('click', close);
-    panel.querySelector('#close-tx-panel-footer').addEventListener('click', close);
-    overlay.addEventListener('click', close);
-}
+        const close = () => { panel.remove(); overlay.remove(); };
+        panel.querySelector('#close-tx-panel').addEventListener('click', close);
+        panel.querySelector('#close-tx-panel-footer').addEventListener('click', close);
+        overlay.addEventListener('click', close);
+    }
 
-showAddTransactionModal() {
-    const modal = document.createElement('dialog');
-    modal.className = 'transaction-modal';
-    modal.innerHTML = `
+    showAddTransactionModal() {
+        const modal = document.createElement('dialog');
+        modal.className = 'transaction-modal';
+        modal.innerHTML = `
             <form id="add-transaction-form">
                 <h2>Add Transaction</h2>
                 
@@ -583,59 +583,59 @@ showAddTransactionModal() {
             </form>
         `;
 
-    document.body.appendChild(modal);
-    modal.showModal();
+        document.body.appendChild(modal);
+        modal.showModal();
 
-    // Close on backdrop click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.close();
+                modal.remove();
+            }
+        });
+
+        // Close on Escape key
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.close();
+                modal.remove();
+            }
+        });
+
+        modal.querySelector('#cancel-modal').addEventListener('click', () => {
             modal.close();
             modal.remove();
-        }
-    });
+        });
 
-    // Close on Escape key
-    modal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            modal.close();
-            modal.remove();
-        }
-    });
+        modal.querySelector('#add-transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
 
-    modal.querySelector('#cancel-modal').addEventListener('click', () => {
-        modal.close();
-        modal.remove();
-    });
+            try {
+                await this.module.recordTransaction({
+                    type: formData.get('type'),
+                    amount: parseFloat(formData.get('amount')),
+                    description: formData.get('description'),
+                    category: formData.get('category'),
+                    date: new Date(formData.get('date')).getTime(),
+                    reference: formData.get('reference') || null
+                });
 
-    modal.querySelector('#add-transaction-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+                modal.close();
+                modal.remove();
+                this.loadDashboard(); // Refresh
+            } catch (err) {
+                alert('Failed to save transaction: ' + err.message);
+            }
+        });
+    }
 
-        try {
-            await this.module.recordTransaction({
-                type: formData.get('type'),
-                amount: parseFloat(formData.get('amount')),
-                description: formData.get('description'),
-                category: formData.get('category'),
-                date: new Date(formData.get('date')).getTime(),
-                reference: formData.get('reference') || null
-            });
+    injectStyles() {
+        if (document.getElementById('pocketbooks-styles')) return;
 
-            modal.close();
-            modal.remove();
-            this.loadDashboard(); // Refresh
-        } catch (err) {
-            alert('Failed to save transaction: ' + err.message);
-        }
-    });
-}
-
-injectStyles() {
-    if (document.getElementById('pocketbooks-styles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'pocketbooks-styles';
-    style.textContent = `
+        const style = document.createElement('style');
+        style.id = 'pocketbooks-styles';
+        style.textContent = `
             .pocketbooks-ui {
                 padding: 0;
             }
@@ -853,8 +853,8 @@ injectStyles() {
                 margin-top: 1.5rem;
             }
         `;
-    document.head.appendChild(style);
-}
+        document.head.appendChild(style);
+    }
 }
 
 export default PocketBooksUI;
