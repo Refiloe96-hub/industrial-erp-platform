@@ -1,9 +1,9 @@
-// Sales UI - Point of Sale interface for shop owners
 import sales from '../modules/Sales.js';
 import PoolStock from '../modules/PoolStock.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import Customers from '../modules/Customers.js';
 import PaymentService from '../services/payments.js';
+import HardwareService from '../services/HardwareService.js';
 import db, { STORES } from '../db/index.js';
 
 class SalesUI {
@@ -320,6 +320,21 @@ class SalesUI {
     });
 
     // Add to Cart (Delegation)
+
+    // Hardware Integration: Listen for live scale readings
+    window.addEventListener('scale-reading', (e) => {
+      const modal = document.getElementById('open-item-modal');
+      if (modal && modal.open) {
+        // Auto-fill the name to indicate it's weighed
+        const nameInput = document.getElementById('open-item-name');
+        if (!nameInput.value || nameInput.value === 'Open Item') {
+          nameInput.value = `Weighed Item (${e.detail.weight}kg)`;
+        }
+        // If we had a base price per kg, we could auto-calculate price here
+        // e.g. priceInput.value = (basePrice * e.detail.weight).toFixed(2);
+      }
+    });
+
     grid.addEventListener('click', (e) => {
       if (e.target.closest('.open-item-btn')) {
         const modal = document.getElementById('open-item-modal');
@@ -329,6 +344,12 @@ class SalesUI {
         nameInput.value = '';
         priceInput.value = '';
         modal.showModal();
+
+        // If the scale simulator is active, grab a fake weight immediately
+        if (HardwareService.simulatorMode) {
+          HardwareService.getSimulatedWeight();
+        }
+
         priceInput.focus();
 
         const confirmBtn = document.getElementById('add-open-item');
@@ -512,8 +533,9 @@ class SalesUI {
           <div class="inv-row"><span>VAT (15%)</span><span>R ${(sale.vatAmount || 0).toFixed(2)}</span></div>
           <div class="inv-row inv-grand"><span>Total</span><span>R ${(sale.total || 0).toFixed(2)}</span></div>
         </div>
+        </div>
         <div class="invoice-actions">
-          <button id="print-invoice-btn" class="btn btn-secondary"><i class="ph ph-printer"></i> Print</button>
+          <button id="print-invoice-btn" class="btn btn-secondary"><i class="ph ph-printer"></i> Print Receipt</button>
           <button id="close-invoice-btn" class="btn btn-primary">New Sale</button>
         </div>
       </div>
@@ -521,7 +543,11 @@ class SalesUI {
     document.body.appendChild(modal);
     modal.showModal();
 
-    modal.querySelector('#print-invoice-btn').addEventListener('click', () => window.print());
+    modal.querySelector('#print-invoice-btn').addEventListener('click', async () => {
+      // The Moat: Print directly to connected Bluetooth thermal printer instead of standard browser print dialog
+      await HardwareService.printReceipt(sale);
+    });
+
     modal.querySelector('#close-invoice-btn').addEventListener('click', () => {
       modal.close();
       modal.remove();

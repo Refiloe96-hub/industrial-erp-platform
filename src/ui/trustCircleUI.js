@@ -1,5 +1,5 @@
-
 import TrustCircle from '../modules/TrustCircle.js';
+import TrustScoreEngine from '../modules/TrustScoreEngine.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 import db, { STORES } from '../db/index.js';
 
@@ -225,6 +225,9 @@ class TrustCircleUI {
         const syndicates = await this.module.getSyndicates();
         const totalPool = syndicates.reduce((sum, s) => sum + (s.totalPool || 0), 0);
 
+        // The Financial Moat
+        const trustProfile = await TrustScoreEngine.getScoreBreakdown();
+
         this.container.innerHTML = `
       <style>
         .trustcircle-dashboard .stats-overview {
@@ -328,12 +331,21 @@ class TrustCircleUI {
         </header>
 
         <div class="stats-overview">
+          <div class="stat-card" data-card="trust_score" style="cursor:pointer; border-left: 4px solid ${trustProfile.color}; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(${parseInt(trustProfile.color.slice(1, 3), 16)}, ${parseInt(trustProfile.color.slice(3, 5), 16)}, ${parseInt(trustProfile.color.slice(5, 7), 16)}, 0.05) 100%);" title="Click for details">
+            <h3 style="color:${trustProfile.color}; font-weight:700;"><i class="ph-duotone ph-shield-check"></i> FinTech Trust Score</h3>
+            <div class="value" style="display:flex; align-items:baseline; gap:0.5rem;">
+                ${trustProfile.score} <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:500;">/ 1000</span>
+            </div>
+            <p style="margin: 0.5rem 0 0 0; font-size:0.85rem; color:var(--text-secondary);">
+                Tier: <strong style="color:var(--text-primary);">${trustProfile.tier}</strong> | Credit Limit: <strong style="color:var(--text-primary);">R ${trustProfile.maxCreditLimit.toLocaleString()}</strong>
+            </p>
+          </div>
           <div class="stat-card" data-card="syndicates" style="cursor:pointer" title="Click for breakdown">
-            <h3>Active Syndicates</h3>
+            <h3>Active Group Buys</h3>
             <div class="value">${syndicates.length}</div>
           </div>
           <div class="stat-card" data-card="capital" style="cursor:pointer" title="Click for breakdown">
-            <h3>Total Capital Pools</h3>
+            <h3>Total Capital Locked</h3>
             <div class="value">R ${totalPool.toLocaleString()}</div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 import db from '../db/index.js';
 import DataImportService from '../services/DataImportService.js';
+import HardwareService from '../services/HardwareService.js';
+import P2PSyncManager from '../sync/P2PSyncManager.js';
 
 class SettingsUI {
   constructor() {
@@ -90,17 +92,58 @@ class SettingsUI {
             </div>
           </div>
 
-          <!-- Hardware (Placeholder) -->
+          <!-- Hardware Integration (The Physical Moat) -->
           <div class="card settings-card">
             <div class="card-header">
-              <h3><i class="ph-duotone ph-printer"></i> Hardware</h3>
+              <h3><i class="ph-duotone ph-plugs-connected"></i> Physical Hardware</h3>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0;">
+                Connect legacy rugged hardware directly to the browser via Web APIs. Fallbacks to simulator mode if devices aren't found.
+              </p>
+              <div>
+                <button class="btn btn-secondary w-100 mb-2" id="btn-connect-scale">
+                    <i class="ph-duotone ph-scales"></i> Connect Weighing Scale (Serial)
+                </button>
+                <button class="btn btn-secondary w-100" id="btn-connect-printer">
+                    <i class="ph-duotone ph-printer"></i> Connect Thermal Printer (Bluetooth)
+                </button>
+              </div>
+              <div id="hardware-status" style="font-size: 0.85rem; padding: 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); text-align: center;">
+                 Status: Waiting for connection...
+              </div>
+            </div>
+          </div>
+          
+          <!-- P2P Offline Sync (The Infrastructure Moat) -->
+          <div class="card settings-card" style="border-left:4px solid #10b981">
+            <div class="card-header">
+              <h3><i class="ph-duotone ph-wifi-slash" style="color:#10b981"></i> Local Device Sync</h3>
             </div>
             <div class="card-body">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                No internet? Sync data directly between devices on the same local network using WebRTC.
+              </p>
+              
               <div class="form-group">
-                <label>Receipt Printer IP</label>
-                <input type="text" id="set-printer" value="${this.settings.printerIp}" placeholder="192.168.1.100">
+                  <label>Your Sync Token (Host)</label>
+                  <div style="display:flex;gap:0.5rem">
+                      <input type="text" id="p2p-host-token" readonly placeholder="Click 'Generate Host Token' ->" style="background:rgba(0,0,0,0.2)">
+                      <button class="btn btn-secondary" id="btn-p2p-host"><i class="ph ph-qr-code"></i> Host</button>
+                  </div>
               </div>
-              <button class="btn btn-sm btn-secondary" disabled>Test Print</button>
+              
+              <div class="form-group" style="margin-top:1.5rem">
+                  <label>Join a Device (Client)</label>
+                  <div style="display:flex;gap:0.5rem">
+                      <input type="text" id="p2p-join-token" placeholder="Paste Host Token Here">
+                      <button class="btn btn-secondary" id="btn-p2p-join"><i class="ph ph-plug"></i> Join</button>
+                  </div>
+              </div>
+
+              <div id="p2p-status" style="margin-top: 1rem; font-size: 0.85rem; padding: 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); text-align: center;">
+                 Status: Disconnected
+              </div>
             </div>
           </div>
 
@@ -250,6 +293,94 @@ class SettingsUI {
       localStorage.setItem('erp_groq_api_key', key);
       localStorage.setItem('erp_forecast_horizon', horizon);
       alert(key ? '✅ Groq API key saved! AI insights are now enabled.' : '✅ AI settings saved (rule-based insights mode).');
+    });
+
+    // P2P Offline Sync (WebRTC)
+    const p2pStatus = container.querySelector('#p2p-status');
+    const hostTokenInput = container.querySelector('#p2p-host-token');
+    const joinTokenInput = container.querySelector('#p2p-join-token');
+
+    // Global listener for connection status changes
+    window.addEventListener('p2p-status', (e) => {
+      if (e.detail === 'connected') {
+        p2pStatus.innerHTML = '<i class="ph-fill ph-wifi-high" style="color:var(--success)"></i> Devices Syncing...';
+      } else {
+        p2pStatus.innerHTML = '<i class="ph-fill ph-wifi-slash" style="color:var(--text-secondary)"></i> Disconnected';
+      }
+    });
+
+    window.addEventListener('p2p-sync-complete', (e) => {
+      p2pStatus.innerHTML = `<i class="ph-fill ph-check-circle" style="color:var(--success)"></i> ${e.detail.store} synced!`;
+      setTimeout(() => p2pStatus.innerHTML = '<i class="ph-fill ph-wifi-high" style="color:var(--success)"></i> Connection Active', 2000);
+    });
+
+    container.querySelector('#btn-p2p-host')?.addEventListener('click', async () => {
+      try {
+        p2pStatus.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Generating Local P2P Node...';
+        const offerToken = await P2PSyncManager.hostSession();
+        hostTokenInput.value = offerToken;
+        hostTokenInput.select();
+        document.execCommand('copy');
+        p2pStatus.innerHTML = 'Token copied! Give it to the joining device.';
+      } catch (err) {
+        console.error(err);
+        p2pStatus.innerHTML = '<i class="ph-fill ph-warning" style="color:var(--danger)"></i> Failed to start node.';
+      }
+    });
+
+    container.querySelector('#btn-p2p-join')?.addEventListener('click', async () => {
+      const token = joinTokenInput.value.trim();
+      if (!token) {
+        alert('Please paste the Host Token from the other device.');
+        return;
+      }
+
+      try {
+        p2pStatus.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Joining Host...';
+        // If we are a client joining an offer
+        if (!P2PSyncManager.peerConnection) {
+          const answerToken = await P2PSyncManager.joinSession(token);
+          joinTokenInput.value = answerToken;
+          joinTokenInput.select();
+          document.execCommand('copy');
+          p2pStatus.innerHTML = 'Connected! Answer token copied back to clipboard. Paste this back into the Host device to finalize.';
+          alert('Please paste this ANSWER token back into the Host device.');
+        }
+        // If we are the Host accepting the answer back
+        else {
+          await P2PSyncManager.completeHandshake(token);
+        }
+      } catch (err) {
+        console.error(err);
+        p2pStatus.innerHTML = '<i class="ph-fill ph-warning" style="color:var(--danger)"></i> Connection failed.';
+      }
+    });
+
+    // Hardware Integration (WebSerial / WebBluetooth)
+    const hardwareStatus = container.querySelector('#hardware-status');
+
+    container.querySelector('#btn-connect-scale')?.addEventListener('click', async () => {
+      hardwareStatus.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Connecting to scale...';
+      const success = await HardwareService.connectScale();
+      if (success) {
+        hardwareStatus.innerHTML = HardwareService.simulatorMode
+          ? '<i class="ph-fill ph-warning" style="color:#f59e0b"></i> Scale Simulator Active (No physical device)'
+          : '<i class="ph-fill ph-check-circle" style="color:var(--success)"></i> Physical Scale Connected via USB';
+      } else {
+        hardwareStatus.innerHTML = '<i class="ph-fill ph-x-circle" style="color:var(--danger)"></i> Scale connection failed.';
+      }
+    });
+
+    container.querySelector('#btn-connect-printer')?.addEventListener('click', async () => {
+      hardwareStatus.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Pairing with printer...';
+      const success = await HardwareService.connectPrinter();
+      if (success) {
+        hardwareStatus.innerHTML = HardwareService.simulatorMode
+          ? '<i class="ph-fill ph-warning" style="color:#f59e0b"></i> Printer Simulator Active (No physical device)'
+          : `<i class="ph-fill ph-check-circle" style="color:var(--success)"></i> Connected to ${HardwareService.printerDevice?.name || 'Bluetooth Printer'}`;
+      } else {
+        hardwareStatus.innerHTML = '<i class="ph-fill ph-x-circle" style="color:var(--danger)"></i> Printer connection failed.';
+      }
     });
 
     // Backup

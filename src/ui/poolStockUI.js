@@ -803,7 +803,10 @@ class PoolStockUI {
 
     async showCreatePOModal() {
         const inventory = await this.module.getInventory();
-        const suppliers = await this.module.getSuppliers();
+
+        const localSuppliers = await this.module.getSuppliers();
+        const networkSuppliers = await this.module.getNetworkSuppliers();
+
         const currentUser = JSON.parse(localStorage.getItem('erp_session'));
 
         const modal = document.createElement('dialog');
@@ -817,8 +820,13 @@ class PoolStockUI {
                         <label>Supplier *</label>
                         <select name="supplierId" required>
                             <option value="">Select supplier...</option>
-                            ${suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
-                            ${suppliers.length === 0 ? '<option value="0">No suppliers — add via Seed Data</option>' : ''}
+                            <optgroup label="🌐 TrustCircle B2B Network">
+                                ${networkSuppliers.map(s => `<option value="${s.id}">🔵 ${s.name} (${s.type})</option>`).join('')}
+                            </optgroup>
+                            <optgroup label="📋 My Local Suppliers">
+                                ${localSuppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                                ${localSuppliers.length === 0 ? '<option value="" disabled>No local suppliers added</option>' : ''}
+                            </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
@@ -950,13 +958,26 @@ class PoolStockUI {
             }
 
             try {
-                await this.module.createPurchaseOrder({
-                    supplierId: parseInt(fd.get('supplierId')) || 0,
-                    items,
-                    expectedDate: fd.get('expectedDate') ? new Date(fd.get('expectedDate')).getTime() : null,
-                    notes: fd.get('notes'),
-                    createdBy: currentUser?.username || 'unknown'
-                });
+                const supplierVal = fd.get('supplierId');
+
+                // Route to B2B network if it's a network supplier
+                if (supplierVal.startsWith('net_')) {
+                    await this.module.sendNetworkOrder(
+                        supplierVal,
+                        items,
+                        fd.get('notes')
+                    );
+                    alert('🌐 Order successfully routed through the B2B Network!');
+                } else {
+                    await this.module.createPurchaseOrder({
+                        supplierId: parseInt(supplierVal) || 0,
+                        items,
+                        expectedDate: fd.get('expectedDate') ? new Date(fd.get('expectedDate')).getTime() : null,
+                        notes: fd.get('notes'),
+                        createdBy: currentUser?.username || 'unknown'
+                    });
+                }
+
                 modal.close();
                 modal.remove();
                 this.loadPurchaseOrders();

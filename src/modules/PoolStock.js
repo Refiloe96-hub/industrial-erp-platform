@@ -229,6 +229,75 @@ class PoolStock {
     return order;
   }
 
+  // ==========================================
+  // B2B Network Order System (The Platform Moat)
+  // ==========================================
+
+  /**
+   * Discover other businesses on the network that act as suppliers/wholesalers.
+   * In a real system, this queries the central indexing server or DHT.
+   */
+  async getNetworkSuppliers() {
+    // Mocking network discovery for the prototype
+    return [
+      {
+        id: 'net_sup_001',
+        name: 'Makro Wholesale Node',
+        type: 'distributor',
+        rating: 4.8,
+        minOrderValue: 2500,
+        isNetworkPeer: true,
+        categories: ['Beverage', 'Food', 'Household']
+      },
+      {
+        id: 'net_sup_002',
+        name: 'JHB East Cash & Carry',
+        type: 'wholesaler',
+        rating: 4.5,
+        minOrderValue: 5000,
+        isNetworkPeer: true,
+        categories: ['Tobacco', 'Airtime']
+      },
+      {
+        id: 'net_sup_003',
+        name: 'Soweto Bakery Co-op',
+        type: 'producer',
+        rating: 4.9,
+        minOrderValue: 500,
+        isNetworkPeer: true,
+        categories: ['Bakery']
+      }
+    ];
+  }
+
+  /**
+   * Send a Purchase Order directly to another tenant's ERP system over the network.
+   */
+  async sendNetworkOrder(supplierId, items, notes) {
+    console.log(`🚀 Routing B2B Order to Network Peer: ${supplierId}`);
+
+    const po = {
+      supplierId: supplierId,
+      items: items,
+      totalAmount: items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0),
+      orderDate: Date.now(),
+      status: 'sent_to_network',
+      isNetworkOrder: true,
+      notes: notes,
+      networkTxId: `b2b_${Date.now()}`
+    };
+
+    const id = await db.add(STORES.purchaseOrders, po);
+
+    // Here we would use WebSockets or Supabase Edge Functions to push the payload
+    // directly into the supplier's incoming orders queue.
+    console.log('✅ Network Purchase order created & dispatched:', id);
+
+    return { id, ...po };
+  }
+
+  // ==========================================
+
   // AI: Demand forecasting
   async forecastDemand(sku, daysAhead = 30) {
     if (!this.aiEngine) {
