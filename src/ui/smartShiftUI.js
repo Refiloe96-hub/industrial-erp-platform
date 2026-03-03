@@ -539,6 +539,7 @@ class SmartShiftUI {
         : '-'}
                 </td>
               </tr>
+              </tr>
             `).join('')
   }
           </tbody>
@@ -993,7 +994,7 @@ dialog::backdrop {
   background: rgba(255, 255, 255, 0.02)!important;
 }
 
-        .smart - shift - layout td, 
+        .smart - shift - layout td,
         .smart - shift - layout th {
   padding: 1rem;
   text - align: left;
