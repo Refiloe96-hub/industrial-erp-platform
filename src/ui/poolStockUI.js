@@ -380,6 +380,54 @@ class PoolStockUI {
         // Make instance globally available for inline handlers
         window.poolStockUI = this;
 
+        // HID Barcode Scanner Integration (The Speed Moat)
+        if (window._poolStockBarcodeListener) {
+            document.removeEventListener('keydown', window._poolStockBarcodeListener);
+        }
+
+        let barcodeBuffer = '';
+        let barcodeTimeout = null;
+
+        window._poolStockBarcodeListener = async (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+            if (e.key === 'Enter') {
+                if (barcodeBuffer.length >= 3) {
+                    e.preventDefault();
+                    const sku = barcodeBuffer.trim();
+                    const all = await this.module.getInventory();
+                    const item = all.find(i => i.sku.toLowerCase() === sku.toLowerCase());
+
+                    if (item) {
+                        try {
+                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            const osc = ctx.createOscillator();
+                            osc.connect(ctx.destination);
+                            osc.frequency.value = 800;
+                            osc.start();
+                            osc.stop(ctx.currentTime + 0.1);
+                        } catch (err) { }
+
+                        console.log(`⚡ Barcode scanned: ${sku}`);
+                        this.showItemDetail(item);
+                    } else {
+                        alert(`Scanned barcode not found in inventory: ${sku}`);
+                    }
+                }
+                barcodeBuffer = '';
+                return;
+            }
+
+            if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+                clearTimeout(barcodeTimeout);
+                barcodeTimeout = setTimeout(() => {
+                    barcodeBuffer = '';
+                }, 50);
+            }
+        };
+        document.addEventListener('keydown', window._poolStockBarcodeListener);
+
         // Add Item Button
         this.container.querySelector('#add-item-btn').addEventListener('click', () => {
             this.showAddItemModal();
@@ -771,7 +819,8 @@ class PoolStockUI {
                                                 <td>${o.expectedDate ? new Date(o.expectedDate).toLocaleDateString() : '—'}</td>
                                                 <td><span class="badge ${statusBadge(o.status)}">${o.status}</span></td>
                                                 <td>
-                                                    ${o.status === 'pending' ? `<button class="btn btn-sm btn-outline receive-po-btn" data-id="${o.id}"><i class="ph ph-package"></i> Receive</button>` : ''}
+                                                    ${o.status === 'pending' ? `<button class="btn btn-sm btn-outline receive-po-btn" style="margin-right: 0.5rem;" data-id="${o.id}"><i class="ph ph-package"></i> Receive</button>` : ''}
+                                                    <button class="btn btn-sm btn-outline wa-share-po-btn" style="color:var(--success, #10b981); border-color:var(--success, #10b981)" data-id="${o.id}"><i class="ph ph-whatsapp-logo"></i> Share</button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -793,6 +842,27 @@ class PoolStockUI {
 
             this.container.querySelectorAll('.receive-po-btn').forEach(btn => {
                 btn.addEventListener('click', () => this.showReceivePOModal(parseInt(btn.dataset.id)));
+            });
+
+            this.container.querySelectorAll('.wa-share-po-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const o = orders.find(order => order.id === parseInt(btn.dataset.id));
+                    if (!o) return;
+
+                    const supplierName = supplierMap[o.supplierId] || `Supplier #${o.supplierId}`;
+                    const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+                    const myBiz = currentUser?.businessName || 'Our Business';
+
+                    let waText = `*Purchase Order: PO-${o.id}*\n_From: ${myBiz}_\n_To: ${supplierName}_\nDate: ${new Date(o.orderDate).toLocaleDateString()}\n\n*Items Ordered:*\n`;
+                    (o.items || []).forEach(item => {
+                        waText += `- ${item.sku} (x${item.quantity}) @ R ${(item.unitPrice || 0).toFixed(2)}\n`;
+                    });
+                    waText += `\n*Expected Total:* R ${(o.totalAmount || 0).toFixed(2)}\n`;
+                    if (o.notes) waText += `\n*Notes:* ${o.notes}\n`;
+                    waText += `\n_Generated via Platform_`;
+
+                    window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`, '_blank');
+                });
             });
 
             this.injectStyles();

@@ -59,6 +59,58 @@ class SyncManager {
     console.log('📡 Connection restored - initiating sync');
     this.failedAttempts = 0;
     this.startPeriodicSync();
+
+    // Phase 5: Auth Rehydration
+    if (isSupabaseEnabled()) {
+      this.checkCloudAuth();
+    }
+  }
+
+  async checkCloudAuth() {
+    console.log('☁️ Checking Cloud Auth state for rehydration...');
+    try {
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+      if (error || !session) {
+        console.warn('⚠️ Cloud session expired or invalid while offline. Sync will fail until re-authenticated.');
+        this.showReauthPrompt();
+      } else {
+        console.log('✅ Cloud session is valid. Background sync can proceed.');
+      }
+    } catch (err) {
+      console.error('Error checking cloud auth:', err);
+    }
+  }
+
+  showReauthPrompt() {
+    // Prevent multiple prompts
+    if (document.getElementById('cloud-reauth-toast')) return;
+
+    const toast = document.createElement('div');
+    toast.id = 'cloud-reauth-toast';
+    toast.innerHTML = `
+      <div style="position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg-primary, #0f172a); border: 1px solid var(--accent-primary, #3b82f6); box-shadow: 0 10px 25px rgba(0,0,0,0.5); padding: 1rem 1.5rem; border-radius: 9999px; display: flex; align-items: center; gap: 1rem; z-index: 10000; backdrop-filter: blur(10px);">
+        <i class="ph-duotone ph-cloud-warning" style="font-size: 1.5rem; color: #f59e0b;"></i>
+        <div style="color: white; font-size: 0.9rem;">
+          <strong>Cloud Sync Paused</strong><br>
+          <span style="opacity: 0.8">Your session expired while offline.</span>
+        </div>
+        <button id="reauth-btn" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Reconnect</button>
+        <button id="dismiss-reauth-btn" class="btn-icon" style="color: white; opacity: 0.5; margin-left: -0.5rem;"><i class="ph ph-x"></i></button>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+
+    document.getElementById('reauth-btn').addEventListener('click', () => {
+      // Clear local session and force a reload to show the login screen
+      localStorage.removeItem('erp_session');
+      window.location.reload();
+    });
+
+    document.getElementById('dismiss-reauth-btn').addEventListener('click', () => {
+      toast.remove();
+    });
   }
 
   onOffline() {

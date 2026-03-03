@@ -321,6 +321,63 @@ class SalesUI {
 
     // Add to Cart (Delegation)
 
+    // Hardware Integration: HID Barcode Scanner (The Speed Moat)
+    if (window._salesBarcodeListener) {
+      document.removeEventListener('keydown', window._salesBarcodeListener);
+    }
+
+    let barcodeBuffer = '';
+    let barcodeTimeout = null;
+
+    window._salesBarcodeListener = (e) => {
+      // Ignore if typing in an input field (search, quantity, etc)
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+      if (e.key === 'Enter') {
+        if (barcodeBuffer.length >= 3) {
+          e.preventDefault();
+          const sku = barcodeBuffer.trim();
+          const item = inventory.find(i => i.sku.toLowerCase() === sku.toLowerCase());
+
+          if (item) {
+            // Beep feedback
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              osc.connect(ctx.destination);
+              osc.frequency.value = 800;
+              osc.start();
+              osc.stop(ctx.currentTime + 0.1);
+            } catch (err) { }
+
+            const existing = cart.find(i => i.sku === item.sku);
+            if (existing) {
+              existing.quantity++;
+            } else {
+              cart.push({ sku: item.sku, name: item.name, price: item.unitPrice || item.unitCost || 0, quantity: 1 });
+            }
+            updateCart();
+            // Optional: flash screen or show subtle toast
+            console.log(`⚡ Barcode scanned: ${sku}`);
+          } else {
+            console.warn(`Scanned barcode not in inventory: ${sku}`);
+          }
+        }
+        barcodeBuffer = '';
+        return;
+      }
+
+      if (e.key.length === 1) {
+        barcodeBuffer += e.key;
+        clearTimeout(barcodeTimeout);
+        // HID Scanners type >10x faster than humans. 50ms timeout ensures we only capture scanner bursts.
+        barcodeTimeout = setTimeout(() => {
+          barcodeBuffer = '';
+        }, 50);
+      }
+    };
+    document.addEventListener('keydown', window._salesBarcodeListener);
+
     // Hardware Integration: Listen for live scale readings
     window.addEventListener('scale-reading', (e) => {
       const modal = document.getElementById('open-item-modal');
@@ -536,12 +593,24 @@ class SalesUI {
         </div>
         <div class="invoice-actions">
           <button id="print-invoice-btn" class="btn btn-secondary"><i class="ph ph-printer"></i> Print Receipt</button>
+          <button id="wa-invoice-btn" class="btn" style="background:var(--success, #10b981); color:white; border:none"><i class="ph ph-whatsapp-logo"></i> Send via WhatsApp</button>
           <button id="close-invoice-btn" class="btn btn-primary">New Sale</button>
         </div>
       </div>
     `;
     document.body.appendChild(modal);
     modal.showModal();
+
+    modal.querySelector('#wa-invoice-btn').addEventListener('click', () => {
+      let waText = `*${businessName}*\n_Tax Invoice: ${invoiceNo}_\nDate: ${invoiceDate}\nCustomer: ${customerName}\n\n*Items:*\n`;
+      sale.items.forEach(item => {
+        waText += `- ${item.name} (x${item.quantity}) = R ${(item.quantity * item.unitPrice).toFixed(2)}\n`;
+      });
+      waText += `\n*Subtotal:* R ${(sale.subtotal || 0).toFixed(2)}\n*VAT (15%):* R ${(sale.vatAmount || 0).toFixed(2)}\n*Total:* R ${(sale.total || 0).toFixed(2)}\n\n_Thank you for your business!_`;
+
+      const encodedText = encodeURIComponent(waText);
+      window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+    });
 
     modal.querySelector('#print-invoice-btn').addEventListener('click', async () => {
       // The Moat: Print directly to connected Bluetooth thermal printer instead of standard browser print dialog
