@@ -526,6 +526,7 @@ class SmartShiftUI {
             </tr>
           </thead>
           <tbody>
+            ${orders.map(o => `
               <tr>
                 <td>${o.orderNumber}</td>
                 <td>${o.product}</td>
@@ -539,12 +540,10 @@ class SmartShiftUI {
         : '-'}
                 </td>
               </tr>
-              </tr>
-            `).join('')
-  }
+            `).join('')}
           </tbody>
-        </table >
-      </div >
+        </table>
+      </div>
 
   <dialog id="add-order-modal">
     <form method="dialog">
@@ -605,13 +604,13 @@ class SmartShiftUI {
     const workers = await this.module.getWorkers();
 
     container.innerHTML = `
-  < div class="action-bar" >
+      <div class="action-bar">
         <h2>Shift Schedule</h2>
         <div style="display: flex; gap: 0.5rem;">
           <button id="optimize-btn" class="btn btn-secondary"><i class="ph-duotone ph-magic-wand"></i> Optimize Schedule</button>
           <button id="add-shift-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Schedule Shift</button>
         </div>
-      </div >
+      </div>
       
       <div class="table-container">
         <table class="data-table">
@@ -689,8 +688,8 @@ class SmartShiftUI {
           alert('No optimization possible. ' + (result?.insights?.message || 'Check orders/resources.'));
         } else {
           const confirmed = confirm(
-            `AI generated ${ result.schedule.length } shifts.\n` +
-            `Blocked orders: ${ result.insights.blocked } \n\n` +
+            `AI generated ${result.schedule.length} shifts.\n` +
+            `Blocked orders: ${result.insights.blocked} \n\n` +
             `Apply this schedule ? `
           );
 
@@ -746,7 +745,7 @@ class SmartShiftUI {
         e.target.disabled = true;
 
         try {
-          const startTime = new Date(`${ date }T${ time } `).getTime();
+          const startTime = new Date(`${date}T${time} `).getTime();
           await this.module.createShift({
             date,
             startTime,
