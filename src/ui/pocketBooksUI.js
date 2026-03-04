@@ -108,45 +108,7 @@ class PocketBooksUI {
                         </div>
                     </div>
 
-                    <!-- Financial Statements Panel -->
-                    <div class="financial-reports-panel">
-                        <div class="reports-header">
-                            <div>
-                                <h3><i class="ph-duotone ph-files"></i> Financial Documents</h3>
-                                <p>Standardized reports configured for your business profile.</p>
-                            </div>
-                        </div>
-                        <div class="reports-grid">
-                            <div class="report-card" id="export-pl-btn" style="cursor:pointer;">
-                                <div class="report-icon pl"><i class="ph-duotone ph-chart-line-up"></i></div>
-                                <div class="report-info">
-                                    <h4>Profit & Loss</h4>
-                                    <span>Income vs Expenses</span>
-                                </div>
-                            </div>
-                            <div class="report-card" id="export-cf-btn" style="cursor:pointer;">
-                                <div class="report-icon cf"><i class="ph-duotone ph-arrows-left-right"></i></div>
-                                <div class="report-info">
-                                    <h4>Cash Flow</h4>
-                                    <span>Operating, Investing, Financing</span>
-                                </div>
-                            </div>
-                            <div class="report-card" id="export-bs-btn" style="cursor:pointer;">
-                                <div class="report-icon bs"><i class="ph-duotone ph-scales"></i></div>
-                                <div class="report-info">
-                                    <h4>Balance Sheet</h4>
-                                    <span>Assets, Liabilities, Equity</span>
-                                </div>
-                            </div>
-                            <div class="report-card" id="export-tax-btn" style="cursor:pointer;">
-                                <div class="report-icon tax"><i class="ph-duotone ph-file-pdf"></i></div>
-                                <div class="report-info">
-                                    <h4>Tax Ledger</h4>
-                                    <span>Formatted Itemized Export</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Filters -->
                     <div class="filters-bar">
@@ -202,6 +164,46 @@ class PocketBooksUI {
                                     ${this.renderTransactionRows(transactions)}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Financial Statements Panel -->
+                    <div class="financial-reports-panel">
+                        <div class="reports-header">
+                            <div>
+                                <h3><i class="ph-duotone ph-files"></i> Financial Documents</h3>
+                                <p>Standardized reports configured for your business profile.</p>
+                            </div>
+                        </div>
+                        <div class="reports-grid">
+                            <div class="report-card" id="export-pl-btn" style="cursor:pointer;">
+                                <div class="report-icon pl"><i class="ph-duotone ph-chart-line-up"></i></div>
+                                <div class="report-info">
+                                    <h4>Profit & Loss</h4>
+                                    <span>Income vs Expenses</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-cf-btn" style="cursor:pointer;">
+                                <div class="report-icon cf"><i class="ph-duotone ph-arrows-left-right"></i></div>
+                                <div class="report-info">
+                                    <h4>Cash Flow</h4>
+                                    <span>Operating, Investing, Financing</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-bs-btn" style="cursor:pointer;">
+                                <div class="report-icon bs"><i class="ph-duotone ph-scales"></i></div>
+                                <div class="report-info">
+                                    <h4>Balance Sheet</h4>
+                                    <span>Assets, Liabilities, Equity</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-tax-btn" style="cursor:pointer;">
+                                <div class="report-icon tax"><i class="ph-duotone ph-file-pdf"></i></div>
+                                <div class="report-info">
+                                    <h4>Tax Ledger</h4>
+                                    <span>Formatted Itemized Export</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
