@@ -388,9 +388,10 @@ class TrustCircle {
 
   // Syndicate analytics
   async getSyndicateAnalytics(syndicateId) {
-    const syndicate = await db.get(STORES.syndicates, syndicateId);
-    const members = await this.getMembers(syndicateId);
-    const contributions = await this.getContributions({ syndicateId });
+    const id = parseInt(syndicateId, 10);
+    const syndicate = await db.get(STORES.syndicates, id);
+    const members = await this.getMembers(id);
+    const contributions = await this.getContributions({ syndicateId: id });
 
     const paidContributions = contributions.filter(c => c.status === 'paid');
     const pendingContributions = contributions.filter(c => c.status === 'pending');

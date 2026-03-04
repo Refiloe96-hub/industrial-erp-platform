@@ -248,7 +248,7 @@ class PocketBooksUI {
         }
 
         return transactions.map(t => `
-                < tr class="transaction-row ${t.type}" data - id="${t.id}" style = "cursor:pointer;" >
+                <tr class="transaction-row ${t.type}" data-id="${t.id}" style="cursor:pointer;">
                 <td>${new Date(t.date).toLocaleDateString('en-ZA')}</td>
                 <td>${t.description}</td>
                 <td><span class="badge ${t.category?.toLowerCase()}">${t.category}</span></td>
@@ -256,7 +256,7 @@ class PocketBooksUI {
                 <td class="amount ${t.type}">
                     ${t.type === 'income' ? '+' : '-'} R ${(t.amount || 0).toLocaleString()}
                 </td>
-            </tr >
+            </tr>
                 `).join('');
     }
 
