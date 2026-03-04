@@ -450,6 +450,68 @@ class PoolStock {
       potentialProfit
     };
   }
+
+  // Phase 7: Historical Data for Analytics Moat
+  async getHistoricalInventoryValue(days = 30) {
+    const items = await this.getInventory();
+
+    // Fallback/Safety: Ensure stockMovements store actually exists before querying
+    let movements = [];
+    try {
+      movements = await db.getAll('stockMovements');
+    } catch (e) {
+      console.warn("Could not fetch stockMovements, using simulated historical data.", e);
+    }
+
+    // Initialize daily array [timestamp, totalValue] points
+    const timeSeries = [];
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    // Current State
+    let currentValue = items.reduce((sum, i) => sum + (i.quantity * (i.unitPrice || i.unitCost || 0)), 0);
+
+    // Group movements by day backwards to reconstruct state
+    // Create a bucketing system for fast lookup
+    const movementsByDay = {};
+    movements.forEach(m => {
+      const dayStart = new Date(m.timestamp).setHours(0, 0, 0, 0);
+      if (!movementsByDay[dayStart]) movementsByDay[dayStart] = [];
+      movementsByDay[dayStart].push(m);
+    });
+
+    // Helper to get item value per unit
+    const itemValueMap = {};
+    items.forEach(i => itemValueMap[i.sku] = (i.unitPrice || i.unitCost || 0));
+
+    // Walk backwards in time to reconstruct the total portfolio value
+    for (let i = 0; i < days; i++) {
+      // Find the start of the day `i` days ago
+      const dateObj = new Date(now - (i * dayMs));
+      dateObj.setHours(0, 0, 0, 0);
+      const dayStartMs = dateObj.getTime();
+
+      // Push current calculated value for this historical day
+      // (Prepend to array so it ends up chronologically ordered)
+      timeSeries.unshift([dayStartMs, currentValue]);
+
+      // "Undo" the movements of that day to calculate what the value was the day BEFORE
+      // If it was an 'in' movement, the stock was added that day, so the day BEFORE had LESS stock (-).
+      // If it was an 'out' movement, the stock was removed that day, so the day BEFORE had MORE stock (+).
+      if (movementsByDay[dayStartMs]) {
+        movementsByDay[dayStartMs].forEach(mov => {
+          const valueChange = (mov.quantity * (itemValueMap[mov.sku] || 0));
+          if (mov.type === 'in') {
+            currentValue -= valueChange; // Reverse 'in'
+          } else if (mov.type === 'out') {
+            currentValue += valueChange; // Reverse 'out'
+          }
+        });
+      }
+    }
+
+    return timeSeries;
+  }
 }
 
 export default PoolStock;

@@ -76,6 +76,21 @@ class PoolStockUI {
                         </div>
                     </div>
 
+                    <!-- Interactive Analytics Chart (Phase 7) -->
+                    <div class="card" style="margin-bottom: 2rem; background: var(--bg-primary); border: 1px solid var(--border); overflow: hidden;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 1rem 1.5rem;">
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; color: var(--text-primary);"><i class="ph-duotone ph-trend-up"></i> Total Inventory Value Over Time</h3>
+                            <div class="chart-controls" style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary chart-range-btn active" data-days="7" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">1W</button>
+                                <button class="btn btn-secondary chart-range-btn" data-days="30" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">1M</button>
+                                <button class="btn btn-secondary chart-range-btn" data-days="90" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">3M</button>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div id="inventory-mountain-chart" style="width: 100%; min-height: 350px;"></div>
+                        </div>
+                    </div>
+
                     <!-- Filters -->
                     <div class="filters-bar">
                         <div class="filter-group">
@@ -130,6 +145,7 @@ class PoolStockUI {
             `;
 
             this.attachEventListeners();
+            await this.renderMountainChart(30); // Default to 30 days
             this.injectStyles();
 
         } catch (err) {
@@ -476,6 +492,130 @@ class PoolStockUI {
                 }
             });
         });
+
+        // Chart Range Buttons
+        this.container.querySelectorAll('.chart-range-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                this.container.querySelectorAll('.chart-range-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                const days = parseInt(e.target.dataset.days);
+                await this.renderMountainChart(days);
+            });
+        });
+    }
+
+    async renderMountainChart(days) {
+        if (!window.ApexCharts) {
+            console.warn("ApexCharts not loaded yet. Skipping chart render.");
+            return;
+        }
+
+        const chartContainer = this.container.querySelector('#inventory-mountain-chart');
+        if (!chartContainer) return;
+
+        chartContainer.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:350px;color:var(--text-secondary);"><i class="ph ph-spinner ph-spin" style="margin-right:8px;"></i> Loading Chart Data...</div>';
+
+        try {
+            const timeSeriesData = await this.module.getHistoricalInventoryValue(days);
+
+            // Format for ApexCharts: [[timestamp, value], ...]
+            const seriesData = timeSeriesData.map(point => [point[0], parseFloat(point[1].toFixed(2))]);
+
+            // Determine min/max for tighter y-axis fitting (makes the mountain look taller)
+            const values = seriesData.map(p => p[1]);
+            const minVal = Math.max(0, Math.min(...values) * 0.95);
+
+            const isDarkMode = true; // Our app uses a dark theme by default
+
+            const options = {
+                series: [{
+                    name: 'Total Inventory Value',
+                    data: seriesData
+                }],
+                chart: {
+                    type: 'area',
+                    height: 350,
+                    fontFamily: 'Inter, sans-serif',
+                    background: 'transparent',
+                    toolbar: { show: false },
+                    animations: { enabled: true, easing: 'easeinout', speed: 800 },
+                    parentHeightOffset: 0
+                },
+                colors: ['#10a37f'], // OpenAI green/teal core brand color
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.6,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                dataLabels: { enabled: false },
+                stroke: {
+                    curve: 'smooth',
+                    width: 2
+                },
+                xaxis: {
+                    type: 'datetime',
+                    tooltip: { enabled: false }, // We use universal tooltip instead
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        style: { colors: '#9ca3af', fontSize: '12px' },
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: "MMM 'yy",
+                            day: 'dd MMM',
+                            hour: 'HH:mm'
+                        }
+                    }
+                },
+                yaxis: {
+                    min: minVal,
+                    tickAmount: 4,
+                    labels: {
+                        style: { colors: '#9ca3af', fontSize: '12px' },
+                        formatter: (value) => {
+                            if (value >= 1000) return 'R ' + (value / 1000).toFixed(1) + 'k';
+                            return 'R ' + value.toFixed(0);
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: 'rgba(255, 255, 255, 0.05)',
+                    strokeDashArray: 4,
+                    xaxis: { lines: { show: true } },
+                    yaxis: { lines: { show: true } },
+                    padding: { top: 0, right: 0, bottom: 0, left: 10 }
+                },
+                tooltip: {
+                    theme: isDarkMode ? 'dark' : 'light',
+                    y: {
+                        formatter: function (val) {
+                            return "R " + val.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    },
+                    marker: { show: false }
+                },
+                theme: {
+                    mode: isDarkMode ? 'dark' : 'light'
+                }
+            };
+
+            chartContainer.innerHTML = ''; // clear loading state
+
+            if (this.mountainChart) {
+                this.mountainChart.destroy();
+            }
+
+            this.mountainChart = new ApexCharts(chartContainer, options);
+            this.mountainChart.render();
+
+        } catch (err) {
+            console.error("Failed to render mountain chart", err);
+            chartContainer.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--danger);"><i class="ph ph-warning-circle"></i> Error loading chart data</div>`;
+        }
     }
 
     async loadForecastView() {
