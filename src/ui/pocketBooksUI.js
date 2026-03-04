@@ -284,9 +284,9 @@ class PocketBooksUI {
             const maxFc = Math.max(...result.forecast, 1);
             const fcBars = result.forecast.slice(0, 14).map((v, i) => {
                 const h = Math.round((v / maxFc) * 40);
-                return `< rect x = "${i * 14 + 2}" y = "${44 - h}" width = "11" height = "${h}" rx = "2" fill = "#6366f1" opacity = "0.7" /> `;
+                return `<rect x="${i * 14 + 2}" y="${44 - h}" width="11" height="${h}" rx="2" fill="#6366f1" opacity="0.7"/>`;
             }).join('');
-            const fcSvg = `< svg width = "210" height = "46" viewBox = "0 0 210 46" style = "display:block;margin:0.5rem 0" > ${fcBars}</svg > `;
+            const fcSvg = `<svg width="210" height="46" viewBox="0 0 210 46" style="display:block;margin:0.5rem 0">${fcBars}</svg>`;
 
             // NL Insights
             const apiKey = aiEngine.getApiKey();
