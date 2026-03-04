@@ -328,23 +328,15 @@ class PoolStockUI {
                     </div>
                 </div>
 
-                <div class="ip-chart-wrap">
-                    <div class="ip-section-title">Stock Level</div>
-                    <div class="ip-chart-row">
-                        <span class="ip-chart-label">Current Stock</span>
-                        <div class="ip-bar-track">
-                            <div class="ip-bar-fill" style="width:${qtyPct}%; background:${color};"></div>
+                <div class="ip-chart-wrap" style="position:relative; z-index:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+                        <span class="ip-section-title" style="margin:0;"><i class="ph-duotone ph-chart-line"></i> Asset History (30D)</span>
+                        <div style="display:flex; gap:0.5rem; font-size: 0.75rem; font-weight:600;">
+                            <span style="color:var(--text-secondary);">Qty:</span> <span style="color:var(--text-primary);">${item.quantity}</span>
                         </div>
-                        <span class="ip-bar-val">${item.quantity}</span>
                     </div>
-                    <div class="ip-chart-row">
-                        <span class="ip-chart-label">Reorder Level</span>
-                        <div class="ip-bar-track">
-                            <div class="ip-bar-fill" style="width:${reorderPct}%; background:#94a3b8;"></div>
-                        </div>
-                        <span class="ip-bar-val">${reorderLevel}</span>
-                    </div>
-                    ${item.quantity <= reorderLevel ? `<p style="font-size:0.8rem;color:${color};margin-top:0.5rem;font-weight:500;">⚠ Stock is at or below reorder level. Consider restocking.</p>` : ''}
+                    <div id="item-ticker-chart-${item.sku}" style="width: 100%; height: 160px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border,#e5e7eb); overflow:hidden;"></div>
+                    ${item.quantity <= reorderLevel ? `<p style="font-size:0.8rem;color:${color};margin-top:0.5rem;font-weight:500;"><i class="ph-duotone ph-warning"></i> Stock is at or below reorder level (${reorderLevel}). Consider restocking.</p>` : ''}
                 </div>
 
                 <div class="ip-section-title">Product Information</div>
@@ -390,6 +382,88 @@ class PoolStockUI {
         panel.querySelector('#close-ip').addEventListener('click', close);
         panel.querySelector('#close-ip-footer').addEventListener('click', close);
         overlay.addEventListener('click', close);
+
+        // Render Mini Ticker Chart
+        if (window.ApexCharts) {
+            this.renderItemTickerChart(item, color);
+        }
+    }
+
+    async renderItemTickerChart(item, brandColor) {
+        const chartId = `#item-ticker-chart-${item.sku}`;
+        const container = document.querySelector(chartId);
+        if (!container) return;
+
+        container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;"><i class="ph ph-spinner ph-spin" style="margin-right:4px;"></i> Syncing...</div>';
+
+        try {
+            const timeSeries = await this.module.getHistoricalItemQuantity(item.sku, 30);
+
+            // Fallback if no data or very new item
+            if (!timeSeries || timeSeries.length < 2) {
+                container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;background:rgba(0,0,0,0.02)">Insufficient history</div>';
+                return;
+            }
+
+            const seriesData = timeSeries.map(p => [p[0], p[1]]);
+            const maxVal = Math.max(...seriesData.map(p => p[1])) || 10;
+            const isDarkMode = true;
+
+            const options = {
+                series: [{ name: 'Quantity', data: seriesData }],
+                chart: {
+                    type: 'area',
+                    height: 160,
+                    parentHeightOffset: 0,
+                    sparkline: { enabled: true },
+                    animations: { enabled: true, easing: 'easeinout', speed: 800 }
+                },
+                colors: [brandColor], // Use the dynamic status color for the line
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.35,
+                        opacityTo: 0.0,
+                        stops: [0, 100],
+                        colorStops: [
+                            { offset: 0, color: brandColor, opacity: 0.25 },
+                            { offset: 100, color: brandColor, opacity: 0.0 }
+                        ]
+                    }
+                },
+                stroke: { curve: 'straight', width: 2 }, // Straight line sparkline
+                yaxis: { min: 0, max: maxVal * 1.05 },
+                xaxis: {
+                    type: 'datetime',
+                    crosshairs: {
+                        show: true,
+                        width: 1,
+                        position: 'back',
+                        opacity: 0.3,
+                        stroke: { color: brandColor, dashArray: 4 }
+                    }
+                },
+                tooltip: {
+                    theme: isDarkMode ? 'dark' : 'light',
+                    fixed: { enabled: false },
+                    style: { fontSize: '11px', fontFamily: 'Inter' },
+                    x: { show: true, format: 'dd MMM yyyy' },
+                    y: {
+                        title: { formatter: function () { return 'Units:' } }
+                    },
+                    marker: { show: false }
+                }
+            };
+
+            container.innerHTML = '';
+            const chart = new ApexCharts(container, options);
+            chart.render();
+
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--danger);font-size:0.8rem;"><i class="ph ph-warning-circle" style="margin-right:4px;"></i> Error</div>';
+        }
     }
 
     attachEventListeners() {
@@ -535,26 +609,30 @@ class PoolStockUI {
                 chart: {
                     type: 'area',
                     height: 350,
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Inter, system-ui, sans-serif',
                     background: 'transparent',
                     toolbar: { show: false },
                     animations: { enabled: true, easing: 'easeinout', speed: 800 },
                     parentHeightOffset: 0
                 },
-                colors: ['#10a37f'], // OpenAI green/teal core brand color
+                colors: ['#3b82f6'], // Premium deep blue
                 fill: {
                     type: 'gradient',
                     gradient: {
                         shadeIntensity: 1,
-                        opacityFrom: 0.6,
-                        opacityTo: 0.05,
-                        stops: [0, 90, 100]
+                        opacityFrom: 0.5,
+                        opacityTo: 0.02,
+                        stops: [0, 90, 100],
+                        colorStops: [
+                            { offset: 0, color: '#3b82f6', opacity: 0.4 },
+                            { offset: 100, color: '#3b82f6', opacity: 0.0 }
+                        ]
                     }
                 },
                 dataLabels: { enabled: false },
                 stroke: {
-                    curve: 'smooth',
-                    width: 2
+                    curve: 'straight', // Straight lines look more aggressive/financial
+                    width: 2.5
                 },
                 xaxis: {
                     type: 'datetime',
@@ -562,41 +640,48 @@ class PoolStockUI {
                     axisBorder: { show: false },
                     axisTicks: { show: false },
                     labels: {
-                        style: { colors: '#9ca3af', fontSize: '12px' },
-                        datetimeFormatter: {
-                            year: 'yyyy',
-                            month: "MMM 'yy",
-                            day: 'dd MMM',
-                            hour: 'HH:mm'
-                        }
+                        style: { colors: '#64748b', fontSize: '11px', fontFamily: 'Inter' },
+                        offsetY: 4
+                    },
+                    crosshairs: {
+                        show: true,
+                        width: 1,
+                        position: 'back',
+                        opacity: 0.3,
+                        stroke: { color: '#64748b', dashArray: 4 }
                     }
                 },
                 yaxis: {
                     min: minVal,
-                    tickAmount: 4,
+                    tickAmount: 5,
+                    axisBorder: { show: false },
                     labels: {
-                        style: { colors: '#9ca3af', fontSize: '12px' },
+                        style: { colors: '#64748b', fontSize: '11px', fontFamily: 'Inter' },
                         formatter: (value) => {
                             if (value >= 1000) return 'R ' + (value / 1000).toFixed(1) + 'k';
                             return 'R ' + value.toFixed(0);
-                        }
+                        },
+                        offsetX: -10
                     }
                 },
                 grid: {
-                    borderColor: 'rgba(255, 255, 255, 0.05)',
-                    strokeDashArray: 4,
+                    borderColor: 'rgba(255, 255, 255, 0.04)',
+                    strokeDashArray: 3,
+                    position: 'back',
                     xaxis: { lines: { show: true } },
                     yaxis: { lines: { show: true } },
                     padding: { top: 0, right: 0, bottom: 0, left: 10 }
                 },
                 tooltip: {
                     theme: isDarkMode ? 'dark' : 'light',
+                    style: { fontSize: '12px', fontFamily: 'Inter' },
                     y: {
                         formatter: function (val) {
                             return "R " + val.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         }
                     },
-                    marker: { show: false }
+                    marker: { show: false },
+                    x: { format: 'dd MMM yyyy' }
                 },
                 theme: {
                     mode: isDarkMode ? 'dark' : 'light'

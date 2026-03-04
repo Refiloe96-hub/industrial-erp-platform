@@ -512,6 +512,58 @@ class PoolStock {
 
     return timeSeries;
   }
+
+  // Phase 7: Historical Data for Individual Ticker Chart
+  async getHistoricalItemQuantity(sku, days = 30) {
+    const items = await this.getInventory();
+    const item = items.find(i => i.sku === sku);
+    if (!item) return [];
+
+    let movements = [];
+    try {
+      movements = await db.getAll('stockMovements');
+    } catch (e) {
+      console.warn("Could not fetch stockMovements", e);
+    }
+
+    // Filter movements just for this SKU
+    const itemMovements = movements.filter(m => m.sku === sku);
+
+    const timeSeries = [];
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    let currentQty = item.quantity || 0;
+
+    // Group movements by day
+    const movementsByDay = {};
+    itemMovements.forEach(m => {
+      const dayStart = new Date(m.timestamp).setHours(0, 0, 0, 0);
+      if (!movementsByDay[dayStart]) movementsByDay[dayStart] = [];
+      movementsByDay[dayStart].push(m);
+    });
+
+    for (let i = 0; i < days; i++) {
+      const dateObj = new Date(now - (i * dayMs));
+      dateObj.setHours(0, 0, 0, 0);
+      const dayStartMs = dateObj.getTime();
+
+      timeSeries.unshift([dayStartMs, currentQty]);
+
+      if (movementsByDay[dayStartMs]) {
+        movementsByDay[dayStartMs].forEach(mov => {
+          const qtyChange = mov.quantity || 0;
+          if (mov.type === 'in') {
+            currentQty -= qtyChange; // Reverse 'in'
+          } else if (mov.type === 'out') {
+            currentQty += qtyChange; // Reverse 'out'
+          }
+        });
+      }
+    }
+
+    return timeSeries;
+  }
 }
 
 export default PoolStock;
