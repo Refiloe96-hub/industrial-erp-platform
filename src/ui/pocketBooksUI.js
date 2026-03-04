@@ -276,6 +276,7 @@ class PocketBooksUI {
     _getBusinessContext() {
         const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
         return {
+            businessType: currentUser.businessType || 'shopowner',
             businessName: currentUser.businessName || 'My Business',
             ownerName: currentUser.ownerName || 'Owner',
             period: this.dateRange === 0 ? 'All Time' : `Last ${this.dateRange} Days`,
@@ -285,8 +286,8 @@ class PocketBooksUI {
 
     async exportProfitAndLoss() {
         try {
-            const pl = await this.module.generateProfitAndLoss();
             const ctx = this._getBusinessContext();
+            const pl = await this.module.generateProfitAndLoss(this.dateRange === 0 ? { startDate: new Date(0), endDate: new Date() } : undefined, ctx.businessType);
 
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -298,16 +299,16 @@ class PocketBooksUI {
                 </head>
                 <body>
                     <h1>${ctx.businessName} - Profit & Loss Statement</h1>
-                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated}</div>
+                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated} <br/> Business Profile: ${ctx.businessType.toUpperCase()}</div>
                     
                     <table>
-                        <tr><th colspan="2">Revenue</th></tr>
+                        <tr><th colspan="2">${pl.labels.revenue}</th></tr>
                         ${Object.entries(pl.revenueBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
-                        <tr class="subtotal"><td>Total Revenue</td><td class="right">R ${pl.revenue.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total ${pl.labels.revenue}</td><td class="right">R ${pl.revenue.toFixed(2)}</td></tr>
                         
-                        <tr><th colspan="2">Cost of Goods Sold (COGS)</th></tr>
+                        <tr><th colspan="2">${pl.labels.cogs}</th></tr>
                         ${Object.entries(pl.cogsBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
-                        <tr class="subtotal"><td>Total COGS</td><td class="right">R ${pl.costOfGoodsSold.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total ${pl.labels.cogs.split(' (')[0]}</td><td class="right">R ${pl.costOfGoodsSold.toFixed(2)}</td></tr>
                         
                         <tr class="grand-total"><td>Gross Profit</td><td class="right">R ${pl.grossProfit.toFixed(2)}</td></tr>
                         
@@ -330,8 +331,8 @@ class PocketBooksUI {
 
     async exportCashFlowStatement() {
         try {
-            const cf = await this.module.generateCashFlowStatement();
             const ctx = this._getBusinessContext();
+            const cf = await this.module.generateCashFlowStatement(this.dateRange === 0 ? { startDate: new Date(0), endDate: new Date() } : undefined, ctx.businessType);
 
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -343,7 +344,7 @@ class PocketBooksUI {
                 </head>
                 <body>
                     <h1>${ctx.businessName} - Statement of Cash Flows</h1>
-                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated}</div>
+                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated} <br/> Business Profile: ${ctx.businessType.toUpperCase()}</div>
                     
                     <table>
                         <tr><th colspan="2">Cash Flows from Operating Activities</th></tr>
@@ -376,8 +377,8 @@ class PocketBooksUI {
 
     async exportBalanceSheet() {
         try {
-            const bs = await this.module.generateBalanceSheet();
             const ctx = this._getBusinessContext();
+            const bs = await this.module.generateBalanceSheet(ctx.businessType);
 
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -389,12 +390,12 @@ class PocketBooksUI {
                 </head>
                 <body>
                     <h1>${ctx.businessName} - Balance Sheet</h1>
-                    <div class="meta">As of: ${ctx.generated}</div>
+                    <div class="meta">As of: ${ctx.generated} <br/> Business Profile: ${ctx.businessType.toUpperCase()}</div>
                     
                     <table>
                         <tr><th colspan="2">ASSETS</th></tr>
                         <tr><td class="indent">Cash and Cash Equivalents</td><td class="right">${bs.assets.cashAndEquivalents.toFixed(2)}</td></tr>
-                        <tr><td class="indent">Inventory Asset Value</td><td class="right">${bs.assets.inventory.toFixed(2)}</td></tr>
+                        <tr><td class="indent">${bs.labels.inventory}</td><td class="right">${bs.assets.inventory.toFixed(2)}</td></tr>
                         <tr class="subtotal"><td>Total Assets</td><td class="right">R ${bs.assets.total.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">LIABILITIES</th></tr>

@@ -271,8 +271,8 @@ class PocketBooks {
     };
   }
 
-  // Phase 9: Industry Standard Financial Statements
-  async generateProfitAndLoss(period = this.currentPeriod) {
+  // Phase 9 & 10: Industry Standard & Business-Type Specific Financial Statements
+  async generateProfitAndLoss(period = this.currentPeriod, businessType = 'shopowner') {
     const transactions = await this.getTransactions({
       startDate: period.startDate.getTime(),
       endDate: period.endDate.getTime()
@@ -291,8 +291,26 @@ class PocketBooks {
         revenue += t.amount;
         revenueBreakdown[t.category] = (revenueBreakdown[t.category] || 0) + t.amount;
       } else if (t.type === 'expense') {
-        // Treat Inventory/Supplies as COGS, everything else as OPEX
-        if (['Inventory', 'Supplies', 'Raw Materials'].includes(t.category)) {
+        // Business Profile specific logic for what constitutes Cost of Goods Sold vs Operating Expenses
+        let isCogs = false;
+
+        switch (businessType) {
+          case 'manufacturer':
+            // Manufacturers track Direct Labor, Raw Materials, and Manufacturing Overhead (Utilities) as COGS
+            isCogs = ['Raw Materials', 'Supplies', 'Inventory', 'Labor', 'Utilities'].includes(t.category);
+            break;
+          case 'warehouse':
+          case 'trader':
+            // Distributors/Warehouses track Freight/Logistics and Inventory purchases as COGS
+            isCogs = ['Inventory', 'Logistics', 'Freight', 'Supplies'].includes(t.category);
+            break;
+          case 'shopowner':
+          default:
+            // Retailers track finished merchandise (Inventory) and direct shrink/supplies
+            isCogs = ['Inventory', 'Merchandise', 'Supplies'].includes(t.category);
+        }
+
+        if (isCogs) {
           costOfGoodsSold += t.amount;
           cogsBreakdown[t.category] = (cogsBreakdown[t.category] || 0) + t.amount;
         } else {
@@ -305,8 +323,17 @@ class PocketBooks {
     const grossProfit = revenue - costOfGoodsSold;
     const netIncome = grossProfit - operatingExpenses;
 
+    // Define business-specific labels
+    const labels = {
+      revenue: businessType === 'warehouse' ? 'Service Revenue & Fees' : 'Sales Revenue',
+      cogs: businessType === 'manufacturer' ? 'Cost of Goods Manufactured (COGM)' :
+        (businessType === 'warehouse' ? 'Cost of Services' : 'Cost of Goods Sold (COGS)'),
+      gross: grossProfit
+    };
+
     return {
       period,
+      labels,
       revenue,
       revenueBreakdown,
       costOfGoodsSold,
@@ -318,7 +345,7 @@ class PocketBooks {
     };
   }
 
-  async generateCashFlowStatement(period = this.currentPeriod) {
+  async generateCashFlowStatement(period = this.currentPeriod, businessType = 'shopowner') {
     const transactions = await this.getTransactions({
       startDate: period.startDate.getTime(),
       endDate: period.endDate.getTime()
@@ -335,14 +362,14 @@ class PocketBooks {
       const isIncome = t.type === 'income';
 
       // Categorize into Operating, Investing, Financing
-      if (['Equipment', 'Assets', 'Machinery'].includes(t.category)) {
+      if (['Equipment', 'Assets', 'Machinery', 'Real Estate'].includes(t.category)) {
         if (isIncome) investingInflow += t.amount;
         else investingOutflow += t.amount;
-      } else if (['Loan', 'Capital', 'Syndicate', 'Dividend'].includes(t.category)) {
+      } else if (['Loan', 'Capital', 'Syndicate', 'Dividend', 'Equity'].includes(t.category)) {
         if (isIncome) financingInflow += t.amount;
         else financingOutflow += t.amount;
       } else {
-        // Default to Operating
+        // Default to Operating (Sales, Inventory, Labor, Utilities, etc)
         if (isIncome) operatingInflow += t.amount;
         else operatingOutflow += t.amount;
       }
@@ -362,7 +389,7 @@ class PocketBooks {
     };
   }
 
-  async generateBalanceSheet() {
+  async generateBalanceSheet(businessType = 'shopowner') {
     // A balance sheet is a snapshot at a point in time (now)
     const accounts = await this.getAccountsSummary();
 
@@ -393,8 +420,16 @@ class PocketBooks {
     // Equity (Assets = Liabilities + Equity)
     const totalEquity = totalAssets - totalLiabilities;
 
+    // Line labels adapted by business type
+    let inventoryLabel = 'Merchandise Inventory';
+    if (businessType === 'manufacturer') inventoryLabel = 'Work-in-Progress / Raw Materials';
+    else if (businessType === 'warehouse') inventoryLabel = 'Warehouse Consumables';
+
     return {
       date: new Date(),
+      labels: {
+        inventory: inventoryLabel
+      },
       assets: {
         cashAndEquivalents,
         inventory: inventoryAssetValue,
