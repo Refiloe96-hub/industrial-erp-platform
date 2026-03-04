@@ -32,27 +32,6 @@ class PocketBooksUI {
                             <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
                                 <i class="ph-duotone ph-robot"></i> AI Insights
                             </button>
-                            
-                            <div class="export-dropdown" id="financial-reports-dropdown">
-                                <button class="export-dropdown-btn" id="open-reports-menu-btn">
-                                    <i class="ph-duotone ph-file-text"></i> Financial Reports <i class="ph-bold ph-caret-down" style="font-size: 0.75rem;"></i>
-                                </button>
-                                <div class="export-dropdown-menu">
-                                    <div class="export-dropdown-item" id="export-pl-btn">
-                                        <i class="ph-duotone ph-chart-line-up"></i> Profit & Loss (P&L)
-                                    </div>
-                                    <div class="export-dropdown-item" id="export-cf-btn">
-                                        <i class="ph-duotone ph-arrows-left-right"></i> Cash Flow
-                                    </div>
-                                    <div class="export-dropdown-item" id="export-bs-btn">
-                                        <i class="ph-duotone ph-scales"></i> Balance Sheet
-                                    </div>
-                                    <div class="export-dropdown-item" id="export-tax-btn">
-                                        <i class="ph-duotone ph-file-pdf"></i> Tax Export
-                                    </div>
-                                </div>
-                            </div>
-
                             <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
                         </div>
                     </header>
@@ -85,6 +64,86 @@ class PocketBooksUI {
                             <div class="stat-content">
                                 <span class="stat-label">Transactions</span>
                                 <span class="stat-value">${transactions.length}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Statements Panel -->
+                    <div class="financial-reports-panel">
+                        <div class="reports-header">
+                            <div>
+                                <h3><i class="ph-duotone ph-file-text"></i> Financial Documents</h3>
+                                <p>Standardized reports configured for your business profile.</p>
+                            </div>
+                        </div>
+                        <div class="reports-grid">
+                            <div class="report-card" id="export-pl-btn">
+                                <div class="report-icon pl"><i class="ph-duotone ph-chart-line-up"></i></div>
+                                <div class="report-info">
+                                    <h4>Profit & Loss</h4>
+                                    <span>Income vs Expenses</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-cf-btn">
+                                <div class="report-icon cf"><i class="ph-duotone ph-arrows-left-right"></i></div>
+                                <div class="report-info">
+                                    <h4>Cash Flow</h4>
+                                    <span>Operating, Investing, Financing</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-bs-btn">
+                                <div class="report-icon bs"><i class="ph-duotone ph-scales"></i></div>
+                                <div class="report-info">
+                                    <h4>Balance Sheet</h4>
+                                    <span>Assets, Liabilities, Equity</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-tax-btn">
+                                <div class="report-icon tax"><i class="ph-duotone ph-file-pdf"></i></div>
+                                <div class="report-info">
+                                    <h4>Tax Ledger</h4>
+                                    <span>Formatted Itemized Export</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Statements Panel -->
+                    <div class="financial-reports-panel">
+                        <div class="reports-header">
+                            <div>
+                                <h3><i class="ph-duotone ph-files"></i> Financial Documents</h3>
+                                <p>Standardized reports configured for your business profile.</p>
+                            </div>
+                        </div>
+                        <div class="reports-grid">
+                            <div class="report-card" id="export-pl-btn" style="cursor:pointer;">
+                                <div class="report-icon pl"><i class="ph-duotone ph-chart-line-up"></i></div>
+                                <div class="report-info">
+                                    <h4>Profit & Loss</h4>
+                                    <span>Income vs Expenses</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-cf-btn" style="cursor:pointer;">
+                                <div class="report-icon cf"><i class="ph-duotone ph-arrows-left-right"></i></div>
+                                <div class="report-info">
+                                    <h4>Cash Flow</h4>
+                                    <span>Operating, Investing, Financing</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-bs-btn" style="cursor:pointer;">
+                                <div class="report-icon bs"><i class="ph-duotone ph-scales"></i></div>
+                                <div class="report-info">
+                                    <h4>Balance Sheet</h4>
+                                    <span>Assets, Liabilities, Equity</span>
+                                </div>
+                            </div>
+                            <div class="report-card" id="export-tax-btn" style="cursor:pointer;">
+                                <div class="report-icon tax"><i class="ph-duotone ph-file-pdf"></i></div>
+                                <div class="report-info">
+                                    <h4>Tax Ledger</h4>
+                                    <span>Formatted Itemized Export</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -451,24 +510,6 @@ class PocketBooksUI {
         this.container.querySelector('#add-transaction-btn').addEventListener('click', () => {
             this.showAddTransactionModal();
         });
-
-        // Toggle Financial Reports Dropdown
-        const dropdownBtn = this.container.querySelector('#open-reports-menu-btn');
-        const dropdownContainer = this.container.querySelector('#financial-reports-dropdown');
-
-        if (dropdownBtn && dropdownContainer) {
-            dropdownBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdownContainer.classList.toggle('show');
-            });
-
-            // Close dropdown if clicked outside
-            document.addEventListener('click', (e) => {
-                if (!dropdownContainer.contains(e.target)) {
-                    dropdownContainer.classList.remove('show');
-                }
-            });
-        }
 
         // Financial Statements Exports
         this.container.querySelector('#export-pl-btn')?.addEventListener('click', () => {
@@ -1068,6 +1109,81 @@ class PocketBooksUI {
                 justify-content: flex-end;
                 gap: 1rem;
                 margin-top: 1.5rem;
+            }
+
+            /* Financial Reports Panel Styles */
+            .financial-reports-panel {
+                margin: 2rem 0;
+                padding: 1.5rem;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
+            }
+            .reports-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1.5rem;
+            }
+            .reports-header h3 {
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 1.25rem;
+            }
+            .reports-header p {
+                margin: 0.25rem 0 0;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+            }
+            .reports-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 1rem;
+            }
+            .report-card {
+                background: var(--surface-light);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                transition: all 0.2s ease;
+                text-align: left;
+                width: 100%;
+                cursor: pointer;
+            }
+            .report-card:hover {
+                transform: translateY(-2px);
+                border-color: var(--accent-primary);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            .report-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+            .report-icon.pl { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+            .report-icon.cf { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+            .report-icon.bs { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+            .report-icon.tax { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+            
+            .report-info h4 {
+                margin: 0 0 0.25rem 0;
+                font-size: 0.95rem;
+                color: var(--text-primary);
+            }
+            .report-info span {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+                display: block;
             }
         `;
         document.head.appendChild(style);
