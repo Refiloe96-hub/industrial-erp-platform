@@ -32,18 +32,27 @@ class PocketBooksUI {
                             <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
                                 <i class="ph-duotone ph-robot"></i> AI Insights
                             </button>
-                            <button id="export-pl-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
-                                <i class="ph-duotone ph-file-text"></i> P&L
-                            </button>
-                            <button id="export-cf-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
-                                <i class="ph-duotone ph-arrows-left-right"></i> Cash Flow
-                            </button>
-                            <button id="export-bs-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
-                                <i class="ph-duotone ph-scales"></i> Balance Sheet
-                            </button>
-                            <button id="export-tax-btn" class="btn btn-secondary" style="border:1px solid var(--success, #10b981);color:var(--success, #10b981)">
-                                <i class="ph-duotone ph-file-pdf"></i> Tax Export
-                            </button>
+                            
+                            <div class="export-dropdown" id="financial-reports-dropdown">
+                                <button class="export-dropdown-btn" id="open-reports-menu-btn">
+                                    <i class="ph-duotone ph-file-text"></i> Financial Reports <i class="ph-bold ph-caret-down" style="font-size: 0.75rem;"></i>
+                                </button>
+                                <div class="export-dropdown-menu">
+                                    <div class="export-dropdown-item" id="export-pl-btn">
+                                        <i class="ph-duotone ph-chart-line-up"></i> Profit & Loss (P&L)
+                                    </div>
+                                    <div class="export-dropdown-item" id="export-cf-btn">
+                                        <i class="ph-duotone ph-arrows-left-right"></i> Cash Flow
+                                    </div>
+                                    <div class="export-dropdown-item" id="export-bs-btn">
+                                        <i class="ph-duotone ph-scales"></i> Balance Sheet
+                                    </div>
+                                    <div class="export-dropdown-item" id="export-tax-btn">
+                                        <i class="ph-duotone ph-file-pdf"></i> Tax Export
+                                    </div>
+                                </div>
+                            </div>
+
                             <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
                         </div>
                     </header>
@@ -442,6 +451,24 @@ class PocketBooksUI {
         this.container.querySelector('#add-transaction-btn').addEventListener('click', () => {
             this.showAddTransactionModal();
         });
+
+        // Toggle Financial Reports Dropdown
+        const dropdownBtn = this.container.querySelector('#open-reports-menu-btn');
+        const dropdownContainer = this.container.querySelector('#financial-reports-dropdown');
+
+        if (dropdownBtn && dropdownContainer) {
+            dropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownContainer.classList.toggle('show');
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!dropdownContainer.contains(e.target)) {
+                    dropdownContainer.classList.remove('show');
+                }
+            });
+        }
 
         // Financial Statements Exports
         this.container.querySelector('#export-pl-btn')?.addEventListener('click', () => {
