@@ -32,6 +32,15 @@ class PocketBooksUI {
                             <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
                                 <i class="ph-duotone ph-robot"></i> AI Insights
                             </button>
+                            <button id="export-pl-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
+                                <i class="ph-duotone ph-file-text"></i> P&L
+                            </button>
+                            <button id="export-cf-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
+                                <i class="ph-duotone ph-arrows-left-right"></i> Cash Flow
+                            </button>
+                            <button id="export-bs-btn" class="btn btn-secondary" style="border:1px solid #3b82f6;color:#3b82f6">
+                                <i class="ph-duotone ph-scales"></i> Balance Sheet
+                            </button>
                             <button id="export-tax-btn" class="btn btn-secondary" style="border:1px solid var(--success, #10b981);color:var(--success, #10b981)">
                                 <i class="ph-duotone ph-file-pdf"></i> Tax Export
                             </button>
@@ -242,6 +251,173 @@ class PocketBooksUI {
         }
     }
 
+    _getReportStyles() {
+        return `
+            <style>
+                body { font-family: 'Inter', sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: auto; }
+                h1 { font-size: 1.5rem; margin-bottom: 0.2rem; }
+                h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+                .meta { color: #555; font-size: 0.9rem; margin-bottom: 2rem; }
+                table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; margin-bottom: 1.5rem; }
+                th, td { padding: 0.5rem 0.25rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
+                th { background: #f9fafb; font-weight: 600; font-size: 0.9rem; color:#4b5563; }
+                .right { text-align: right; }
+                .indent { padding-left: 2rem; color: #4b5563; }
+                .subtotal { font-weight: 600; background: #f9fafb; border-top: 1px solid #ccc; }
+                .grand-total { font-weight: bold; font-size: 1.1rem; border-top: 2px solid #000; border-bottom: 2px double #000; }
+                @media print {
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    button { display: none !important; }
+                }
+            </style>
+        `;
+    }
+
+    _getBusinessContext() {
+        const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
+        return {
+            businessName: currentUser.businessName || 'My Business',
+            ownerName: currentUser.ownerName || 'Owner',
+            period: this.dateRange === 0 ? 'All Time' : `Last ${this.dateRange} Days`,
+            generated: new Date().toLocaleString('en-ZA')
+        };
+    }
+
+    async exportProfitAndLoss() {
+        try {
+            const pl = await this.module.generateProfitAndLoss();
+            const ctx = this._getBusinessContext();
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Profit & Loss - ${ctx.businessName}</title>
+                    ${this._getReportStyles()}
+                </head>
+                <body>
+                    <h1>${ctx.businessName} - Profit & Loss Statement</h1>
+                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated}</div>
+                    
+                    <table>
+                        <tr><th colspan="2">Revenue</th></tr>
+                        ${Object.entries(pl.revenueBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
+                        <tr class="subtotal"><td>Total Revenue</td><td class="right">R ${pl.revenue.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">Cost of Goods Sold (COGS)</th></tr>
+                        ${Object.entries(pl.cogsBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
+                        <tr class="subtotal"><td>Total COGS</td><td class="right">R ${pl.costOfGoodsSold.toFixed(2)}</td></tr>
+                        
+                        <tr class="grand-total"><td>Gross Profit</td><td class="right">R ${pl.grossProfit.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">Operating Expenses</th></tr>
+                        ${Object.entries(pl.opexBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
+                        <tr class="subtotal"><td>Total Operating Expenses</td><td class="right">R ${pl.operatingExpenses.toFixed(2)}</td></tr>
+                        
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Income</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${pl.netIncome.toFixed(2)}</td></tr>
+                    </table>
+                    
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Print / Save PDF</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } catch (err) { alert('Failed to generate P&L: ' + err.message); }
+    }
+
+    async exportCashFlowStatement() {
+        try {
+            const cf = await this.module.generateCashFlowStatement();
+            const ctx = this._getBusinessContext();
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Statement of Cash Flows - ${ctx.businessName}</title>
+                    ${this._getReportStyles()}
+                </head>
+                <body>
+                    <h1>${ctx.businessName} - Statement of Cash Flows</h1>
+                    <div class="meta">Period: ${ctx.period} | Generated: ${ctx.generated}</div>
+                    
+                    <table>
+                        <tr><th colspan="2">Cash Flows from Operating Activities</th></tr>
+                        <tr><td class="indent">Cash Inflows from Customers</td><td class="right">${cf.operatingActivities.inflow.toFixed(2)}</td></tr>
+                        <tr><td class="indent">Cash Outflows to Suppliers/Expenses</td><td class="right">(${cf.operatingActivities.outflow.toFixed(2)})</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Operating Activities</td><td class="right">R ${cf.operatingActivities.net.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">Cash Flows from Investing Activities</th></tr>
+                        <tr><td class="indent">Cash Inflows from Asset Sales</td><td class="right">${cf.investingActivities.inflow.toFixed(2)}</td></tr>
+                        <tr><td class="indent">Cash Outflows for Asset Purchases</td><td class="right">(${cf.investingActivities.outflow.toFixed(2)})</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Investing Activities</td><td class="right">R ${cf.investingActivities.net.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">Cash Flows from Financing Activities</th></tr>
+                        <tr><td class="indent">Cash Inflows from Loans/Capital</td><td class="right">${cf.financingActivities.inflow.toFixed(2)}</td></tr>
+                        <tr><td class="indent">Cash Outflows for Repayments</td><td class="right">(${cf.financingActivities.outflow.toFixed(2)})</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Financing Activities</td><td class="right">R ${cf.financingActivities.net.toFixed(2)}</td></tr>
+                        
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Increase (Decrease) in Cash</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${cf.netIncreaseInCash.toFixed(2)}</td></tr>
+                    </table>
+                    
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Print / Save PDF</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } catch (err) { alert('Failed to generate Cash Flow: ' + err.message); }
+    }
+
+    async exportBalanceSheet() {
+        try {
+            const bs = await this.module.generateBalanceSheet();
+            const ctx = this._getBusinessContext();
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Balance Sheet - ${ctx.businessName}</title>
+                    ${this._getReportStyles()}
+                </head>
+                <body>
+                    <h1>${ctx.businessName} - Balance Sheet</h1>
+                    <div class="meta">As of: ${ctx.generated}</div>
+                    
+                    <table>
+                        <tr><th colspan="2">ASSETS</th></tr>
+                        <tr><td class="indent">Cash and Cash Equivalents</td><td class="right">${bs.assets.cashAndEquivalents.toFixed(2)}</td></tr>
+                        <tr><td class="indent">Inventory Asset Value</td><td class="right">${bs.assets.inventory.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Assets</td><td class="right">R ${bs.assets.total.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">LIABILITIES</th></tr>
+                        <tr><td class="indent">Loans / Notes Payable</td><td class="right">${bs.liabilities.loansPayable.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Liabilities</td><td class="right">R ${bs.liabilities.total.toFixed(2)}</td></tr>
+                        
+                        <tr><th colspan="2">EQUITY</th></tr>
+                        <tr><td class="indent">Retained Earnings / Capital</td><td class="right">${bs.equity.retainedEarnings.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Equity</td><td class="right">R ${bs.equity.total.toFixed(2)}</td></tr>
+                        
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Total Liabilities and Equity</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${(bs.liabilities.total + bs.equity.total).toFixed(2)}</td></tr>
+                    </table>
+                    
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Print / Save PDF</button>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } catch (err) { alert('Failed to generate Balance Sheet: ' + err.message); }
+    }
+
     renderTransactionRows(transactions) {
         if (!transactions.length) {
             return '<tr><td colspan="5" class="empty-state">No transactions found. Click "Add Transaction" or use Seed Data.</td></tr>';
@@ -264,6 +440,19 @@ class PocketBooksUI {
         // Add Transaction Button
         this.container.querySelector('#add-transaction-btn').addEventListener('click', () => {
             this.showAddTransactionModal();
+        });
+
+        // Financial Statements Exports
+        this.container.querySelector('#export-pl-btn')?.addEventListener('click', () => {
+            this.exportProfitAndLoss();
+        });
+
+        this.container.querySelector('#export-cf-btn')?.addEventListener('click', () => {
+            this.exportCashFlowStatement();
+        });
+
+        this.container.querySelector('#export-bs-btn')?.addEventListener('click', () => {
+            this.exportBalanceSheet();
         });
 
         // The Compliance Moat: Automated Tax Export

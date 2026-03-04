@@ -271,6 +271,146 @@ class PocketBooks {
     };
   }
 
+  // Phase 9: Industry Standard Financial Statements
+  async generateProfitAndLoss(period = this.currentPeriod) {
+    const transactions = await this.getTransactions({
+      startDate: period.startDate.getTime(),
+      endDate: period.endDate.getTime()
+    });
+
+    let revenue = 0;
+    let costOfGoodsSold = 0;
+    let operatingExpenses = 0;
+
+    const revenueBreakdown = {};
+    const cogsBreakdown = {};
+    const opexBreakdown = {};
+
+    transactions.forEach(t => {
+      if (t.type === 'income') {
+        revenue += t.amount;
+        revenueBreakdown[t.category] = (revenueBreakdown[t.category] || 0) + t.amount;
+      } else if (t.type === 'expense') {
+        // Treat Inventory/Supplies as COGS, everything else as OPEX
+        if (['Inventory', 'Supplies', 'Raw Materials'].includes(t.category)) {
+          costOfGoodsSold += t.amount;
+          cogsBreakdown[t.category] = (cogsBreakdown[t.category] || 0) + t.amount;
+        } else {
+          operatingExpenses += t.amount;
+          opexBreakdown[t.category] = (opexBreakdown[t.category] || 0) + t.amount;
+        }
+      }
+    });
+
+    const grossProfit = revenue - costOfGoodsSold;
+    const netIncome = grossProfit - operatingExpenses;
+
+    return {
+      period,
+      revenue,
+      revenueBreakdown,
+      costOfGoodsSold,
+      cogsBreakdown,
+      grossProfit,
+      operatingExpenses,
+      opexBreakdown,
+      netIncome
+    };
+  }
+
+  async generateCashFlowStatement(period = this.currentPeriod) {
+    const transactions = await this.getTransactions({
+      startDate: period.startDate.getTime(),
+      endDate: period.endDate.getTime()
+    });
+
+    let operatingInflow = 0;
+    let operatingOutflow = 0;
+    let investingInflow = 0;
+    let investingOutflow = 0;
+    let financingInflow = 0;
+    let financingOutflow = 0;
+
+    transactions.forEach(t => {
+      const isIncome = t.type === 'income';
+
+      // Categorize into Operating, Investing, Financing
+      if (['Equipment', 'Assets', 'Machinery'].includes(t.category)) {
+        if (isIncome) investingInflow += t.amount;
+        else investingOutflow += t.amount;
+      } else if (['Loan', 'Capital', 'Syndicate', 'Dividend'].includes(t.category)) {
+        if (isIncome) financingInflow += t.amount;
+        else financingOutflow += t.amount;
+      } else {
+        // Default to Operating
+        if (isIncome) operatingInflow += t.amount;
+        else operatingOutflow += t.amount;
+      }
+    });
+
+    const netOperatingCashFlow = operatingInflow - operatingOutflow;
+    const netInvestingCashFlow = investingInflow - investingOutflow;
+    const netFinancingCashFlow = financingInflow - financingOutflow;
+    const netIncreaseInCash = netOperatingCashFlow + netInvestingCashFlow + netFinancingCashFlow;
+
+    return {
+      period,
+      operatingActivities: { inflow: operatingInflow, outflow: operatingOutflow, net: netOperatingCashFlow },
+      investingActivities: { inflow: investingInflow, outflow: investingOutflow, net: netInvestingCashFlow },
+      financingActivities: { inflow: financingInflow, outflow: financingOutflow, net: netFinancingCashFlow },
+      netIncreaseInCash
+    };
+  }
+
+  async generateBalanceSheet() {
+    // A balance sheet is a snapshot at a point in time (now)
+    const accounts = await this.getAccountsSummary();
+
+    // Assets
+    const cashAndEquivalents = accounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+
+    // Get Inventory Value from PoolStock (if available)
+    let inventoryAssetValue = 0;
+    try {
+      const poolStockData = await db.getAll(STORES.inventory);
+      if (poolStockData && poolStockData.length) {
+        inventoryAssetValue = poolStockData.reduce((sum, item) => sum + ((item.quantity || 0) * (item.costPrice || 0)), 0);
+      }
+    } catch (e) {
+      console.warn('Could not fetch inventory asset value for balance sheet', e);
+    }
+
+    const totalAssets = cashAndEquivalents + inventoryAssetValue;
+
+    // Liabilities (Simplified: searching through transactions for outstanding loans - in a real system we'd have a liabilities store)
+    // For this conceptual model, let's assume Syndicate/Loan income that hasn't been repaid is a liability
+    const transactions = await this.getTransactions();
+    const loanIncome = transactions.filter(t => t.type === 'income' && t.category === 'Loan').reduce((sum, t) => sum + t.amount, 0);
+    const loanRepayments = transactions.filter(t => t.type === 'expense' && t.category === 'Loan').reduce((sum, t) => sum + t.amount, 0);
+
+    const totalLiabilities = Math.max(0, loanIncome - loanRepayments);
+
+    // Equity (Assets = Liabilities + Equity)
+    const totalEquity = totalAssets - totalLiabilities;
+
+    return {
+      date: new Date(),
+      assets: {
+        cashAndEquivalents,
+        inventory: inventoryAssetValue,
+        total: totalAssets
+      },
+      liabilities: {
+        loansPayable: totalLiabilities,
+        total: totalLiabilities
+      },
+      equity: {
+        retainedEarnings: totalEquity,
+        total: totalEquity
+      }
+    };
+  }
+
   // Create account
   async createAccount(data) {
     const account = {
