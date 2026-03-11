@@ -1054,10 +1054,12 @@ class SalesUI {
           border: none;
           border-radius: 16px;
           padding: 0;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
           width: 380px;
           max-width: 95vw;
-          background: var(--bg-primary);
+          background: var(--bg-primary, rgba(15, 23, 42, 0.95));
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
           color: var(--text-primary);
         }
         .scanner-modal::backdrop { background: rgba(0,0,0,0.6); }
