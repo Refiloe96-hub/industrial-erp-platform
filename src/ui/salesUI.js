@@ -724,7 +724,7 @@ class SalesUI {
   renderStyles() {
     return `
       <style>
-        .sales-container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+        .sales-container { padding: 1rem; max-width: 1200px; margin: 0 auto; overflow-x: hidden; }
 
         .sales-stats {
           display: grid;
@@ -761,13 +761,14 @@ class SalesUI {
 
         /* ── Mobile POS Layout ── */
         @media (max-width: 768px) {
-          .sales-container { padding: 0.75rem; }
+          .sales-container { padding: 0.5rem; width: 100%; box-sizing: border-box; }
 
           .module-header {
             flex-direction: column !important;
             align-items: flex-start !important;
             gap: 0.5rem !important;
             padding-bottom: 0.75rem !important;
+            width: 100%;
           }
           .module-header h1 { font-size: 1.1rem !important; }
           .module-header > div:last-child { width: 100%; }
@@ -782,14 +783,17 @@ class SalesUI {
           .stat-value { font-size: 1.2rem !important; }
 
           .pos-layout {
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             height: auto;
             gap: 1rem;
+            width: 100%;
+            overflow: hidden;
           }
 
           /* Products first on mobile, cart below */
-          .product-section { order: 1; }
-          .cart-section { order: 2; position: static; }
+          .product-section { order: 1; width: 100%; max-width: 100vw; }
+          .cart-section { order: 2; position: static; width: 100%; max-width: 100vw; }
 
           /* Category filters – horizontal scroll */
           .category-filters {
@@ -826,10 +830,11 @@ class SalesUI {
           .prod-stock { font-size: 0.7rem !important; }
 
           /* Cart card – no fixed height */
-          .cart-card { max-height: none !important; overflow: visible !important; }
+          .cart-card { max-height: none !important; overflow: visible !important; width: 100%; box-sizing: border-box; }
           .cart-items {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
+            overflow-x: hidden;
           }
 
           /* Payment options – bigger touch targets with label */
