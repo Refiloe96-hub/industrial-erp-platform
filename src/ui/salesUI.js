@@ -98,7 +98,7 @@ class SalesUI {
                     <span id="cart-subtotal">R 0.00</span>
                   </div>
                   <div class="summary-row vat-row">
-                    <span>VAT (15%):</span>
+                    <span>Includes VAT (15%):</span>
                     <span id="cart-vat">R 0.00</span>
                   </div>
                   <div class="summary-row total-row">
@@ -286,10 +286,11 @@ class SalesUI {
         cartItemsContainer.appendChild(row);
       });
 
-      const vatAmount = subtotal * 0.15;
-      const grandTotal = subtotal + vatAmount;
+      const grandTotal = subtotal; // Prices are already VAT inclusive
+      const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT from the inclusive total
+      const exVatSubtotal = grandTotal - vatAmount; // The true subtotal before VAT
 
-      container.querySelector('#cart-subtotal').textContent = `R ${subtotal.toFixed(2)}`;
+      container.querySelector('#cart-subtotal').textContent = `R ${exVatSubtotal.toFixed(2)}`;
       container.querySelector('#cart-vat').textContent = `R ${vatAmount.toFixed(2)}`;
       container.querySelector('#cart-total').textContent = `R ${grandTotal.toFixed(2)}`;
       checkoutBtn.textContent = `Charge R ${grandTotal.toFixed(2)}`;
@@ -472,9 +473,9 @@ class SalesUI {
 
       try {
         const paymentMethod = container.querySelector('input[name="payment"]:checked').value;
-        const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-        const vatAmount = subtotal * 0.15;
-        const grandTotal = subtotal + vatAmount;
+        const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0); // Inclusive of VAT
+        const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT
+        const subtotal = grandTotal - vatAmount; // True subtotal before VAT
 
         const customerSelect = container.querySelector('#sale-customer');
         const customerId = customerSelect.value ? parseInt(customerSelect.value) : null;
@@ -520,9 +521,9 @@ class SalesUI {
       } catch (err) {
         console.error(err);
         alert('Sale failed: ' + err.message);
-        const sub = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+        const grandTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
         btn.disabled = false;
-        btn.textContent = `Charge R ${(sub * 1.15).toFixed(2)}`;
+        btn.textContent = `Charge R ${grandTotal.toFixed(2)}`;
       }
     });
 
@@ -594,7 +595,7 @@ class SalesUI {
           <tbody>${linesHtml}</tbody>
         </table>
         <div class="invoice-totals">
-          <div class="inv-row"><span>Subtotal</span><span>R ${(sale.subtotal || 0).toFixed(2)}</span></div>
+          <div class="inv-row"><span>Subtotal (Excl. VAT)</span><span>R ${(sale.subtotal || 0).toFixed(2)}</span></div>
           <div class="inv-row"><span>VAT (15%)</span><span>R ${(sale.vatAmount || 0).toFixed(2)}</span></div>
           <div class="inv-row inv-grand"><span>Total</span><span>R ${(sale.total || 0).toFixed(2)}</span></div>
         </div>
