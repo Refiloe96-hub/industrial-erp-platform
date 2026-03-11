@@ -113,9 +113,9 @@ class TrustCircleUI {
                 width: 95%;
                 padding: 2.5rem;
                 border-radius: var(--radius-lg);
-                background: var(--bg-primary);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
+                background: var(--bg-primary, rgba(15, 23, 42, 0.95));
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
                 color: var(--text-primary);
                 border: 1px solid var(--border-color);
                 box-shadow: var(--shadow-lg);

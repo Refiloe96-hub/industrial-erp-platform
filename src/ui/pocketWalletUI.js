@@ -217,9 +217,9 @@ class PocketWalletUI {
         .form-container {
             max-width: 500px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: var(--bg-primary, rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border-radius: var(--radius-lg);
             padding: 2.5rem;
             border: 1px solid var(--border-color);
