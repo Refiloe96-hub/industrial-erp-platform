@@ -29,6 +29,7 @@ class Sales {
             paymentMethod: saleData.paymentMethod || 'cash',
             customerId: saleData.customerId || null,
             customerName: saleData.customerName || 'Walk-in',
+            cashierName: saleData.cashierName || 'System',
             notes: saleData.notes || ''
         };
 

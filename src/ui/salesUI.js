@@ -468,18 +468,74 @@ class SalesUI {
     // Checkout
     checkoutBtn.addEventListener('click', async () => {
       const btn = checkoutBtn;
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
+      if (cart.length === 0) return;
 
-      try {
+      const paymentMethod = container.querySelector('input[name="payment"]:checked').value;
+      const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+      const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+      
+      const customerSelect = container.querySelector('#sale-customer');
+      const customerName = customerSelect.value ? customerSelect.options[customerSelect.selectedIndex].text : 'Walk-in';
+
+      // Inject Confirmation Modal HTML
+      let modal = document.getElementById('checkout-confirm-modal');
+      if (!modal) {
+        modal = document.createElement('dialog');
+        modal.id = 'checkout-confirm-modal';
+        modal.className = 'scanner-modal'; // recycle scanner-modal styling
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div class="scanner-content">
+          <h3 style="margin-bottom:0.5rem;"><i class="ph-duotone ph-shopping-cart"></i> Confirm Checkout</h3>
+          <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Please review the order details before charging.</p>
+          
+          <div style="background:var(--bg-secondary); padding:1rem; border-radius:8px; margin-bottom:1.5rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+              <span style="color:var(--text-secondary)">Total Items:</span>
+              <span style="font-weight:600;color:var(--text-primary)">${totalItems}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+              <span style="color:var(--text-secondary)">Customer:</span>
+              <span style="font-weight:600;color:var(--text-primary)">${customerName}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+              <span style="color:var(--text-secondary)">Payment:</span>
+              <span style="font-weight:600;color:var(--text-primary);text-transform:capitalize;">${paymentMethod}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--border-color);">
+              <span style="color:var(--text-secondary)">Grand Total:</span>
+              <span style="font-size:1.4rem;font-weight:700;color:var(--accent-primary)">R ${grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div style="display:flex;gap:0.75rem;">
+            <button id="cancel-checkout-btn" class="btn btn-secondary" style="flex:1">Go Back</button>
+            <button id="confirm-checkout-btn" class="btn btn-primary" style="flex:1">Confirm & Charge</button>
+          </div>
+        </div>
+      `;
+
+      modal.showModal();
+
+      modal.querySelector('#cancel-checkout-btn').addEventListener('click', () => modal.close());
+
+      modal.querySelector('#confirm-checkout-btn').addEventListener('click', async () => {
+        const confirmBtn = modal.querySelector('#confirm-checkout-btn');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing...';
+        btn.disabled = true;
+
+        try {
         const paymentMethod = container.querySelector('input[name="payment"]:checked').value;
         const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0); // Inclusive of VAT
         const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT
         const subtotal = grandTotal - vatAmount; // True subtotal before VAT
 
-        const customerSelect = container.querySelector('#sale-customer');
+        const session = JSON.parse(localStorage.getItem('erp_session') || '{}');
+        const cashierName = session.name || session.username || 'Admin User';
         const customerId = customerSelect.value ? parseInt(customerSelect.value) : null;
-        const customerName = customerSelect.value ? customerSelect.options[customerSelect.selectedIndex].text : 'Walk-in';
 
         if (paymentMethod === 'card') {
           btn.textContent = 'Waiting for Card Tap...';
@@ -511,20 +567,23 @@ class SalesUI {
           total: grandTotal,
           paymentMethod,
           customerId,
-          customerName
+          customerName,
+          cashierName
         });
 
         cart = [];
         updateCart();
+        modal.close();
         this.showInvoiceModal(sale, customerName, paymentMethod);
 
       } catch (err) {
         console.error(err);
         alert('Sale failed: ' + err.message);
-        const grandTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+        modal.close();
         btn.disabled = false;
         btn.textContent = `Charge R ${grandTotal.toFixed(2)}`;
       }
+      });
     });
 
     // Barcode scan — find product by SKU
@@ -579,7 +638,8 @@ class SalesUI {
           <div><strong>Invoice #:</strong> ${invoiceNo}</div>
           <div><strong>Date:</strong> ${invoiceDate}</div>
           <div><strong>Customer:</strong> ${customerName}</div>
-          <div>
+          <div><strong>Cashier:</strong> ${sale.cashierName || 'System'}</div>
+          <div style="grid-column: span 2; margin-top: 0.25rem;">
             <span style="background:${payBadge};color:white;padding:2px 10px;border-radius:12px;font-size:0.8rem;text-transform:capitalize">${paymentMethod}</span>
           </div>
         </div>
