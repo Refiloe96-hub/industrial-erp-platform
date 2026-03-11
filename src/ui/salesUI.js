@@ -109,16 +109,24 @@ class SalesUI {
 
                 <div class="payment-methods">
                   <label class="payment-option">
-                    <input type="radio" name="payment" value="cash" checked> <i class="ph-duotone ph-money"></i>
+                    <input type="radio" name="payment" value="cash" checked>
+                    <i class="ph-duotone ph-money"></i>
+                    <span class="pay-label">Cash</span>
                   </label>
                   <label class="payment-option">
-                    <input type="radio" name="payment" value="card"> <i class="ph-duotone ph-credit-card"></i>
+                    <input type="radio" name="payment" value="card">
+                    <i class="ph-duotone ph-credit-card"></i>
+                    <span class="pay-label">Card</span>
                   </label>
                   <label class="payment-option">
-                    <input type="radio" name="payment" value="mobile"> <i class="ph-duotone ph-device-mobile"></i>
+                    <input type="radio" name="payment" value="mobile">
+                    <i class="ph-duotone ph-device-mobile"></i>
+                    <span class="pay-label">Mobile</span>
                   </label>
                   <label class="payment-option">
-                    <input type="radio" name="payment" value="mpesa"> <i class="ph-duotone ph-qr-code"></i>
+                    <input type="radio" name="payment" value="mpesa">
+                    <i class="ph-duotone ph-qr-code"></i>
+                    <span class="pay-label">QR</span>
                   </label>
                 </div>
 
@@ -750,9 +758,106 @@ class SalesUI {
           gap: 1.5rem;
           height: calc(100vh - 200px);
         }
+
+        /* ── Mobile POS Layout ── */
         @media (max-width: 768px) {
-          .pos-layout { grid-template-columns: 1fr; height: auto; }
-          .cart-section { order: -1; position: sticky; top: 0; z-index: 10; margin-bottom: 1rem; }
+          .sales-container { padding: 0.75rem; }
+
+          .module-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
+            padding-bottom: 0.75rem !important;
+          }
+          .module-header h1 { font-size: 1.1rem !important; }
+          .module-header > div:last-child { width: 100%; }
+          .module-header > div:last-child .btn { width: 100%; justify-content: center; }
+
+          .sales-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+          }
+          .stat-card { padding: 0.75rem; }
+          .stat-value { font-size: 1.2rem !important; }
+
+          .pos-layout {
+            grid-template-columns: 1fr;
+            height: auto;
+            gap: 1rem;
+          }
+
+          /* Products first on mobile, cart below */
+          .product-section { order: 1; }
+          .cart-section { order: 2; position: static; }
+
+          /* Category filters – horizontal scroll */
+          .category-filters {
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+          }
+          .cat-btn {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8rem;
+            min-height: 36px;
+          }
+
+          /* Bigger tap target for scan button */
+          .scan-btn {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+          }
+
+          /* Product grid: 2 columns on mobile */
+          .product-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+          }
+          .product-card {
+            padding: 0.75rem 0.5rem !important;
+            min-height: 80px !important;
+          }
+          .prod-name { font-size: 0.8rem !important; }
+          .prod-price { font-size: 0.9rem !important; }
+          .prod-stock { font-size: 0.7rem !important; }
+
+          /* Cart card – no fixed height */
+          .cart-card { max-height: none !important; overflow: visible !important; }
+          .cart-items {
+            max-height: 200px;
+            overflow-y: auto;
+          }
+
+          /* Payment options – bigger touch targets with label */
+          .payment-methods {
+            gap: 0.4rem !important;
+          }
+          .payment-option {
+            padding: 0.6rem 0.25rem !important;
+            font-size: 1rem !important;
+            flex-direction: column;
+            gap: 0.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .payment-option input[type="radio"] { display: none; }
+          .pay-label {
+            font-size: 0.65rem;
+            color: inherit;
+            display: block;
+          }
+
+          /* Checkout button – full width, tall */
+          #checkout-btn {
+            font-size: 1rem !important;
+            padding: 1rem !important;
+            min-height: 52px;
+          }
         }
 
         .category-filters {
