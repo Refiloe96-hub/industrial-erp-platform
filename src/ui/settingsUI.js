@@ -31,22 +31,56 @@ class SettingsUI {
     await this.init();
 
     container.innerHTML = `
-      <div class="settings-container">
-        <div class="settings-header">
-          <h2><i class="ph-duotone ph-gear"></i> Settings</h2>
-          <p>Configure your business workspace</p>
+      <div class="settings-layout">
+        <!-- LEFT COLUMN: Navigation Master -->
+        <div class="settings-nav">
+          <div class="nav-header">
+            <h2>Settings</h2>
+          </div>
+          <div class="nav-menu">
+            <button class="nav-item active" data-target="pane-business">
+              <i class="ph-duotone ph-buildings"></i> Your Business
+            </button>
+            <button class="nav-item" data-target="pane-financials">
+              <i class="ph-duotone ph-currency-dollar"></i> Financials
+            </button>
+            <button class="nav-item" data-target="pane-team">
+              <i class="ph-duotone ph-users"></i> Team Management
+            </button>
+            <button class="nav-item" data-target="pane-data">
+              <i class="ph-duotone ph-floppy-disk"></i> Data & Storage
+            </button>
+            <button class="nav-item" data-target="pane-hardware">
+              <i class="ph-duotone ph-plugs-connected"></i> Hardware Integrations
+            </button>
+            <button class="nav-item" data-target="pane-sync">
+              <i class="ph-duotone ph-wifi-slash"></i> Offline P2P Sync
+            </button>
+            <button class="nav-item" data-target="pane-ai">
+              <i class="ph-duotone ph-robot"></i> AI & Forecasting
+            </button>
+          </div>
         </div>
 
-        <div class="settings-grid">
-          <!-- General Settings -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-buildings"></i> Business Details</h3>
+        <!-- RIGHT COLUMN: Content Detail -->
+        <div class="settings-pane">
+          <!-- Mobile Header (Hidden on Desktop) -->
+          <div class="pane-mobile-header" style="display:none;">
+            <button class="btn-icon" id="btn-back-nav"><i class="ph-bold ph-arrow-left"></i></button>
+            <h3 id="mobile-pane-title">Your Business</h3>
+          </div>
+
+          <!-- PANE: Business -->
+          <div class="pane-content active" id="pane-business">
+            <div class="pane-header">
+              <h3>Your Business</h3>
+              <p>Configure your workspace details and branding.</p>
             </div>
-            <div class="card-body">
+            <div class="pane-body">
               <div class="form-group">
                 <label>Business Name</label>
                 <input type="text" id="set-name" value="${this.settings.businessName}" placeholder="My Shop">
+                <small class="text-muted">This appears on your receipts and financial documents.</small>
               </div>
               <div class="form-group">
                 <label>Default Currency</label>
@@ -55,115 +89,146 @@ class SettingsUI {
                 </select>
                 <small class="text-muted">System locked to ZAR for now.</small>
               </div>
+              <div class="pane-actions">
+                <button class="btn btn-primary" id="save-settings-business">Save Changes</button>
+              </div>
             </div>
           </div>
 
-          <!-- Financial Settings -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-currency-dollar"></i> Tax & Finance</h3>
+          <!-- PANE: Financials -->
+          <div class="pane-content" id="pane-financials">
+            <div class="pane-header">
+              <h3>Financials</h3>
+              <p>Manage tax rates and accounting preferences.</p>
             </div>
-            <div class="card-body">
+            <div class="pane-body">
               <div class="form-group">
                 <label>VAT / Tax Rate (%)</label>
                 <input type="number" id="set-tax" value="${this.settings.taxRate}" min="0" max="100">
+                <small class="text-muted">This rate is used to extract VAT automatically at the Point of Sale.</small>
+              </div>
+              <div class="pane-actions">
+                <button class="btn btn-primary" id="save-settings-finance">Save Changes</button>
               </div>
             </div>
           </div>
 
-          <!-- Data Management -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-floppy-disk"></i> Data Management</h3>
+          <!-- PANE: Team -->
+          <div class="pane-content" id="pane-team">
+            <div class="pane-header">
+              <h3>Team Management</h3>
+              <p>Manage staff access and roles for your business.</p>
             </div>
-            <div class="card-body">
-              <p class="text-muted mb-2">Back up your entire database to a file or restore from a backup.</p>
+            <div class="pane-body">
+              <button class="btn btn-outline-primary mb-4" id="btn-add-team-member" style="width:auto;">
+                <i class="ph-bold ph-user-plus"></i> Add Team Member
+              </button>
+              <div id="team-list" class="slim-list">
+                <div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading team...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE: Data -->
+          <div class="pane-content" id="pane-data">
+            <div class="pane-header">
+              <h3>Data & Storage</h3>
+              <p>Back up your database, restore from a file, or import templates.</p>
+            </div>
+            <div class="pane-body">
               <div class="data-actions">
-                <button class="btn btn-secondary w-100 mb-2" id="btn-backup"><i class="ph-duotone ph-download-simple"></i> Backup Data (JSON)</button>
-                <button class="btn btn-outline-danger w-100" id="btn-restore"><i class="ph-duotone ph-upload-simple"></i> Restore Backup</button>
+                <button class="btn btn-secondary w-100 mb-3" id="btn-backup">
+                  <i class="ph-bold ph-download-simple"></i> Download Backup (JSON)
+                </button>
+                <button class="btn btn-outline-danger w-100 mb-4" id="btn-restore">
+                  <i class="ph-bold ph-upload-simple"></i> Restore Backup
+                </button>
                 <input type="file" id="file-restore" style="display: none" accept=".json">
               </div>
               
-              <hr class="my-3">
+              <div class="settings-section-divider"></div>
               
-              <h4 class="text-sm font-semibold mb-2">Import Wizard</h4>
-              <p class="text-xs text-muted mb-2">Kickstart your workspace with business-specific templates.</p>
-              <button class="btn btn-primary w-100" id="btn-import-wizard"><i class="ph-duotone ph-magic-wand"></i> Open Import Wizard</button>
+              <div class="form-group">
+                <label>System Import Wizard</label>
+                <p class="text-sm text-muted mb-3">Initialize your workspace with industry-specific inventory templates.</p>
+                <button class="btn btn-primary w-100" id="btn-import-wizard">
+                  <i class="ph-bold ph-magic-wand"></i> Open Import Wizard
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Hardware Integration (The Physical Moat) -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-plugs-connected"></i> Physical Hardware</h3>
+          <!-- PANE: Hardware -->
+          <div class="pane-content" id="pane-hardware">
+            <div class="pane-header">
+              <h3>Hardware Integrations</h3>
+              <p>Connect physical devices via Web Serial and Web Bluetooth.</p>
             </div>
-            <div class="card-body" style="display: flex; flex-direction: column; gap: 1rem;">
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0;">
-                Connect legacy rugged hardware directly to the browser via Web APIs. Fallbacks to simulator mode if devices aren't found.
-              </p>
-              <div>
-                <button class="btn btn-secondary w-100 mb-2" id="btn-connect-scale">
-                    <i class="ph-duotone ph-scales"></i> Connect Weighing Scale (Serial)
-                </button>
-                <button class="btn btn-secondary w-100" id="btn-connect-printer">
-                    <i class="ph-duotone ph-printer"></i> Connect Thermal Printer (Bluetooth)
-                </button>
-              </div>
-              <div id="hardware-status" style="font-size: 0.85rem; padding: 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); text-align: center;">
+            <div class="pane-body">
+              <p class="text-sm text-muted mb-4">Legacy rugged hardware connects directly to the browser. Fallbacks to simulator mode if physical devices aren't found.</p>
+              
+              <button class="btn btn-secondary w-100 mb-3" id="btn-connect-scale">
+                  <i class="ph-bold ph-scales"></i> Connect Weighing Scale (Serial)
+              </button>
+              <button class="btn btn-secondary w-100 mb-4" id="btn-connect-printer">
+                  <i class="ph-bold ph-printer"></i> Connect Thermal Printer (Bluetooth)
+              </button>
+              
+              <div id="hardware-status" class="status-box">
                  Status: Waiting for connection...
               </div>
             </div>
           </div>
-          
-          <!-- P2P Offline Sync (The Infrastructure Moat) -->
-          <div class="card settings-card" style="border-left:4px solid #10b981">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-wifi-slash" style="color:#10b981"></i> Local Device Sync</h3>
+
+          <!-- PANE: Sync -->
+          <div class="pane-content" id="pane-sync">
+            <div class="pane-header">
+              <h3>Offline P2P Sync</h3>
+              <p>Sync data directly across local devices without internet.</p>
             </div>
-            <div class="card-body">
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                No internet? Sync data directly between devices on the same local network using WebRTC.
-              </p>
-              
-              <div class="form-group">
-                  <label>Your Sync Token (Host)</label>
-                  <div style="display:flex;gap:0.5rem">
-                      <input type="text" id="p2p-host-token" readonly placeholder="Click 'Generate Host Token' ->" style="background:rgba(0,0,0,0.2)">
-                      <button class="btn btn-secondary" id="btn-p2p-host"><i class="ph ph-qr-code"></i> Host</button>
+            <div class="pane-body">
+              <div class="form-group mb-4">
+                  <label>Host a Session (Server)</label>
+                  <p class="text-xs text-muted mb-2">Generate a token for other devices to join.</p>
+                  <div class="flex-input-group">
+                      <input type="text" id="p2p-host-token" readonly placeholder="Click 'Host' ->">
+                      <button class="btn btn-secondary" id="btn-p2p-host"><i class="ph-bold ph-qr-code"></i> Host</button>
                   </div>
               </div>
               
-              <div class="form-group" style="margin-top:1.5rem">
-                  <label>Join a Device (Client)</label>
-                  <div style="display:flex;gap:0.5rem">
+              <div class="settings-section-divider"></div>
+
+              <div class="form-group mb-4">
+                  <label>Join a Session (Client)</label>
+                  <p class="text-xs text-muted mb-2">Paste the token from the Host device.</p>
+                  <div class="flex-input-group">
                       <input type="text" id="p2p-join-token" placeholder="Paste Host Token Here">
-                      <button class="btn btn-secondary" id="btn-p2p-join"><i class="ph ph-plug"></i> Join</button>
+                      <button class="btn btn-secondary" id="btn-p2p-join"><i class="ph-bold ph-plug"></i> Join</button>
                   </div>
               </div>
 
-              <div id="p2p-status" style="margin-top: 1rem; font-size: 0.85rem; padding: 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); text-align: center;">
+              <div id="p2p-status" class="status-box">
                  Status: Disconnected
               </div>
             </div>
           </div>
 
-          <!-- AI & Forecasting -->
-          <div class="card settings-card" style="border-left:4px solid #6366f1">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-robot" style="color:#6366f1"></i> AI &amp; Forecasting</h3>
+          <!-- PANE: AI -->
+          <div class="pane-content" id="pane-ai">
+            <div class="pane-header">
+              <h3>AI & Forecasting</h3>
+              <p>Configure the intelligence engine for PocketBooks and SmartShift.</p>
             </div>
-            <div class="card-body">
-              <div class="form-group">
-                <label>Groq API Key <small style="color:var(--text-secondary)">(free — <a href="https://console.groq.com" target="_blank" rel="noopener" style="color:#6366f1">get one here</a>)</small></label>
+            <div class="pane-body">
+              <div class="form-group mb-4">
+                <label>Groq API Key</label>
+                <p class="text-xs text-muted mb-2">Powers the Business Advisor. Leave blank for rule-based mode. <br><a href="https://console.groq.com" target="_blank" class="text-accent underline">Get a free key here</a>.</p>
                 <input type="password" id="set-groq-key"
                   value="${localStorage.getItem('erp_groq_api_key') || ''}"
                   placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx"
                   autocomplete="off">
-                <small style="color:var(--text-secondary);display:block;margin-top:0.3rem">
-                  Powers AI Business Advisor — signs up free, no credit card. Leave blank for rule-based insights.
-                </small>
               </div>
-              <div class="form-group">
+              <div class="form-group mb-4">
                 <label>Forecast Horizon</label>
                 <select id="set-forecast-horizon">
                   <option value="7" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '7' ? 'selected' : ''}>7 Days</option>
@@ -171,60 +236,44 @@ class SettingsUI {
                   <option value="30" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '30' ? 'selected' : ''}>30 Days</option>
                 </select>
               </div>
-              <button class="btn btn-primary w-100" id="save-ai-settings">
-                <i class="ph ph-check"></i> Save AI Settings
-              </button>
-            </div>
-          </div>
-          <!-- Team Management -->
-          <div class="card settings-card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-users"></i> Team Management</h3>
-            </div>
-            <div class="card-body">
-              <p class="text-muted mb-3">Manage staff access and roles.</p>
-              <div id="team-list" style="margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
-                <div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading team...</div>
+              <div class="pane-actions">
+                <button class="btn btn-primary" id="save-ai-settings">Save AI Settings</button>
               </div>
-              <button class="btn btn-outline-primary w-100" id="btn-add-team-member">
-                <i class="ph-duotone ph-user-plus"></i> Add Team Member
-              </button>
             </div>
           </div>
-        </div>
 
-        <div class="settings-footer">
-          <button class="btn btn-primary btn-lg" id="save-settings"><i class="ph-duotone ph-floppy-disk"></i> Save Changes</button>
-        </div>
-      </div>
+        </div> <!-- /.settings-pane -->
+      </div> <!-- /.settings-layout -->
+
       <!-- Add Team Member Modal -->
-      <dialog id="add-team-modal" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 25px rgba(0,0,0,0.2); max-width:400px; width:100%;">
-        <div style="padding:1.5rem;">
-           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
-              <h3 style="margin:0">Add Team Member</h3>
-              <button type="button" class="btn-icon" id="close-add-team" style="background:none;border:none;font-size:1.5rem;cursor:pointer">&times;</button>
+      <dialog id="add-team-modal" class="x-modal">
+        <div class="x-modal-content">
+           <div class="x-modal-header">
+              <h3>Add Team Member</h3>
+              <button type="button" class="btn-icon" id="close-add-team">&times;</button>
            </div>
-           <form id="add-team-form">
-             <div class="form-group" style="margin-bottom:1rem">
-               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Username</label>
-               <input type="text" name="username" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+           <form id="add-team-form" class="x-modal-body">
+             <div class="form-group">
+               <label>Username</label>
+               <input type="text" name="username" required>
              </div>
-             <div class="form-group" style="margin-bottom:1rem">
-               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Password</label>
-               <input type="password" name="password" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+             <div class="form-group">
+               <label>Password</label>
+               <input type="password" name="password" required>
              </div>
-             <div class="form-group" style="margin-bottom:1rem">
-               <label style="display:block;margin-bottom:0.25rem;font-weight:500;">Role</label>
-               <select name="role" required style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;">
+             <div class="form-group">
+               <label>Role</label>
+               <select name="role" required>
                  <option value="staff">Staff (Limited Access)</option>
                  <option value="manager">Manager</option>
                  <option value="admin">Admin / Owner</option>
                </select>
              </div>
-             <button type="submit" class="btn btn-primary w-100 mt-2" style="width:100%">Create Account</button>
+             <button type="submit" class="btn btn-primary w-100 mt-2">Create Account</button>
            </form>
         </div>
       </dialog>
+
       ${this.renderStyles()}
       ${this.renderImportModal()}
     `;
@@ -257,13 +306,45 @@ class SettingsUI {
   }
 
   attachHandlers(container) {
-    // Save Settings
-    container.querySelector('#save-settings').addEventListener('click', async () => {
+    // --- Navigation Routing (Master-Detail Split Pane) ---
+    const navItems = container.querySelectorAll('.nav-item');
+    const panes = container.querySelectorAll('.pane-content');
+    const layout = container.querySelector('.settings-layout');
+    const mobileBackBtn = container.querySelector('#btn-back-nav');
+    const mobileTitle = container.querySelector('#mobile-pane-title');
+
+    navItems.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all
+        navItems.forEach(n => n.classList.remove('active'));
+        panes.forEach(p => p.classList.remove('active'));
+
+        // Add active class to clicked
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        container.querySelector(`#${targetId}`).classList.add('active');
+        
+        // Mobile handling
+        if (window.innerWidth <= 768) {
+           layout.classList.add('pane-active');
+           const iconHtml = btn.querySelector('i').outerHTML;
+           const textTitle = btn.textContent.trim();
+           mobileTitle.innerHTML = `${iconHtml} ${textTitle}`;
+        }
+      });
+    });
+
+    mobileBackBtn?.addEventListener('click', () => {
+       layout.classList.remove('pane-active');
+    });
+
+    // --- Save Settings ---
+    const handleSave = async () => {
       const newSettings = {
         ...this.settings,
         businessName: container.querySelector('#set-name').value,
         taxRate: parseFloat(container.querySelector('#set-tax').value) || 0,
-        printerIp: container.querySelector('#set-printer').value
+        printerIp: container.querySelector('#set-printer')?.value || ''
       };
 
       try {
@@ -276,15 +357,15 @@ class SettingsUI {
         if (currentUser) {
           currentUser.businessName = newSettings.businessName;
           localStorage.setItem('erp_session', JSON.stringify(currentUser));
-          // Reload page to reflect name change in sidebar?
-          // location.reload(); 
         }
-
       } catch (err) {
         console.error(err);
         alert('Failed to save settings');
       }
-    });
+    };
+
+    container.querySelector('#save-settings-business')?.addEventListener('click', handleSave);
+    container.querySelector('#save-settings-finance')?.addEventListener('click', handleSave);
 
     // AI Settings Save
     container.querySelector('#save-ai-settings')?.addEventListener('click', () => {
@@ -602,107 +683,276 @@ class SettingsUI {
   renderStyles() {
     return `
       <style>
-        .settings-container {
-          padding: 1rem;
-          max-width: 900px;
+        .settings-layout {
+          display: flex;
+          height: calc(100vh - 60px); /* Fill space below header */
+          max-width: 1200px;
           margin: 0 auto;
+          background: var(--bg-primary);
           color: var(--text-primary);
         }
 
-        .settings-header {
-            margin-bottom: 2rem;
-            text-align: center;
+        /* --- NAV COLUMN (Master) --- */
+        .settings-nav {
+          width: 320px;
+          flex-shrink: 0;
+          border-right: 1px solid var(--border-color);
+          overflow-y: auto;
+          background: var(--bg-primary);
         }
         
-        .settings-header p {
-            color: var(--text-secondary);
+        .nav-header {
+          padding: 1rem 1.5rem;
+          position: sticky;
+          top: 0;
+          background: rgba(15, 23, 42, 0.9);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          z-index: 10;
+        }
+        
+        .nav-header h2 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 700;
         }
 
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .nav-menu {
+          display: flex;
+          flex-direction: column;
+          padding: 0 0 1rem 0;
         }
 
-        .settings-card {
-            height: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          width: 100%;
+          padding: 1rem 1.5rem;
+          background: transparent;
+          border: none;
+          color: var(--text-primary);
+          font-size: 1rem;
+          text-align: left;
+          cursor: pointer;
+          transition: background 0.15s;
         }
         
-        .settings-card .card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(255,255,255,0.01);
+        /* The chevron chevron */
+        .nav-item::after {
+          content: '›';
+          margin-left: auto;
+          font-size: 1.5rem;
+          color: var(--text-secondary);
+          opacity: 0;
+          transition: opacity 0.2s;
         }
         
-        .settings-card .card-header h3 {
-            margin: 0;
-            color: var(--text-primary);
+        .nav-item:hover {
+          background: rgba(255, 255, 255, 0.03);
         }
         
-        .settings-card .card-body {
-            padding: 1.5rem;
+        .nav-item.active {
+          border-right: 3px solid var(--accent-primary);
+          background: rgba(255, 255, 255, 0.05);
         }
 
+        .nav-item:hover::after, .nav-item.active::after {
+          opacity: 1;
+        }
+
+        /* --- CONTENT PANE (Detail) --- */
+        .settings-pane {
+          flex: 1;
+          overflow-y: auto;
+          background: var(--bg-primary);
+          position: relative;
+        }
+
+        .pane-content {
+          display: none;
+          padding: 2rem 2.5rem;
+          max-width: 680px;
+          animation: fadeIn 0.3s ease;
+        }
+        .pane-content.active {
+          display: block;
+        }
+
+        .pane-header {
+          margin-bottom: 2rem;
+        }
+        .pane-header h3 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1.5rem;
+          font-weight: 800;
+        }
+        .pane-header p {
+          margin: 0;
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+        }
+
+        /* --- FORM ELEMENTS (X-Style Minimal) --- */
         .form-group {
-            margin-bottom: 1.25rem;
+          margin-bottom: 2rem;
         }
-
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+          display: block;
+          font-weight: 700;
+          margin-bottom: 0.5rem;
+          font-size: 0.95rem;
+        }
+        .form-group input, .form-group select {
+          width: 100%;
+          padding: 0.85rem 1rem;
+          background: transparent;
+          border: 1px solid var(--border-color);
+          border-radius: 4px; /* Less rounded, more technical */
+          color: var(--text-primary);
+          font-family: inherit;
+          font-size: 1rem;
+          transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+          outline: none;
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 0 1px var(--accent-primary);
+        }
+        
+        /* Flex Input Row (for buttons next to inputs) */
+        .flex-input-group {
+          display: flex;
+          gap: 0.5rem;
+        }
+        .flex-input-group input {
+          flex: 1;
+        }
+        .flex-input-group .btn {
+          width: auto;
+          white-space: nowrap;
         }
 
-        .form-group input, .form-group select, .form-group textarea {
+        .settings-section-divider {
+          height: 1px;
+          background: var(--border-color);
+          margin: 2rem 0;
+        }
+
+        .pane-actions {
+          margin-top: 2rem;
+          display: flex;
+          justify-content: flex-end;
+        }
+        .pane-actions .btn {
+          padding: 0.75rem 2rem;
+          border-radius: 999px; /* Pill shape buttons */
+          font-weight: 700;
+        }
+
+        .status-box {
+          margin-top: 1rem;
+          font-size: 0.85rem;
+          padding: 0.75rem;
+          border-radius: 4px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--border-color);
+          text-align: center;
+          color: var(--text-secondary);
+        }
+
+        /* Custom Slim List (for Team members) */
+        .slim-list {
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .slim-list > div {
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+        .slim-list > div:last-child {
+          border-bottom: none;
+        }
+
+        /* --- MODALS --- */
+        .x-modal {
+          border: none;
+          border-radius: 16px;
+          padding: 0;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          width: 400px;
+          max-width: 95vw;
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+        }
+        .x-modal::backdrop { background: rgba(0,0,0,0.6); }
+        .x-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 1.5rem 1rem;
+        }
+        .x-modal-header h3 { margin: 0; font-weight: 800; font-size: 1.25rem; }
+        .x-modal-body { padding: 0 1.5rem 1.5rem; }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- MOBILE RESPONSIVENESS (Off-canvas slide) --- */
+        @media (max-width: 768px) {
+          .settings-layout {
+            position: relative;
+            overflow: hidden;
+          }
+          .settings-nav {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-        
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .settings-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .data-actions button {
-            text-align: left;
-            padding-left: 1rem;
-        }
-        
-        /* Modal overrides for settings forms */
-        dialog {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-        
-        dialog form {
-            color: var(--text-primary);
+            border-right: none;
+            transition: transform 0.3s ease;
+          }
+          .settings-pane {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 20;
+          }
+          
+          /* When a pane is active on mobile, slide it in */
+          .settings-layout.pane-active .settings-nav {
+            transform: translateX(-30%);
+          }
+          .settings-layout.pane-active .settings-pane {
+            transform: translateX(0);
+          }
+          
+          .pane-content {
+            padding: 1.5rem;
+          }
+          
+          .pane-mobile-header {
+            display: flex !important;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10;
+          }
+          .pane-mobile-header h3 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+          .pane-header { display: none; /* Hide the big header on mobile, use the sticky one */ }
         }
       </style>
     `;
