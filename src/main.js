@@ -13,6 +13,8 @@ import PocketBooksUI from './ui/pocketBooksUI.js';
 import PoolStockUI from './ui/poolStockUI.js';
 import SalesUI from './ui/salesUI.js';
 import ReportsUI from './ui/reportsUI.js';
+import SettingsUI from './ui/settingsUI.js'; // Added for consistency, though dynamically imported later
+import LandingUI from './ui/landingUI.js'; // New import
 import ChartUtils from './utils/charts.js';
 import notificationService from './services/notifications.js';
 import PocketBooks from './modules/PocketBooks.js';
@@ -457,15 +459,31 @@ class IndustrialERPApp {
         localStorage.removeItem('erp_session');
       }
     }
+
+    // 3. Listen for path changes (SPA Routing)
+    window.addEventListener('popstate', () => {
+      this.render();
+    });
   }
 
   render() {
     const app = document.getElementById('app');
+    const path = window.location.pathname;
 
     if (!this.currentUser) {
-      app.innerHTML = this.renderLogin();
-      this.attachLoginHandlers();
+      if (path === '/' || path === '') {
+        // Show public landing page
+        landingUI.render(app);
+      } else {
+        // Show Auth UI (for /app, /login, etc)
+        app.innerHTML = this.renderLogin();
+        this.attachLoginHandlers();
+      }
     } else {
+      if (path === '/' || path === '') {
+        // Logged in users trying to hit the landing page get redirected to app
+        window.history.replaceState({}, '', '/app');
+      }
       app.innerHTML = this.renderDashboard();
       this.attachDashboardHandlers();
       if (!this.currentUser.onboardingComplete) {
