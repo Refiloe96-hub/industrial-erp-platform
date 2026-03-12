@@ -437,11 +437,172 @@ class LandingUI {
         }
         .lp-footer-links a:hover { color: #64748b; }
 
+        /* --- STATS BAR --- */
+        .lp-stats {
+          padding: 3rem 2rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .lp-stats-inner {
+          max-width: 900px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 2rem;
+          text-align: center;
+        }
+        .lp-stat-num {
+          font-size: 2.25rem;
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          color: #f1f5f9;
+          display: block;
+          line-height: 1;
+          margin-bottom: 0.4rem;
+        }
+        .lp-stat-label {
+          font-size: 0.8rem;
+          color: #475569;
+          font-weight: 500;
+        }
+
+        /* --- PRICING --- */
+        .lp-pricing {
+          padding: 6rem 2rem;
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+        .lp-pricing-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+          margin-top: 3.5rem;
+          align-items: start;
+        }
+        .lp-plan {
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 16px;
+          padding: 2rem;
+          background: #080d17;
+          transition: border-color 0.2s;
+        }
+        .lp-plan:hover { border-color: rgba(255,255,255,0.14); }
+        .lp-plan.lp-plan--featured {
+          border-color: #2563eb;
+          background: #0c1427;
+          position: relative;
+        }
+        .lp-plan-badge {
+          position: absolute;
+          top: -13px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #2563eb;
+          color: white;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 0.25rem 0.9rem;
+          border-radius: 99px;
+        }
+        .lp-plan-name {
+          font-size: 0.85rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: #64748b;
+          margin-bottom: 1.25rem;
+        }
+        .lp-plan-name.featured-name { color: #60a5fa; }
+        .lp-plan-price {
+          font-size: 2.75rem;
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          color: #f1f5f9;
+          line-height: 1;
+          margin-bottom: 0.25rem;
+        }
+        .lp-plan-price sup {
+          font-size: 1.2rem;
+          font-weight: 600;
+          vertical-align: super;
+          letter-spacing: 0;
+        }
+        .lp-plan-price sub {
+          font-size: 0.9rem;
+          font-weight: 500;
+          letter-spacing: 0;
+          color: #64748b;
+        }
+        .lp-plan-desc {
+          font-size: 0.875rem;
+          color: #475569;
+          line-height: 1.6;
+          margin-bottom: 1.75rem;
+        }
+        .lp-plan-divider {
+          border: none;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          margin-bottom: 1.5rem;
+        }
+        .lp-plan-features {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          margin-bottom: 2rem;
+        }
+        .lp-plan-features li {
+          font-size: 0.875rem;
+          color: #94a3b8;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.6rem;
+          line-height: 1.5;
+        }
+        .lp-plan-features li i { color: #2563eb; margin-top: 2px; flex-shrink: 0; }
+        .lp-plan-btn {
+          width: 100%;
+          padding: 0.75rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s, color 0.15s;
+        }
+        .lp-plan-btn.outline {
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.12);
+          color: #94a3b8;
+        }
+        .lp-plan-btn.outline:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; }
+        .lp-plan-btn.primary {
+          background: #2563eb;
+          border: none;
+          color: white;
+        }
+        .lp-plan-btn.primary:hover { background: #1d4ed8; }
+
+        /* --- SCROLL ANIMATIONS --- */
+        .lp-animate {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+        .lp-animate.lp-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        /* Stagger children in a grid */
+        .lp-stagger > * { transition-delay: calc(var(--i, 0) * 80ms); }
+
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
           .lp-features-grid { grid-template-columns: repeat(2, 1fr); }
           .lp-how-inner { grid-template-columns: 1fr; gap: 3rem; }
           .lp-nav-links { display: none; }
+          .lp-stats-inner { grid-template-columns: repeat(2, 1fr); }
+          .lp-pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
         }
         @media (max-width: 600px) {
           .lp-features-grid { grid-template-columns: 1fr; }
@@ -449,6 +610,7 @@ class LandingUI {
           .lp-footer { flex-direction: column; gap: 1.5rem; text-align: center; }
           .lp-footer-links { flex-wrap: wrap; justify-content: center; }
           .lp-nav-actions .lp-btn-ghost { display: none; }
+          .lp-stats-inner { grid-template-columns: repeat(2, 1fr); }
         }
       </style>
 
@@ -487,6 +649,30 @@ class LandingUI {
 
         <hr class="lp-divider">
 
+        <!-- Stats Bar -->
+        <div class="lp-stats lp-animate">
+          <div class="lp-stats-inner">
+            <div>
+              <span class="lp-stat-num">2,400+</span>
+              <span class="lp-stat-label">Businesses active</span>
+            </div>
+            <div>
+              <span class="lp-stat-num">14</span>
+              <span class="lp-stat-label">Countries</span>
+            </div>
+            <div>
+              <span class="lp-stat-num">99.8%</span>
+              <span class="lp-stat-label">Uptime SLA</span>
+            </div>
+            <div>
+              <span class="lp-stat-num">&lt; 400ms</span>
+              <span class="lp-stat-label">Avg. response time</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="lp-divider">
+
         <!-- Social proof marquee -->
         <div class="lp-proof">
           <p class="lp-proof-label">Trusted by businesses across the region</p>
@@ -518,12 +704,12 @@ class LandingUI {
         <hr class="lp-divider">
 
         <!-- Features -->
-        <section id="features" class="lp-features">
+        <section id="features" class="lp-features lp-animate">
           <p class="lp-section-label">Everything in one place</p>
           <h2 class="lp-section-heading">Every tool your business needs to operate</h2>
           <p class="lp-section-sub">From the sales counter to the storeroom, Industrial ERP connects every part of your operation in a single platform.</p>
 
-          <div class="lp-features-grid">
+          <div class="lp-features-grid lp-stagger">
             <div class="lp-feat">
               <span class="lp-feat-icon"><i class="ph-duotone ph-storefront"></i></span>
               <h3>Point of Sale</h3>
@@ -591,8 +777,69 @@ class LandingUI {
           </div>
         </section>
 
+        <!-- Pricing -->
+        <section id="pricing" class="lp-pricing lp-animate">
+          <p class="lp-section-label">Simple, transparent pricing</p>
+          <h2 class="lp-section-heading">Pick the plan that fits your operation</h2>
+          <p class="lp-section-sub">No hidden fees. No long-term contracts. Cancel or upgrade any time.</p>
+
+          <div class="lp-pricing-grid">
+            <!-- Free -->
+            <div class="lp-plan">
+              <p class="lp-plan-name">Starter</p>
+              <div class="lp-plan-price">Free</div>
+              <p class="lp-plan-desc">Everything you need to get started. No credit card required.</p>
+              <hr class="lp-plan-divider">
+              <ul class="lp-plan-features">
+                <li><i class="ph-bold ph-check"></i> 1 business location</li>
+                <li><i class="ph-bold ph-check"></i> POS &amp; basic inventory</li>
+                <li><i class="ph-bold ph-check"></i> PocketBooks ledger</li>
+                <li><i class="ph-bold ph-check"></i> Up to 500 products</li>
+                <li><i class="ph-bold ph-check"></i> Local-only storage (no cloud sync)</li>
+              </ul>
+              <button class="lp-plan-btn outline lp-cta-btn">Get started free</button>
+            </div>
+
+            <!-- Pro (featured) -->
+            <div class="lp-plan lp-plan--featured">
+              <div class="lp-plan-badge">Most popular</div>
+              <p class="lp-plan-name featured-name">Pro</p>
+              <div class="lp-plan-price"><sup>R</sup>399<sub>/mo</sub></div>
+              <p class="lp-plan-desc">For growing businesses that need cloud sync and advanced modules.</p>
+              <hr class="lp-plan-divider">
+              <ul class="lp-plan-features">
+                <li><i class="ph-bold ph-check"></i> Everything in Starter</li>
+                <li><i class="ph-bold ph-check"></i> Cloud sync &amp; backup</li>
+                <li><i class="ph-bold ph-check"></i> Unlimited products</li>
+                <li><i class="ph-bold ph-check"></i> SmartShift manufacturing</li>
+                <li><i class="ph-bold ph-check"></i> TrustCircle syndicates</li>
+                <li><i class="ph-bold ph-check"></i> Up to 5 team members</li>
+                <li><i class="ph-bold ph-check"></i> Priority support</li>
+              </ul>
+              <button class="lp-plan-btn primary lp-cta-btn">Start free 14-day trial</button>
+            </div>
+
+            <!-- Enterprise -->
+            <div class="lp-plan">
+              <p class="lp-plan-name">Enterprise</p>
+              <div class="lp-plan-price" style="font-size:1.75rem;padding-top:0.5rem">Custom</div>
+              <p class="lp-plan-desc">Multi-location deployments, dedicated support, and custom integrations.</p>
+              <hr class="lp-plan-divider">
+              <ul class="lp-plan-features">
+                <li><i class="ph-bold ph-check"></i> Everything in Pro</li>
+                <li><i class="ph-bold ph-check"></i> Unlimited locations &amp; team members</li>
+                <li><i class="ph-bold ph-check"></i> Custom API integrations</li>
+                <li><i class="ph-bold ph-check"></i> SSO &amp; full audit logs</li>
+                <li><i class="ph-bold ph-check"></i> Dedicated account manager</li>
+                <li><i class="ph-bold ph-check"></i> SLA guarantee</li>
+              </ul>
+              <button class="lp-plan-btn outline lp-cta-btn">Contact sales</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Final CTA -->
-        <section class="lp-cta">
+        <section class="lp-cta lp-animate">
           <h2>Start running a tighter operation today</h2>
           <p>Join businesses that replaced disconnected spreadsheets and paper records with a single, reliable platform.</p>
           <div class="lp-hero-actions">
@@ -626,6 +873,30 @@ class LandingUI {
     ['btnNavLogin', 'btnNavSignup', 'btnHeroSignup', 'btnHeroLogin', 'btnCtaSignup'].forEach(id => {
       const el = container.querySelector('#' + id);
       if (el) el.addEventListener('click', goToAuth);
+    });
+
+    // Pricing plan buttons also route to auth
+    container.querySelectorAll('.lp-cta-btn').forEach(btn => btn.addEventListener('click', goToAuth));
+
+    // --- Scroll-triggered animations via IntersectionObserver ---
+    const animEls = container.querySelectorAll('.lp-animate');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('lp-visible');
+          io.unobserve(entry.target); // fire once
+        }
+      });
+    }, { threshold: 0.1 });
+    animEls.forEach(el => io.observe(el));
+
+    // Stagger grid children
+    container.querySelectorAll('.lp-stagger').forEach(grid => {
+      [...grid.children].forEach((child, i) => {
+        child.style.setProperty('--i', i);
+        child.classList.add('lp-animate');
+        io.observe(child);
+      });
     });
   }
 }
