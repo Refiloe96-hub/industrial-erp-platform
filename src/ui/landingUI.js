@@ -596,6 +596,170 @@ class LandingUI {
         /* Stagger children in a grid */
         .lp-stagger > * { transition-delay: calc(var(--i, 0) * 80ms); }
 
+        /* --- FEATURES SWITCHER --- */
+        .lp-features-tabs {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-bottom: 2.5rem;
+          background: rgba(255,255,255,0.03);
+          padding: 0.4rem;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.05);
+          max-width: fit-content;
+          margin-inline: auto;
+        }
+        .lp-tab-btn {
+          background: transparent;
+          border: none;
+          color: #94a3b8;
+          padding: 0.6rem 1.25rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .lp-tab-btn:hover { color: #f1f5f9; }
+        .lp-tab-btn.active {
+          background: #2563eb;
+          color: white;
+          box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+        }
+        .lp-feat { display: none; }
+        .lp-feat.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TESTIMONIALS --- */
+        .lp-testimonials {
+          padding: 6rem 2rem;
+          max-width: 1100px;
+          margin: 0 auto;
+          text-align: center;
+        }
+        .lp-test-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+          margin-top: 3.5rem;
+          text-align: left;
+        }
+        .lp-quote-card {
+          background: #080d17;
+          border: 1px solid rgba(255,255,255,0.05);
+          padding: 2rem;
+          border-radius: 16px;
+        }
+        .lp-quote-text {
+          font-size: 1rem;
+          color: #e2e8f0;
+          line-height: 1.6;
+          margin-bottom: 1.5rem;
+          font-style: italic;
+        }
+        .lp-quote-author {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+        .lp-quote-avatar {
+          width: 40px; height: 40px;
+          border-radius: 50%;
+          background: #1e293b;
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 700; color: #94a3b8;
+        }
+        .lp-quote-name { font-size: 0.875rem; font-weight: 700; color: #f1f5f9; }
+        .lp-quote-biz { font-size: 0.75rem; color: #64748b; }
+
+        /* --- COMPARISON TABLE --- */
+        .lp-compare {
+          padding: 6rem 2rem;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        .lp-compare-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 3rem;
+        }
+        .lp-compare-table th, .lp-compare-table td {
+          padding: 1.25rem;
+          text-align: left;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .lp-compare-table th {
+          font-size: 0.875rem;
+          font-weight: 700;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .lp-compare-table th:nth-child(2) { color: #2563eb; background: rgba(37,99,235,0.05); border-radius: 8px 8px 0 0; }
+        .lp-compare-table td:nth-child(1) { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; }
+        .lp-compare-table td:nth-child(2) { background: rgba(37,99,235,0.05); text-align: center; }
+        .lp-compare-table td:nth-child(3), .lp-compare-table td:nth-child(4) { text-align: center; color: #64748b; }
+        .lp-compare-table i.ph-check-circle { color: #10b981; font-size: 1.25rem; }
+        .lp-compare-table i.ph-x-circle { color: #ef4444; font-size: 1.25rem; opacity: 0.5; }
+
+        /* --- FAQ ACCORDION --- */
+        .lp-faq {
+          padding: 6rem 2rem;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .lp-faq-item {
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .lp-faq-q {
+          width: 100%;
+          text-align: left;
+          background: none; border: none;
+          padding: 1.5rem 0;
+          font-size: 1.05rem;
+          font-weight: 600;
+          color: #f1f5f9;
+          cursor: pointer;
+          display: flex; justify-content: space-between; align-items: center;
+        }
+        .lp-faq-q i { color: #2563eb; transition: transform 0.2s; }
+        .lp-faq-item.active .lp-faq-q i { transform: rotate(180deg); }
+        .lp-faq-a {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+        }
+        .lp-faq-item.active .lp-faq-a { max-height: 200px; }
+        .lp-faq-a-inner {
+          padding-bottom: 1.5rem;
+          font-size: 0.95rem;
+          color: #64748b;
+          line-height: 1.6;
+        }
+
+        /* --- STICKY CTA BAR --- */
+        .lp-sticky-cta {
+          position: fixed;
+          bottom: -100px; left: 50%;
+          transform: translateX(-50%);
+          background: rgba(15, 23, 42, 0.9);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 0.75rem 1.5rem;
+          border-radius: 99px;
+          display: flex; align-items: center; gap: 1.5rem;
+          z-index: 1000;
+          transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .lp-sticky-cta.show { bottom: 2rem; }
+        .lp-sticky-text { font-size: 0.875rem; font-weight: 600; color: #f8fafc; }
+        .lp-sticky-btn {
+          background: #2563eb; color: white; border: none;
+          padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .lp-sticky-btn:hover { background: #1d4ed8; }
+
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
           .lp-features-grid { grid-template-columns: repeat(2, 1fr); }
@@ -603,6 +767,8 @@ class LandingUI {
           .lp-nav-links { display: none; }
           .lp-stats-inner { grid-template-columns: repeat(2, 1fr); }
           .lp-pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
+          .lp-test-grid { grid-template-columns: 1fr; }
+          .lp-compare-table { display: block; overflow-x: auto; white-space: nowrap; }
         }
         @media (max-width: 600px) {
           .lp-features-grid { grid-template-columns: 1fr; }
@@ -610,7 +776,10 @@ class LandingUI {
           .lp-footer { flex-direction: column; gap: 1.5rem; text-align: center; }
           .lp-footer-links { flex-wrap: wrap; justify-content: center; }
           .lp-nav-actions .lp-btn-ghost { display: none; }
-          .lp-stats-inner { grid-template-columns: repeat(2, 1fr); }
+          .lp-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+          .lp-stat-num { font-size: 1.75rem; }
+          .lp-sticky-cta { width: calc(100% - 2rem); justify-content: space-between; padding: 0.75rem 1rem; }
+          .lp-features-tabs { flex-wrap: wrap; }
         }
       </style>
 
@@ -703,42 +872,156 @@ class LandingUI {
 
         <hr class="lp-divider">
 
-        <!-- Features -->
+        <!-- Features with Switcher -->
         <section id="features" class="lp-features lp-animate">
           <p class="lp-section-label">Everything in one place</p>
-          <h2 class="lp-section-heading">Every tool your business needs to operate</h2>
-          <p class="lp-section-sub">From the sales counter to the storeroom, Industrial ERP connects every part of your operation in a single platform.</p>
+          <h2 class="lp-section-heading">Tailored to your operation type</h2>
+          <p class="lp-section-sub">Industrial ERP automatically configures its modules based on how your business actually runs.</p>
 
-          <div class="lp-features-grid lp-stagger">
-            <div class="lp-feat">
-              <span class="lp-feat-icon"><i class="ph-duotone ph-storefront"></i></span>
-              <h3>Point of Sale</h3>
-              <p>Fast offline checkout, barcode scanning, receipt printing, and VAT calculation that keeps working when the internet does not.</p>
-            </div>
-            <div class="lp-feat">
-              <span class="lp-feat-icon"><i class="ph-duotone ph-archive-box"></i></span>
-              <h3>PoolStock Inventory</h3>
-              <p>Real-time stock levels, low-inventory alerts, purchase orders, and a full audit trail of every item in and out.</p>
-            </div>
-            <div class="lp-feat">
+          <div class="lp-features-tabs">
+            <button class="lp-tab-btn active" data-tab="shop">Retail Shop</button>
+            <button class="lp-tab-btn" data-tab="warehouse">Warehouse</button>
+            <button class="lp-tab-btn" data-tab="factory">Factory</button>
+          </div>
+
+          <div class="lp-features-grid">
+            <!-- Shared / Base Features -->
+            <div class="lp-feat active" data-for="shop warehouse factory">
               <span class="lp-feat-icon"><i class="ph-duotone ph-notebook"></i></span>
               <h3>PocketBooks</h3>
-              <p>Automatic profit & loss, cash flow tracking, and expense management — accountant-quality reporting, zero accounting knowledge required.</p>
+              <p>Automatic profit & loss, cash flow tracking, and expense management.</p>
             </div>
-            <div class="lp-feat">
-              <span class="lp-feat-icon"><i class="ph-duotone ph-factory"></i></span>
-              <h3>SmartShift Manufacturing</h3>
-              <p>Track raw materials, manage bills of materials, plan production runs, and monitor machine utilisation — all from one view.</p>
-            </div>
-            <div class="lp-feat">
-              <span class="lp-feat-icon"><i class="ph-duotone ph-handshake"></i></span>
-              <h3>TrustCircle Syndicates</h3>
-              <p>Pool orders with other businesses you trust to unlock bulk-buy pricing and supplier credit that neither of you could access alone.</p>
-            </div>
-            <div class="lp-feat">
+            <div class="lp-feat active" data-for="shop warehouse factory">
               <span class="lp-feat-icon"><i class="ph-duotone ph-cloud-slash"></i></span>
               <h3>Local-First Architecture</h3>
-              <p>Your data is stored on-device and syncs to the cloud in the background. Full functionality whether you are online or offline.</p>
+              <p>Your data is stored on-device and syncs to the cloud in the background automatically.</p>
+            </div>
+
+            <!-- Shop specific -->
+            <div class="lp-feat active" data-for="shop">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-storefront"></i></span>
+              <h3>Point of Sale</h3>
+              <p>Fast offline checkout, barcode scanning, and receipt printing.</p>
+            </div>
+
+            <!-- Warehouse & Shop specific -->
+            <div class="lp-feat active" data-for="shop warehouse">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-archive-box"></i></span>
+              <h3>PoolStock Inventory</h3>
+              <p>Real-time stock levels, low-inventory alerts, and complete audit trails.</p>
+            </div>
+            <div class="lp-feat active" data-for="shop warehouse">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-handshake"></i></span>
+              <h3>TrustCircle Syndicates</h3>
+              <p>Pool orders with other businesses you trust to unlock bulk-buy pricing.</p>
+            </div>
+
+            <!-- Factory specific -->
+            <div class="lp-feat" data-for="factory">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-factory"></i></span>
+              <h3>SmartShift Manufacturing</h3>
+              <p>Track raw materials, manage bills of materials, and plan production runs.</p>
+            </div>
+            <div class="lp-feat" data-for="factory">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-engine"></i></span>
+              <h3>Machine Utilisation</h3>
+              <p>Monitor uptime, log maintenance events, and calculate exact production costs.</p>
+            </div>
+            <div class="lp-feat" data-for="warehouse factory">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-truck"></i></span>
+              <h3>Dispatch & Routing</h3>
+              <p>Manage outgoing shipments, generate waybills, and track delivery status.</p>
+            </div>
+            <div class="lp-feat" data-for="warehouse">
+              <span class="lp-feat-icon"><i class="ph-duotone ph-barcode"></i></span>
+              <h3>Bulk Receiving</h3>
+              <p>Rapid pallet scanning, GRN generation, and automatic supplier matching.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Comparison Table -->
+        <section class="lp-compare lp-animate">
+          <p class="lp-section-label">Why choose us?</p>
+          <h2 class="lp-section-heading">Built differently</h2>
+          <table class="lp-compare-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Industrial ERP</th>
+                <th>Cloud Accounting (e.g. Xero)</th>
+                <th>Legacy On-Premise</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Works offline infinitely</td>
+                <td><i class="ph-fill ph-check-circle"></i></td>
+                <td><i class="ph-fill ph-x-circle"></i></td>
+                <td><i class="ph-fill ph-check-circle"></i></td>
+              </tr>
+              <tr>
+                <td>Cloud backup & sync</td>
+                <td><i class="ph-fill ph-check-circle"></i></td>
+                <td><i class="ph-fill ph-check-circle"></i></td>
+                <td><i class="ph-fill ph-x-circle"></i></td>
+              </tr>
+              <tr>
+                <td>Setup time</td>
+                <td><span style="color:#e2e8f0;font-weight:600">5 minutes</span></td>
+                <td>Hours</td>
+                <td>Months</td>
+              </tr>
+              <tr>
+                <td>Upfront server costs</td>
+                <td><span style="color:#e2e8f0;font-weight:600">Free</span></td>
+                <td>Free</td>
+                <td>R50k+</td>
+              </tr>
+              <tr>
+                <td>Syndicate buying</td>
+                <td><i class="ph-fill ph-check-circle"></i></td>
+                <td><i class="ph-fill ph-x-circle"></i></td>
+                <td><i class="ph-fill ph-x-circle"></i></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="lp-testimonials lp-animate">
+          <p class="lp-section-label">Don't just take our word for it</p>
+          <h2 class="lp-section-heading" style="margin: 0 auto;">Trusted by local operators</h2>
+          <div class="lp-test-grid lp-stagger">
+            <div class="lp-quote-card">
+              <p class="lp-quote-text">"Before this, when the power went and the internet dropped, the till stopped. Now my cashiers don't even notice. We just keep selling."</p>
+              <div class="lp-quote-author">
+                <div class="lp-quote-avatar">TM</div>
+                <div>
+                  <p class="lp-quote-name">Thabo M.</p>
+                  <p class="lp-quote-biz">Soweto Spaza Owner</p>
+                </div>
+              </div>
+            </div>
+            <div class="lp-quote-card">
+              <p class="lp-quote-text">"The TrustCircle feature alone saves us 15% on bulk maize meal because I group my orders with three other shops in our street."</p>
+              <div class="lp-quote-author">
+                <div class="lp-quote-avatar">SJ</div>
+                <div>
+                  <p class="lp-quote-name">Sarah J.</p>
+                  <p class="lp-quote-biz">Metro Traders</p>
+                </div>
+              </div>
+            </div>
+            <div class="lp-quote-card">
+              <p class="lp-quote-text">"We tried Sage, but it was too complex for my floor staff. Industrial ERP has just what we need to track raw materials without the bloat."</p>
+              <div class="lp-quote-author">
+                <div class="lp-quote-avatar">DN</div>
+                <div>
+                  <p class="lp-quote-name">David N.</p>
+                  <p class="lp-quote-biz">Eastgate Mills</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -838,6 +1121,37 @@ class LandingUI {
           </div>
         </section>
 
+        <!-- FAQ Accordion -->
+        <section class="lp-faq lp-animate">
+          <p class="lp-section-label">Questions?</p>
+          <h2 class="lp-section-heading">Frequently Asked</h2>
+          
+          <div class="lp-faq-item">
+            <button class="lp-faq-q">Does it really work without the internet? <i class="ph-bold ph-caret-down"></i></button>
+            <div class="lp-faq-a">
+              <div class="lp-faq-a-inner">Yes. Unlike standard cloud software that blocks you when you go offline, Industrial ERP is a "local-first" Progressive Web App. It saves all your sales, inventory counts, and expenses directly to your device. When the internet comes back, it quietly synchronizes with the cloud in the background.</div>
+            </div>
+          </div>
+          <div class="lp-faq-item">
+            <button class="lp-faq-q">What hardware do I need to buy? <i class="ph-bold ph-caret-down"></i></button>
+            <div class="lp-faq-a">
+              <div class="lp-faq-a-inner">None. The system runs in your web browser. You can use your existing PC, a cheap Android tablet, or your smartphone. It also connects via Bluetooth or USB to standard receipt printers and barcode scanners.</div>
+            </div>
+          </div>
+          <div class="lp-faq-item">
+            <button class="lp-faq-q">Can I import my existing product list? <i class="ph-bold ph-caret-down"></i></button>
+            <div class="lp-faq-a">
+              <div class="lp-faq-a-inner">Absolutely. If you have an Excel spreadsheet (`.csv` file) of your current stock, you can upload it inside the Settings panel and be ready to sell in minutes.</div>
+            </div>
+          </div>
+          <div class="lp-faq-item">
+            <button class="lp-faq-q">How does TrustCircle Syndicates work? <i class="ph-bold ph-caret-down"></i></button>
+            <div class="lp-faq-a">
+              <div class="lp-faq-a-inner">TrustCircle lets you securely connect your account with other known businesses in your area. When you need to order stock, you can group your order with theirs. Because the combined order is larger, you unlock the bulk-tier pricing from wholesalers that typically require massive minimum order quantities.</div>
+            </div>
+          </div>
+        </section>
+
         <!-- Final CTA -->
         <section class="lp-cta lp-animate">
           <h2>Start running a tighter operation today</h2>
@@ -847,6 +1161,12 @@ class LandingUI {
           </div>
           <p class="lp-hero-note" style="margin-top:1rem;">Setup takes less than 5 minutes</p>
         </section>
+
+        <!-- Sticky Bottom CTA -->
+        <div class="lp-sticky-cta" id="stickyCta">
+          <span class="lp-sticky-text">Ready to upgrade your operations?</span>
+          <button class="lp-sticky-btn lp-cta-btn">Start free trial</button>
+        </div>
 
         <!-- Footer -->
         <footer>
@@ -875,10 +1195,42 @@ class LandingUI {
       if (el) el.addEventListener('click', goToAuth);
     });
 
-    // Pricing plan buttons also route to auth
+    // Pricing & Sticky plan buttons also route to auth
     container.querySelectorAll('.lp-cta-btn').forEach(btn => btn.addEventListener('click', goToAuth));
 
-    // --- Scroll-triggered animations via IntersectionObserver ---
+    // --- Business Switcher Tabs ---
+    const tabs = container.querySelectorAll('.lp-tab-btn');
+    const feats = container.querySelectorAll('.lp-feat');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const selected = tab.dataset.tab;
+        
+        // Filter features
+        feats.forEach(feat => {
+          if (feat.dataset.for.includes(selected)) {
+            feat.classList.add('active');
+          } else {
+            feat.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // --- FAQ Accordion ---
+    const faqs = container.querySelectorAll('.lp-faq-item');
+    faqs.forEach(item => {
+      const btn = item.querySelector('.lp-faq-q');
+      btn.addEventListener('click', () => {
+        // Close others
+        faqs.forEach(other => { if (other !== item) other.classList.remove('active'); });
+        // Toggle current
+        item.classList.toggle('active');
+      });
+    });
+
+    // --- Scroll-triggered animations ---
     const animEls = container.querySelectorAll('.lp-animate');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -898,6 +1250,23 @@ class LandingUI {
         io.observe(child);
       });
     });
+
+    // --- Sticky CTA Controller ---
+    const stickyCta = container.querySelector('#stickyCta');
+    const hero = container.querySelector('.lp-hero');
+    if (stickyCta && hero) {
+      const stickyIo = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          // If hero is fully out of view, show sticky bar
+          if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+            stickyCta.classList.add('show');
+          } else {
+            stickyCta.classList.remove('show');
+          }
+        });
+      }, { threshold: 0 }); // fire as soon as hero enters/leaves
+      stickyIo.observe(hero);
+    }
   }
 }
 
