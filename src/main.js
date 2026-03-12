@@ -15,6 +15,7 @@ import SalesUI from './ui/salesUI.js';
 import ReportsUI from './ui/reportsUI.js';
 import SettingsUI from './ui/settingsUI.js'; // Added for consistency, though dynamically imported later
 import LandingUI from './ui/landingUI.js'; // New import
+import WelcomeWizardUI from './ui/welcomeWizardUI.js';
 import ChartUtils from './utils/charts.js';
 import notificationService from './services/notifications.js';
 import PocketBooks from './modules/PocketBooks.js';
@@ -313,6 +314,12 @@ class IndustrialERPApp {
         seedBtn.style.marginTop = 'auto'; // Push to bottom
         seedBtn.onclick = () => SeedData.init();
         nav.appendChild(seedBtn);
+
+        const wizardBtn = document.createElement('button');
+        wizardBtn.className = 'btn btn-outline-light mt-2 w-100';
+        wizardBtn.innerHTML = '<i class="ph-duotone ph-hand-waving"></i> Test Onboarding';
+        wizardBtn.onclick = () => WelcomeWizardUI.show(() => console.log('Wizard test complete'));
+        nav.appendChild(wizardBtn);
       }
 
       this.isInitialized = true;
@@ -365,6 +372,13 @@ class IndustrialERPApp {
             this.render();
             initSync(); // Start background sync
             console.log('✅ OAuth user authenticated via Supabase');
+
+            // Trigger Welcome Wizard for first-time login
+            if (localStorage.getItem('erp_onboarding_complete') !== 'true') {
+              WelcomeWizardUI.show(() => {
+                console.log('Wizard complete');
+              });
+            }
           };
 
           // If this is a new OAuth user, they won't have a business_type yet. Target them.
