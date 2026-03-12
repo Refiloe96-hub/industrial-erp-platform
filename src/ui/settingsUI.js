@@ -685,11 +685,12 @@ class SettingsUI {
       <style>
         .settings-layout {
           display: flex;
-          height: calc(100vh - 60px); /* Fill space below header */
+          height: calc(100vh - 60px);
           max-width: 1200px;
           margin: 0 auto;
-          background: var(--bg-primary);
+          background: #0f172a;
           color: var(--text-primary);
+          overflow: hidden;
         }
 
         /* --- NAV COLUMN (Master) --- */
@@ -698,7 +699,8 @@ class SettingsUI {
           flex-shrink: 0;
           border-right: 1px solid var(--border-color);
           overflow-y: auto;
-          background: var(--bg-primary);
+          background: #0f172a;
+          height: 100%;
         }
         
         .nav-header {
@@ -765,8 +767,9 @@ class SettingsUI {
         .settings-pane {
           flex: 1;
           overflow-y: auto;
-          background: var(--bg-primary);
+          background: #0f172a;
           position: relative;
+          height: 100%;
         }
 
         .pane-content {
@@ -902,56 +905,84 @@ class SettingsUI {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- MOBILE RESPONSIVENESS (Off-canvas slide) --- */
+        /* Always show chevron on mobile-sized items */
         @media (max-width: 768px) {
           .settings-layout {
             position: relative;
             overflow: hidden;
+            height: calc(100vh - 120px); /* Account for app header + bottom nav */
           }
+
           .settings-nav {
             width: 100%;
             border-right: none;
+            height: 100%;
+            overflow-y: auto;
             transition: transform 0.3s ease;
+            background: #0f172a;
           }
+
+          /* Always show the chevron arrow on mobile */
+          .nav-item::after {
+            opacity: 1 !important;
+          }
+
           .settings-pane {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--bg-primary);
+            background: #0f172a;
             transform: translateX(100%);
             transition: transform 0.3s ease;
             z-index: 20;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
           }
-          
-          /* When a pane is active on mobile, slide it in */
+
+          /* pane-content scrolls inside */
+          .pane-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 1.25rem;
+            padding-bottom: 2rem; /* Extra bottom breathing room */
+          }
+
+          /* Slide pane in when active */
           .settings-layout.pane-active .settings-nav {
-            transform: translateX(-30%);
+            transform: translateX(-100%);
+            pointer-events: none;
           }
           .settings-layout.pane-active .settings-pane {
             transform: translateX(0);
           }
-          
-          .pane-content {
-            padding: 1.5rem;
-          }
-          
+
           .pane-mobile-header {
             display: flex !important;
             align-items: center;
             gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            background: rgba(15, 23, 42, 0.9);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+            background: rgba(15, 23, 42, 0.97);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            z-index: 10;
+            z-index: 30;
           }
-          .pane-mobile-header h3 { margin: 0; font-size: 1.25rem; font-weight: 700; }
-          .pane-header { display: none; /* Hide the big header on mobile, use the sticky one */ }
+          .pane-mobile-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+          .pane-mobile-header #btn-back-nav {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            font-size: 1rem;
+            flex-shrink: 0;
+          }
+          .pane-header { display: none; }
         }
       </style>
     `;
