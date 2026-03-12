@@ -1141,7 +1141,7 @@ class LandingUI {
           <div class="lp-faq-item">
             <button class="lp-faq-q">Can I import my existing product list? <i class="ph-bold ph-caret-down"></i></button>
             <div class="lp-faq-a">
-              <div class="lp-faq-a-inner">Absolutely. If you have an Excel spreadsheet (`.csv` file) of your current stock, you can upload it inside the Settings panel and be ready to sell in minutes.</div>
+              <div class="lp-faq-a-inner">Absolutely. If you have an Excel spreadsheet (\`.csv\` file) of your current stock, you can upload it inside the Settings panel and be ready to sell in minutes.</div>
             </div>
           </div>
           <div class="lp-faq-item">
