@@ -337,31 +337,106 @@ class IndustrialERPApp {
             .eq('id', supabaseId)
             .maybeSingle();
 
-          const rebuiltUser = {
-            username: profile?.username || email.split('@')[0],
-            email: email,
-            businessName: profile?.business_name || 'My Business',
-            businessType: profile?.business_type || 'shopowner',
-            ownerName: profile?.owner_name || session.user.user_metadata?.full_name || '',
-            phone: profile?.phone || '',
-            supabaseId: supabaseId,
-            role: profile?.role || 'admin',
-            lastLogin: Date.now(),
-            createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+          const finalizeOAuthLogin = async (finalProfile) => {
+            const rebuiltUser = {
+              username: finalProfile?.username || email.split('@')[0],
+              email: email,
+              businessName: finalProfile?.business_name || 'My Business',
+              businessType: finalProfile?.business_type || 'shopowner',
+              ownerName: finalProfile?.owner_name || session.user.user_metadata?.full_name || '',
+              phone: finalProfile?.phone || '',
+              supabaseId: supabaseId,
+              role: finalProfile?.role || 'admin',
+              lastLogin: Date.now(),
+              createdAt: finalProfile?.created_at ? new Date(finalProfile.created_at).getTime() : Date.now(),
+            };
+
+            // Save locally
+            try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
+            await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
+
+            this.currentUser = rebuiltUser;
+            localStorage.setItem('erp_session', JSON.stringify(rebuiltUser));
+
+            // Force UI refresh, remove hash fragments from URL (cleanup)
+            window.history.replaceState({}, document.title, window.location.pathname);
+            this.render();
+            initSync(); // Start background sync
+            console.log('✅ OAuth user authenticated via Supabase');
           };
 
-          // Save locally
-          try { await db.update('users', rebuiltUser); } catch { await db.add('users', rebuiltUser); }
-          await db.update('settings', { key: 'businessProfile', ...rebuiltUser });
+          // If this is a new OAuth user, they won't have a business_type yet. Target them.
+          if (!profile?.business_type) {
+            // Unskippable modal to collect business info
+            const modal = document.createElement('dialog');
+            modal.className = 'item-modal'; // REUSING poolStock modal styles for consistency
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+              <form id="oauth-profile-form">
+                  <h2 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);">Complete your profile</h2>
+                  <p style="color:var(--text-secondary);margin-bottom:1.5rem;font-size:0.9rem;">Please define your business structure to customize your workspace.</p>
+                  
+                  <div class="form-group" style="margin-bottom:1.5rem;">
+                      <label style="display:block;margin-bottom:0.5rem;font-weight:700;">Business Name *</label>
+                      <input type="text" id="oauth-biz-name" required placeholder="e.g. Acme Corp" 
+                             style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:white;">
+                  </div>
+                  
+                  <div class="form-group" style="margin-bottom:2rem;">
+                      <label style="display:block;margin-bottom:0.5rem;font-weight:700;">Business Type *</label>
+                      <select id="oauth-biz-type" required style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:white;">
+                          <option value="shopowner" style="background:#0f172a">Retail / Spaza Shop (POS, Inventory, Ledgers)</option>
+                          <option value="warehouse" style="background:#0f172a">Warehouse / Distribution (Bulk Stock, POs, Clients)</option>
+                          <option value="manufacturer" style="background:#0f172a">Manufacturing / Factory (Raw Materials, Production)</option>
+                      </select>
+                  </div>
 
-          this.currentUser = rebuiltUser;
-          localStorage.setItem('erp_session', JSON.stringify(rebuiltUser));
+                  <button type="submit" class="btn btn-primary" style="width:100%;padding:1rem;font-size:1.1rem;font-weight:700;">Complete Setup & Login</button>
+              </form>
+            `;
+            
+            // Minimal reset for dialog just in case app styles ain't fully mounted
+            Object.assign(modal.style, {
+              background: '#0f172a', color: 'white', padding: '2.5rem', borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.8)',
+              maxWidth: '500px', width: '90%'
+            });
 
-          // Force UI refresh, remove hash fragments from URL (cleanup)
-          window.history.replaceState({}, document.title, window.location.pathname);
-          this.render();
-          initSync(); // Start background sync
-          console.log('✅ OAuth user authenticated via Supabase');
+            document.body.appendChild(modal);
+            modal.showModal();
+
+            modal.querySelector('#oauth-profile-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const bName = document.getElementById('oauth-biz-name').value;
+              const bType = document.getElementById('oauth-biz-type').value;
+              
+              const btn = e.target.querySelector('button[type="submit"]');
+              btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+              btn.disabled = true;
+
+              const updatedProfile = {
+                  id: supabaseId,
+                  username: email.split('@')[0], // safety default
+                  business_name: bName,
+                  business_type: bType,
+                  email: email,
+                  role: 'admin',
+                  created_at: new Date().toISOString()
+              };
+
+              // Overwrite or create the profile
+              await supabaseClient.from('profiles').upsert(updatedProfile);
+              
+              modal.close();
+              modal.remove();
+              
+              // Proceed with login
+              await finalizeOAuthLogin(updatedProfile);
+            });
+          } else {
+            // Existing user who already has a profile / business_type
+            await finalizeOAuthLogin(profile);
+          }
         } else if (event === 'SIGNED_OUT') {
           this.currentUser = null;
           localStorage.removeItem('erp_session');
