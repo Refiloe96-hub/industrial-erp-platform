@@ -850,10 +850,17 @@ class LandingUI {
           <p class="lp-hero-note">No credit card required &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; Runs on any device</p>
 
           <!-- Hero Video / App Screenshot -->
-          <div class="lp-hero-media lp-animate">
-            <!-- This acts as a placeholder for a real video or high-res image -->
-            <div class="lp-play-btn"><i class="ph-fill ph-play"></i></div>
-            <p style="position:absolute; bottom:1rem; color:#64748b; font-size:0.8rem; font-weight:500;">Interactive Demo [Placeholder]</p>
+          <div class="lp-hero-media lp-animate" style="background: #000;">
+            <video 
+              src="/demo.mp4" 
+              width="100%" 
+              height="100%" 
+              autoplay 
+              loop 
+              muted 
+              playsinline 
+              style="object-fit: cover; width: 100%; height: 100%;">
+            </video>
           </div>
         </section>
 
