@@ -279,11 +279,11 @@ class PoolStockUI {
 
         const overlay = document.createElement('div');
         overlay.className = 'item-detail-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1200;backdrop-filter:blur(8px);';
 
         const panel = document.createElement('div');
         panel.className = 'item-detail-panel';
-        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(460px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(460px,100vw);background:#0f172a;z-index:1201;box-shadow:-4px 0 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;border-left:1px solid rgba(255,255,255,0.08);';
 
         panel.innerHTML = `
             <style>
