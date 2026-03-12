@@ -194,12 +194,13 @@ class LandingUI {
           border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* --- SOCIAL PROOF --- */
+        /* --- MARQUEE / TICKER --- */
         .lp-proof {
-          padding: 3rem 2rem;
+          padding: 3.5rem 0;
           text-align: center;
+          overflow: hidden;
         }
-        .lp-proof p {
+        .lp-proof-label {
           font-size: 0.8rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
@@ -207,20 +208,61 @@ class LandingUI {
           font-weight: 600;
           margin-bottom: 2rem;
         }
-        .lp-proof-logos {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 3rem;
-          flex-wrap: wrap;
-          opacity: 0.35;
-          filter: grayscale(1);
+        /* Track wrapper — clips the logos */
+        .lp-marquee-outer {
+          position: relative;
+          overflow: hidden;
+          /* Fade edges using a mask */
+          -webkit-mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 12%,
+            black 88%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 12%,
+            black 88%,
+            transparent 100%
+          );
         }
-        .lp-proof-logo {
-          font-size: 0.95rem;
+        /* Scrolling track */
+        .lp-marquee-track {
+          display: flex;
+          width: max-content;
+          animation: lp-marquee 28s linear infinite;
+        }
+        .lp-marquee-track:hover {
+          animation-play-state: paused;
+        }
+        @keyframes lp-marquee {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        /* Individual logo item */
+        .lp-marquee-item {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          padding: 0 3rem;
+          white-space: nowrap;
+          font-size: 0.875rem;
           font-weight: 700;
-          color: #94a3b8;
-          letter-spacing: -0.01em;
+          letter-spacing: 0.03em;
+          color: #334155;
+          text-transform: uppercase;
+          transition: color 0.2s;
+        }
+        .lp-marquee-item:hover { color: #64748b; }
+        /* Dot separator between names */
+        .lp-marquee-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: #1e293b;
+          flex-shrink: 0;
         }
 
         /* --- FEATURES --- */
@@ -445,15 +487,31 @@ class LandingUI {
 
         <hr class="lp-divider">
 
-        <!-- Social proof -->
+        <!-- Social proof marquee -->
         <div class="lp-proof">
-          <p>Trusted by businesses across the region</p>
-          <div class="lp-proof-logos">
-            <span class="lp-proof-logo">SHOPRITE SPAZA</span>
-            <span class="lp-proof-logo">DURBAN WAREHOUSE CO.</span>
-            <span class="lp-proof-logo">METRO TRADERS</span>
-            <span class="lp-proof-logo">EASTGATE MILLS</span>
-            <span class="lp-proof-logo">KASI FRESH</span>
+          <p class="lp-proof-label">Trusted by businesses across the region</p>
+          <div class="lp-marquee-outer">
+            <!-- The track is duplicated so the loop is seamless -->
+            <div class="lp-marquee-track">
+              <!-- Set 1 -->
+              <div class="lp-marquee-item"><span>SHOPRITE SPAZA</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>DURBAN WAREHOUSE CO.</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>METRO TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>EASTGATE MILLS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>KASI FRESH</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>SOWETO BULK DEPOT</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>CAPE GRAIN TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>TEMBISA TOOLS</span><span class="lp-marquee-dot"></span></div>
+              <!-- Set 2 — exact duplicate for seamless loop -->
+              <div class="lp-marquee-item"><span>SHOPRITE SPAZA</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>DURBAN WAREHOUSE CO.</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>METRO TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>EASTGATE MILLS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>KASI FRESH</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>SOWETO BULK DEPOT</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>CAPE GRAIN TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>TEMBISA TOOLS</span><span class="lp-marquee-dot"></span></div>
+            </div>
           </div>
         </div>
 
