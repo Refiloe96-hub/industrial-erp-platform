@@ -13,9 +13,21 @@ class LandingUI {
         .lp {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
           color: #e2e8f0;
-          background: #080d17;
           min-height: 100vh;
           -webkit-font-smoothing: antialiased;
+          background-color: #080d17;
+          background-image: 
+            radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0vw, transparent 50vw),
+            radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.1) 0vw, transparent 50vw),
+            radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.15) 0vw, transparent 50vw);
+          background-size: 200% 200%;
+          animation: ambientBg 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes ambientBg {
+          0% { background-position: 0% 0%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 100%; }
         }
 
         /* --- NAVBAR --- */
