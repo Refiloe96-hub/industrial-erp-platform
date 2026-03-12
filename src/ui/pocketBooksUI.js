@@ -663,11 +663,11 @@ class PocketBooksUI {
 
         const overlay = document.createElement('div');
         overlay.className = 'tx-detail-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1200;backdrop-filter:blur(2px);';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1200;backdrop-filter:blur(8px);';
 
         const panel = document.createElement('div');
         panel.className = 'tx-detail-panel';
-        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:var(--bg-primary,#fff);z-index:1201;box-shadow:-4px 0 24px rgba(0,0,0,0.15);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:#0f172a;z-index:1201;box-shadow:-4px 0 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;border-left:1px solid rgba(255,255,255,0.08);';
 
         panel.innerHTML = `
             <style>
@@ -679,13 +679,13 @@ class PocketBooksUI {
                 .tx-amount-hero .amount { font-size: 2.5rem; font-weight: 700; letter-spacing:-1px; color:${amountColor}; }
                 .tx-amount-hero .type-badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:${isIncome ? '#dcfce7' : '#fee2e2'}; color:${amountColor}; margin-top:0.5rem; }
                 .tx-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
-                .tx-field { background:var(--bg-secondary,#f8fafc); border-radius:8px; padding:0.875rem 1rem; }
-                .tx-field .field-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-secondary,#6b7280); margin-bottom:0.25rem; }
-                .tx-field .field-value { font-size:0.95rem; font-weight:500; color:var(--text-primary,#111); word-break:break-word; }
+                .tx-field { background:rgba(255,255,255,0.05); border-radius:8px; padding:0.875rem 1rem; border:1px solid rgba(255,255,255,0.07); }
+                .tx-field .field-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-secondary,#94a3b8); margin-bottom:0.25rem; }
+                .tx-field .field-value { font-size:0.95rem; font-weight:500; color:var(--text-primary,#f1f5f9); word-break:break-word; }
                 .tx-field.full-span { grid-column:1/-1; }
-                .tx-detail-footer { padding:1rem 1.5rem; border-top:1px solid var(--border,#e5e7eb); display:flex; gap:0.75rem; }
-                .btn-close-panel { flex:1; padding:0.6rem; border:1px solid var(--border,#e5e7eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#6b7280); }
-                .btn-close-panel:hover { background:var(--bg-secondary,#f8fafc); }
+                .tx-detail-footer { padding:1rem 1.5rem; border-top:1px solid rgba(255,255,255,0.06); display:flex; gap:0.75rem; }
+                .btn-close-panel { flex:1; padding:0.6rem; border:1px solid rgba(255,255,255,0.12); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#94a3b8); }
+                .btn-close-panel:hover { background:rgba(255,255,255,0.06); }
             </style>
             <div class="tx-detail-header">
                 <h2>Transaction Details</h2>
