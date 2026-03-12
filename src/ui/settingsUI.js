@@ -880,15 +880,14 @@ class SettingsUI {
           border: none;
           border-radius: 16px;
           padding: 0;
-          background: var(--bg-primary);
+          background: #0f172a;
           color: var(--text-primary);
-          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.7);
           width: 400px;
           max-width: 95vw;
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.1);
         }
-        .x-modal::backdrop { background: rgba(0,0,0,0.6); }
+        .x-modal::backdrop { background: rgba(0,0,0,0.7); }
         .x-modal-header {
           display: flex;
           justify-content: space-between;

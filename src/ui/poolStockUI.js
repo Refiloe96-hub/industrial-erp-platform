@@ -1527,8 +1527,15 @@ class PoolStockUI {
             .btn-icon:hover { opacity: 1; }
 
             /* Modal */
-                border: 1px solid var(--border-color);
-                box-shadow: var(--shadow-lg);
+            .item-modal {
+                max-width: 600px;
+                width: 95%;
+                padding: 2.5rem;
+                border-radius: var(--radius-lg);
+                background: #0f172a;
+                color: var(--text-primary);
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             }
 
             .item-modal::backdrop {
@@ -1537,10 +1544,38 @@ class PoolStockUI {
 
             .item-modal h2 {
                 margin: 0 0 1.5rem;
+                color: var(--text-primary, #f1f5f9);
+            }
+
+            .item-modal input, .item-modal select, .item-modal textarea {
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.12);
+                color: var(--text-primary, #f1f5f9);
+                border-radius: 6px;
+                padding: 0.6rem 0.8rem;
+                width: 100%;
+                font-size: 0.95rem;
+            }
+            .item-modal input:focus, .item-modal select:focus {
+                border-color: var(--accent-primary);
+                outline: none;
+            }
+            .item-modal select option {
+                background: #0f172a;
+                color: #f1f5f9;
+            }
+            .item-modal label {
+                color: var(--text-secondary, #94a3b8);
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.35rem;
+                display: block;
             }
 
             .item-modal input[readonly] {
-                background: rgba(255, 255, 255, 0.05); /* Ghost base */
+                background: rgba(255, 255, 255, 0.03);
                 color: var(--text-secondary);
             }
 
