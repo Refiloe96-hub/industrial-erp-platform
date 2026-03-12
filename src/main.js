@@ -473,7 +473,7 @@ class IndustrialERPApp {
     if (!this.currentUser) {
       if (path === '/' || path === '') {
         // Show public landing page
-        landingUI.render(app);
+        LandingUI.render(app);
       } else {
         // Show Auth UI (for /app, /login, etc)
         app.innerHTML = this.renderLogin();
