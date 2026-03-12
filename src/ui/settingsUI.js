@@ -686,11 +686,14 @@ class SettingsUI {
         .settings-layout {
           display: flex;
           height: calc(100vh - 60px);
+          width: 100%;
           max-width: 1200px;
           margin: 0 auto;
           background: #0f172a;
           color: var(--text-primary);
-          overflow: hidden;
+          overflow-x: hidden !important;
+          overflow-y: hidden;
+          position: relative;
         }
 
         /* --- NAV COLUMN (Master) --- */
