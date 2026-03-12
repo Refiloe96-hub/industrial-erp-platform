@@ -760,6 +760,40 @@ class LandingUI {
         }
         .lp-sticky-btn:hover { background: #1d4ed8; }
 
+        /* --- HERO MEDIA --- */
+        .lp-hero-media {
+          margin-top: 4rem;
+          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(0,0,0,0.5);
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+          overflow: hidden;
+          position: relative;
+          aspect-ratio: 16 / 9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .lp-hero-media::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at top, rgba(37,99,235,0.1), transparent 50%);
+          pointer-events: none;
+        }
+        .lp-play-btn {
+          width: 64px; height: 64px;
+          background: rgba(37,99,235,0.9);
+          backdrop-filter: blur(4px);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          color: white; font-size: 1.5rem;
+          cursor: pointer;
+          transition: transform 0.2s, background 0.2s;
+          z-index: 1;
+        }
+        .lp-play-btn:hover { transform: scale(1.05); background: #2563eb; }
+
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
           .lp-features-grid { grid-template-columns: repeat(2, 1fr); }
@@ -814,6 +848,13 @@ class LandingUI {
             <button class="lp-btn-outline" id="btnHeroLogin">Sign in to your account</button>
           </div>
           <p class="lp-hero-note">No credit card required &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; Runs on any device</p>
+
+          <!-- Hero Video / App Screenshot -->
+          <div class="lp-hero-media lp-animate">
+            <!-- This acts as a placeholder for a real video or high-res image -->
+            <div class="lp-play-btn"><i class="ph-fill ph-play"></i></div>
+            <p style="position:absolute; bottom:1rem; color:#64748b; font-size:0.8rem; font-weight:500;">Interactive Demo [Placeholder]</p>
+          </div>
         </section>
 
         <hr class="lp-divider">
