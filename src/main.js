@@ -857,6 +857,19 @@ class IndustrialERPApp {
         const allUsers = await db.getAll('users').catch(() => []);
         localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
 
+        // If not found locally but cloud is enabled, check the cloud profiles
+        if (!localUser && isSupabaseEnabled()) {
+          const { data: cloudProfile } = await supabaseClient.from('profiles').select('*').eq('email', email).maybeSingle();
+          if (cloudProfile) {
+            // Mock enough of a localUser to confidently route them to the login path
+            localUser = { 
+              email: cloudProfile.email, 
+              supabaseId: cloudProfile.id, 
+              businessName: cloudProfile.business_name 
+            };
+          }
+        }
+
         // If returning user with a passkey, try Passkey login first
         if (localUser && localUser.passkeyId && window.PublicKeyCredential) {
           try {

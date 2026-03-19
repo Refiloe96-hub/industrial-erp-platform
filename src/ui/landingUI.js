@@ -1176,7 +1176,7 @@ class LandingUI {
                 <li><i class="ph-bold ph-check"></i> Dedicated account manager</li>
                 <li><i class="ph-bold ph-check"></i> SLA guarantee</li>
               </ul>
-              <button class="lp-plan-btn outline lp-cta-btn">Contact sales</button>
+              <button class="lp-plan-btn outline" onclick="window.location.href='mailto:sales@industrial-erp.test'">Contact sales</button>
             </div>
           </div>
         </section>
@@ -1245,8 +1245,10 @@ class LandingUI {
     `;
 
     // Route all CTA buttons to the Auth screen
-    const goToAuth = () => {
-      window.history.pushState({}, '', '/app');
+    const goToAuth = (e) => {
+      const text = e && e.target ? e.target.textContent.toLowerCase() : '';
+      const path = text.includes('trial') ? '/app?intent=trial' : '/app';
+      window.history.pushState({}, '', path);
       window.dispatchEvent(new Event('popstate'));
     };
 
