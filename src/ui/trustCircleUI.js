@@ -1,5 +1,6 @@
 import TrustCircle from '../modules/TrustCircle.js';
 import TrustScoreEngine from '../modules/TrustScoreEngine.js';
+import PocketWallet from '../modules/PocketWallet.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 import db, { STORES } from '../db/index.js';
 
@@ -924,11 +925,15 @@ class TrustCircleUI {
                 ev.preventDefault();
                 const fd = new FormData(ev.target);
                 const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+                const walletModule = new PocketWallet();
+                const wallet = await walletModule.getWalletByBusiness(currentUser?.supabaseId || currentUser?.id || 'unknown');
+
                 try {
                     await this.module.joinGroupBuy(parseInt(groupBuyId), {
                         memberId: currentUser?.username || 'unknown',
                         businessName: currentUser?.businessName || currentUser?.username || 'Unknown',
-                        quantity: parseInt(fd.get('quantity'))
+                        quantity: parseInt(fd.get('quantity')),
+                        walletId: wallet?.id
                     });
                     modal.close();
                     modal.remove();
@@ -1164,8 +1169,17 @@ class TrustCircleUI {
                 </div>
 
                 <div class="form-group">
-                    <label>Amount Paid (R) *</label>
+                    <label>Amount (R) *</label>
                     <input type="number" name="amount" min="1" step="0.01" required placeholder="e.g. 1500">
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Status</label>
+                    <select name="status" required>
+                        <option value="paid">Paid (On Time) 📈</option>
+                        <option value="late">Late (-5 Trust Score) 📉</option>
+                        <option value="missed">Missed (-15 Trust Score) 🚨</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1198,9 +1212,9 @@ class TrustCircleUI {
                     memberId: formData.get('memberId'),
                     amount: parseFloat(formData.get('amount')),
                     type: formData.get('type'),
-                    status: 'paid',
+                    status: formData.get('status'),
                     paymentMethod: 'cash',
-                    date: Date.now()
+                    date: parseInt(new Date(formData.get('date')).getTime()) || Date.now()
                 });
                 modal.close();
                 modal.remove();

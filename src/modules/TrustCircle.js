@@ -4,6 +4,8 @@
 // NOT: Social savings club, audio rooms, or consumer stokvels
 
 import db, { STORES } from '../db/index.js';
+import PocketWallet from './PocketWallet.js';
+import PoolStock from './PoolStock.js';
 
 
 class TrustCircle {
@@ -338,22 +340,40 @@ class TrustCircle {
       throw new Error('Group buy is no longer open');
     }
 
+    const commitmentAmount = data.quantity * groupBuy.bulkPrice;
+
+    // The Moat: Financial Escrow Logic
+    if (data.walletId) {
+      const walletModule = new PocketWallet();
+      const wallet = await walletModule.getWallet(data.walletId);
+      if (!wallet || wallet.balance < commitmentAmount) {
+        throw new Error(`Insufficient funds. You need R ${commitmentAmount.toLocaleString()} to commit.`);
+      }
+      // Lock funds natively into Escrow
+      await walletModule.withdraw({
+        walletId: data.walletId,
+        amount: commitmentAmount,
+        description: `Group Buy Escrow Lock: ${groupBuy.item}`,
+        reference: `GB-ESCROW-${groupBuyId}`
+      });
+    }
+
     const participant = {
       memberId: data.memberId,
       businessName: data.businessName,
       quantity: data.quantity,
-      commitment: data.quantity * groupBuy.bulkPrice,
+      commitment: commitmentAmount,
+      walletId: data.walletId,
       joinedAt: Date.now()
     };
 
     groupBuy.participants.push(participant);
     groupBuy.totalQuantity += data.quantity;
 
-    // The Moat: Financial Escrow Logic
     if (groupBuy.totalQuantity >= groupBuy.minQuantity && groupBuy.status === 'open') {
       groupBuy.status = 'funds_secured';
       groupBuy.committedAt = Date.now();
-      await this.lockEscrow(groupBuy); // Initiate programmatic lock
+      await this.lockEscrow(groupBuy); // Initiate programmatic lock (logging only for pooled funds now)
     }
 
     await db.update(STORES.groupBuys, groupBuy);
@@ -383,6 +403,39 @@ class TrustCircle {
 
     // Auto-update pool stock inventory for participants locally
     // (Simulating the goods arriving)
+    try {
+      const stock = new PoolStock();
+      const sku = groupBuy.sku || `GB-${groupBuy.id}`;
+      
+      const existingItem = await stock.getItem(sku);
+      
+      if (existingItem) {
+        await stock.recordMovement({
+          sku,
+          type: 'in',
+          quantity: groupBuy.totalQuantity, // We deliver it to the single local db for now (single tenant view)
+          reference: `GB-RELEASE-${groupBuyId}`,
+          notes: 'TrustCircle Group Buy delivery'
+        });
+      } else {
+        await stock.updateInventory({
+          sku,
+          name: groupBuy.item,
+          category: 'Group Buy',
+          quantity: groupBuy.totalQuantity,
+          unit: 'units',
+          location: 'Main Warehouse',
+          unitCost: groupBuy.bulkPrice,
+          unitPrice: groupBuy.unitPrice,
+          reorderLevel: 5,
+          reorderQuantity: 20,
+          preferredSupplier: groupBuy.supplier
+        });
+      }
+    } catch (err) {
+      console.error('Error distributing escrow goods to PoolStock:', err);
+    }
+
     return groupBuy;
   }
 
