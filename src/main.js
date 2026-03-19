@@ -1359,30 +1359,71 @@ class IndustrialERPApp {
     return `
       <style>
         :root {
-          /* DeepPCB Design System */
-          --bg-primary: #ffffff;
-          --bg-secondary: #f8fafc;
-          --bg-sidebar: #0f172a;
-          --text-primary: #1e293b;
-          --text-secondary: #64748b;
-          --accent-primary: #f97316; /* DeepPCB Orange */
-          --accent-hover: #ea580c;
-          --border: #e2e8f0;
-          --success: #10b981;
-          --warning: #f59e0b;
-          --danger: #ef4444;
-          --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-
-        [data-theme="dark"] {
-          --bg-primary: #1e1e1e; /* Neutral Dark */
+          /* Platform is permanently in Dark Mode */
+          --bg-primary: #1e1e1e;
           --bg-secondary: #121212;
           --bg-sidebar: #000000;
+          --bg-tertiary: #2a2b32;
           --text-primary: #f8fafc;
           --text-secondary: #94a3b8;
           --border: #333333;
-          --accent-primary: #fb923c; /* Lighter Orange for Dark Mode */
+          --border-color: #333333;
+          --accent-primary: #fb923c;
           --accent-hover: #f97316;
+          --primary-color: #6366f1;
+          --success: #10b981;
+          --warning: #f59e0b;
+          --danger: #ef4444;
+          --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+        }
+
+        /* Global dark dialog override - browser renders dialog with white Canvas background by default */
+        dialog,
+        .tc-modal,
+        .item-modal {
+          background: var(--bg-primary) !important;
+          color: var(--text-primary) !important;
+          border: 1px solid var(--border) !important;
+          border-radius: 12px !important;
+        }
+
+        dialog::backdrop,
+        .tc-modal::backdrop {
+          background: rgba(0, 0, 0, 0.75) !important;
+          backdrop-filter: blur(4px);
+        }
+
+        dialog h3,
+        .tc-modal h3 {
+          color: var(--text-primary) !important;
+        }
+
+        dialog label,
+        .tc-modal label {
+          color: var(--text-secondary) !important;
+        }
+
+        dialog input,
+        dialog select,
+        dialog textarea,
+        .tc-modal input,
+        .tc-modal select,
+        .tc-modal textarea {
+          background: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          border: 1px solid var(--border) !important;
+          border-radius: 6px !important;
+          padding: 0.5rem !important;
+          width: 100% !important;
+        }
+
+        dialog button[value="cancel"],
+        dialog .btn-secondary,
+        .tc-modal button[value="cancel"],
+        .tc-modal .btn-secondary {
+          background: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          border: 1px solid var(--border) !important;
         }
 
         /* DeepPCB Table Styles */
@@ -3159,26 +3200,29 @@ class IndustrialERPApp {
         document.getElementById('stat-inventory').textContent = 'Error';
       }
 
-      // 3. Machines
+      // 3. SmartShift - Machines + Production Orders
       try {
-        console.log('⚙️ Fetching machines...');
+        console.log('⚙️ Fetching SmartShift data...');
         const machines = await db.getAll('machines');
-        console.log(`✅ Got ${machines.length} machines`);
+        const productionOrders = await db.getAll('productionOrders');
+        console.log(`✅ Got ${machines.length} machines, ${productionOrders.length} orders`);
         const elMachine = document.getElementById('stat-machine-util');
         if (elMachine) {
           if (machines.length) {
-            const operational = machines.filter(m => m.status === 'operational').length;
+            const operational = machines.filter(m => m.status === 'operational' || m.status === 'running').length;
             const util = Math.round((operational / machines.length) * 100);
-            elMachine.textContent = `${util}% Operational`;
+            const pendingOrders = productionOrders.filter(o => o.status === 'pending' || o.status === 'in_progress').length;
+            elMachine.textContent = `${util}% (${pendingOrders} Orders)`;
           } else {
-            elMachine.textContent = '0 Machines';
+            const pendingOrders = productionOrders.filter(o => o.status === 'pending' || o.status === 'in_progress').length;
+            elMachine.textContent = pendingOrders > 0 ? `${pendingOrders} Pending Orders` : 'No Machines Yet';
           }
         }
         // Chart
         const chartMachines = document.getElementById('chart-machines');
         if (chartMachines) {
           if (machines.length) {
-            const operational = machines.filter(m => m.status === 'operational').length;
+            const operational = machines.filter(m => m.status === 'operational' || m.status === 'running').length;
             chartMachines.innerHTML = ChartUtils.renderGauge(operational, machines.length, {
               size: 140,
               color: operational / machines.length > 0.7 ? '#10b981' : '#f59e0b',
@@ -3192,6 +3236,7 @@ class IndustrialERPApp {
         console.error('❌ Machine Error:', e);
         document.getElementById('stat-machine-util').textContent = 'Error';
       }
+
 
       // 4. Syndicates
       try {
