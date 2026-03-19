@@ -19,6 +19,12 @@ class SalesUI {
     const todaySummary = await this.salesModule.getDailySummary();
     const inventory = await this.inventory.getInventory();
     this.customers = await Customers.getAllCustomers();
+    
+    const config = await db.get('settings', 'config') || {};
+    const currency = config.currency || 'ZAR';
+    const symArr = { ZAR: 'R ', KES: 'KSh ', NGN: '₦ ', USD: '$', EUR: '€ ' };
+    const sym = symArr[currency] || 'R ';
+    this.currencySym = sym;
 
     container.innerHTML = `
       <div class="sales-container">
@@ -41,7 +47,7 @@ class SalesUI {
           <div class="stat-card today-revenue">
             <div class="stat-content">
               <p class="stat-label">Revenue</p>
-              <h2 class="stat-value">R ${todaySummary.revenue.toLocaleString()}</h2>
+              <h2 class="stat-value">${sym}${todaySummary.revenue.toLocaleString()}</h2>
             </div>
           </div>
           <div class="stat-card">
@@ -95,15 +101,15 @@ class SalesUI {
                 <div class="cart-summary">
                   <div class="summary-row subtotal-row">
                     <span>Subtotal:</span>
-                    <span id="cart-subtotal">R 0.00</span>
+                    <span id="cart-subtotal">${sym}0.00</span>
                   </div>
                   <div class="summary-row vat-row">
-                    <span>Includes VAT (15%):</span>
-                    <span id="cart-vat">R 0.00</span>
+                    <span>Includes VAT (${config.taxRate || 15}%):</span>
+                    <span id="cart-vat">${sym}0.00</span>
                   </div>
                   <div class="summary-row total-row">
                     <span>Total:</span>
-                    <span id="cart-total">R 0.00</span>
+                    <span id="cart-total">${sym}0.00</span>
                   </div>
                 </div>
 
@@ -137,7 +143,7 @@ class SalesUI {
                 </div>
 
                 <button id="checkout-btn" class="btn btn-primary btn-lg btn-block" disabled>
-                  Charge R 0
+                  Charge ${sym}0
                 </button>
               </div>
             </div>
@@ -164,7 +170,7 @@ class SalesUI {
       <dialog id="open-item-modal" style="border: none; border-radius: 12px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.4); width: 300px; background: var(--bg-primary, #1e293b); color: var(--text-primary, #f8fafc);">
         <h3 style="margin-top: 0; color: var(--text-primary, #f8fafc);">Open Item</h3>
         <input type="text" id="open-item-name" placeholder="Item Name (Optional)" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc); font-size: 0.95rem;">
-        <input type="number" id="open-item-price" placeholder="Price (R)" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; font-size: 1.5rem; text-align: center; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc);" step="0.01">
+        <input type="number" id="open-item-price" placeholder="Price (${this.currencySym})" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; font-size: 1.5rem; text-align: center; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc);" step="0.01">
         <div style="display: flex; gap: 0.5rem;">
           <button id="cancel-open-item" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border, #334155); background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc); border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Cancel</button>
           <button id="add-open-item" style="flex: 1; padding: 0.75rem; border: none; background: #6366f1; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">Add</button>
@@ -181,7 +187,7 @@ class SalesUI {
       return `
       <button class="product-card" data-sku="${item.sku}" data-price="${price}" data-name="${item.name}" style="border-left: 4px solid ${item.color || '#ccc'}">
         <div class="prod-name">${item.name}</div>
-        <div class="prod-price">R ${price}</div>
+        <div class="prod-price">${this.currencySym}${price}</div>
         <div class="prod-stock ${item.quantity === 0 ? 'out-of-stock' : ''}">
           ${item.quantity} left
         </div>
@@ -221,8 +227,8 @@ class SalesUI {
           <div class="dp-section">
             <div class="dp-section-title">Revenue Trends</div>
             <div class="dp-kv-grid">
-              ${dpKV('7-Day Revenue', 'R ' + Math.round(result.revenueThisWeek).toLocaleString())}
-              ${dpKV('Prior 7 Days', 'R ' + Math.round(result.revenuePriorWeek).toLocaleString())}
+              ${dpKV('7-Day Revenue', this.currencySym + Math.round(result.revenueThisWeek).toLocaleString())}
+              ${dpKV('Prior 7 Days', this.currencySym + Math.round(result.revenuePriorWeek).toLocaleString())}
               ${dpKV('Trend', result.revenueTrend, parseFloat(result.revTrendPct) >= 0)}
               ${dpKV('Peak Day', result.peakDay)}
             </div>
@@ -240,13 +246,13 @@ class SalesUI {
           <div class="dp-section">
             <div class="dp-section-title">Top Sellers (7 Days)</div>
             ${result.topItems.length ? result.topItems.map(item =>
-          dpBar(item.name, item.revenue, result.topItems[0].revenue, '#10b981', v => 'R ' + Math.round(v).toLocaleString())
+          dpBar(item.name, item.revenue, result.topItems[0].revenue, '#10b981', v => this.currencySym + Math.round(v).toLocaleString())
         ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
           </div>
           <div class="dp-section">
             <div class="dp-section-title">Slow Movers</div>
             ${result.slowMovers.length ? result.slowMovers.map(item =>
-          dpBar(item.name, item.revenue, result.topItems[0]?.revenue || 1, '#ef4444', v => 'R ' + Math.round(v).toLocaleString())
+          dpBar(item.name, item.revenue, result.topItems[0]?.revenue || 1, '#ef4444', v => this.currencySym + Math.round(v).toLocaleString())
         ).join('') : '<div class="dp-empty">Not enough recent sales data</div>'}
           </div>
         `
@@ -260,10 +266,10 @@ class SalesUI {
       if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-muted text-center" id="empty-cart-msg">Tap items to add</p>';
         checkoutBtn.disabled = true;
-        checkoutBtn.textContent = 'Charge R 0.00';
-        container.querySelector('#cart-subtotal').textContent = 'R 0.00';
-        container.querySelector('#cart-vat').textContent = 'R 0.00';
-        container.querySelector('#cart-total').textContent = 'R 0.00';
+        checkoutBtn.textContent = `Charge ${this.currencySym}0.00`;
+        container.querySelector('#cart-subtotal').textContent = `${this.currencySym}0.00`;
+        container.querySelector('#cart-vat').textContent = `${this.currencySym}0.00`;
+        container.querySelector('#cart-total').textContent = `${this.currencySym}0.00`;
         return;
       }
 
@@ -278,9 +284,9 @@ class SalesUI {
         row.innerHTML = `
           <div class="cart-item-info">
             <span class="cart-item-name">${item.name}</span>
-            <span class="cart-item-price">R ${item.price.toFixed(2)} x ${item.quantity}</span>
+            <span class="cart-item-price">${this.currencySym}${item.price.toFixed(2)} x ${item.quantity}</span>
           </div>
-          <div class="cart-item-total">R ${itemTotal.toFixed(2)}</div>
+          <div class="cart-item-total">${this.currencySym}${itemTotal.toFixed(2)}</div>
           <button class="btn-remove-item" data-index="${index}">✕</button>
         `;
         cartItemsContainer.appendChild(row);
@@ -290,10 +296,10 @@ class SalesUI {
       const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT from the inclusive total
       const exVatSubtotal = grandTotal - vatAmount; // The true subtotal before VAT
 
-      container.querySelector('#cart-subtotal').textContent = `R ${exVatSubtotal.toFixed(2)}`;
-      container.querySelector('#cart-vat').textContent = `R ${vatAmount.toFixed(2)}`;
-      container.querySelector('#cart-total').textContent = `R ${grandTotal.toFixed(2)}`;
-      checkoutBtn.textContent = `Charge R ${grandTotal.toFixed(2)}`;
+      container.querySelector('#cart-subtotal').textContent = `${this.currencySym}${exVatSubtotal.toFixed(2)}`;
+      container.querySelector('#cart-vat').textContent = `${this.currencySym}${vatAmount.toFixed(2)}`;
+      container.querySelector('#cart-total').textContent = `${this.currencySym}${grandTotal.toFixed(2)}`;
+      checkoutBtn.textContent = `Charge ${this.currencySym}${grandTotal.toFixed(2)}`;
       checkoutBtn.disabled = false;
 
       container.querySelectorAll('.btn-remove-item').forEach(btn => {

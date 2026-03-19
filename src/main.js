@@ -20,6 +20,7 @@ import ChartUtils from './utils/charts.js';
 import notificationService from './services/notifications.js';
 import PocketBooks from './modules/PocketBooks.js';
 import PoolStock from './modules/PoolStock.js';
+import Analytics from './utils/analytics.js';
 
 // Module access by business type
 const MODULE_ACCESS = {
@@ -265,6 +266,7 @@ class IndustrialERPApp {
 
   async init() {
     console.log('🚀 Initializing Industrial ERP Platform...');
+    Analytics.init();
 
     try {
       // Initialize IndexedDB
@@ -285,6 +287,9 @@ class IndustrialERPApp {
 
       console.log('✅ PocketBooks ready');
       await this.checkAuth();
+
+      // Load User Configuration/Settings
+      this.config = (await db.get('settings', 'config')) || {};
 
       // Initialize Router
       initRouter();
@@ -1017,6 +1022,14 @@ class IndustrialERPApp {
     this.completeLogin = async (user, passwordStr = null) => {
       user.lastLogin = Date.now();
 
+      Analytics.identify(user.id || user.email, {
+        email: user.email,
+        businessName: user.businessName,
+        businessType: user.businessType,
+        role: user.role
+      });
+      Analytics.track('Login Success', { method: passwordStr ? 'Password' : 'OAuth' });
+
       // Setup Background Supabase Sync if password is known
       if (passwordStr && isSupabaseEnabled() && user.email) {
         supabaseClient.auth.signInWithPassword({ email: user.email, password: passwordStr })
@@ -1125,7 +1138,12 @@ class IndustrialERPApp {
         <nav class="sidebar" id="sidebar">
           <div class="sidebar-header">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <h2><i class="ph-duotone ph-chart-bar"></i> Business</h2>
+                <h2 style="display: flex; align-items: center; gap: 0.5rem;" class="brand">
+                  <span class="logo" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 6px;">
+                    ${this.config?.businessLogo ? `<img src="${this.config.businessLogo}" style="width: 100%; height: 100%; object-fit: contain;">` : '<i class="ph-duotone ph-buildings"></i>'}
+                  </span>
+                  <span>Business</span>
+                </h2>
                 <button id="sidebar-toggle-btn" class="btn-icon" title="Toggle Sidebar" style="background: transparent; color: var(--text-primary); width: 32px; height: 32px; padding: 4px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                 </button>

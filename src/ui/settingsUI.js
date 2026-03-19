@@ -9,6 +9,7 @@ class SettingsUI {
       taxRate: 15,
       currency: 'ZAR',
       businessName: '',
+      businessLogo: null,
       printerIp: ''
     };
   }
@@ -78,16 +79,30 @@ class SettingsUI {
             </div>
             <div class="pane-body">
               <div class="form-group">
+                <label>Business Logo</label>
+                <div style="display:flex; align-items:center; gap: 1rem;">
+                  <div id="logo-preview" style="width: 60px; height: 60px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed rgba(255,255,255,0.2);">
+                    ${this.settings.businessLogo ? `<img src="${this.settings.businessLogo}" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<i class="ph-duotone ph-image" style="font-size: 1.5rem; color: #64748b;"></i>'}
+                  </div>
+                  <input type="file" id="set-logo" accept="image/*" class="btn btn-outline-secondary" style="padding: 0.5rem;">
+                </div>
+                <small class="text-muted">Displays in the sidebar and on printed receipts. Maximum 1MB.</small>
+              </div>
+              <div class="form-group">
                 <label>Business Name</label>
                 <input type="text" id="set-name" value="${this.settings.businessName}" placeholder="My Shop">
                 <small class="text-muted">This appears on your receipts and financial documents.</small>
               </div>
               <div class="form-group">
                 <label>Default Currency</label>
-                <select id="set-currency" disabled>
-                   <option value="ZAR" selected>ZAR (R)</option>
+                <select id="set-currency">
+                   <option value="ZAR" ${this.settings.currency === 'ZAR' ? 'selected' : ''}>South African Rand (ZAR)</option>
+                   <option value="KES" ${this.settings.currency === 'KES' ? 'selected' : ''}>Kenyan Shilling (KES)</option>
+                   <option value="NGN" ${this.settings.currency === 'NGN' ? 'selected' : ''}>Nigerian Naira (NGN)</option>
+                   <option value="USD" ${this.settings.currency === 'USD' ? 'selected' : ''}>US Dollar (USD)</option>
+                   <option value="EUR" ${this.settings.currency === 'EUR' ? 'selected' : ''}>Euro (EUR)</option>
                 </select>
-                <small class="text-muted">System locked to ZAR for now.</small>
+                <small class="text-muted">Sets the primary symbol used across dashboards (R, KSh, ₦, $, €).</small>
               </div>
               <div class="pane-actions">
                 <button class="btn btn-primary" id="save-settings-business">Save Changes</button>
@@ -338,29 +353,70 @@ class SettingsUI {
        layout.classList.remove('pane-active');
     });
 
+    // Image Logo Upload Preview
+    const logoInput = container.querySelector('#set-logo');
+    let currentLogoBase64 = this.settings.businessLogo || null;
+    if (logoInput) {
+      logoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 1024 * 1024) {
+          alert('Logo file must be less than 1MB');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          currentLogoBase64 = event.target.result;
+          const preview = container.querySelector('#logo-preview');
+          if (preview) preview.innerHTML = `<img src="${currentLogoBase64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     // --- Save Settings ---
-    const handleSave = async () => {
+    const handleSave = async (e) => {
+      const btn = e.target;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+
       const newSettings = {
         ...this.settings,
-        businessName: container.querySelector('#set-name').value,
-        taxRate: parseFloat(container.querySelector('#set-tax').value) || 0,
+        businessName: container.querySelector('#set-name')?.value || this.settings.businessName,
+        currency: container.querySelector('#set-currency')?.value || this.settings.currency,
+        businessLogo: currentLogoBase64,
+        taxRate: parseFloat(container.querySelector('#set-tax')?.value) || 0,
         printerIp: container.querySelector('#set-printer')?.value || ''
       };
 
       try {
         await db.update('settings', { key: 'config', ...newSettings });
         this.settings = newSettings;
-        alert('✅ Settings saved successfully!');
+        
+        // Update sidebar dynamically
+        const brandLogo = document.querySelector('.brand .logo');
+        const brandName = document.querySelector('.brand h2');
+        if (brandLogo && currentLogoBase64) {
+          brandLogo.innerHTML = `<img src="${currentLogoBase64}" style="width: 100%; height: 100%; object-fit: contain;">`;
+          brandLogo.style.background = 'none';
+        } else if (brandLogo && !currentLogoBase64) {
+          brandLogo.innerHTML = '<i class="ph-duotone ph-buildings"></i>';
+        }
+        if (brandName && newSettings.businessName) brandName.textContent = newSettings.businessName;
 
-        // Update user profile if name changed
+        // Update user profile
         const currentUser = JSON.parse(localStorage.getItem('erp_session'));
         if (currentUser) {
           currentUser.businessName = newSettings.businessName;
           localStorage.setItem('erp_session', JSON.stringify(currentUser));
         }
+
+        setTimeout(() => btn.innerHTML = 'Saved!', 500);
+        setTimeout(() => btn.innerHTML = originalText, 2000);
       } catch (err) {
         console.error(err);
         alert('Failed to save settings');
+        btn.innerHTML = originalText;
       }
     };
 

@@ -1,3 +1,5 @@
+import Analytics from '../utils/analytics.js';
+
 class WelcomeWizardUI {
   constructor() {
     this.currentStep = 1;
@@ -8,6 +10,8 @@ class WelcomeWizardUI {
   show(onCompleteCallback) {
     this.onComplete = onCompleteCallback;
     this.currentStep = 1;
+    
+    Analytics.track('Onboarding Started');
 
     // Remove any existing wizard
     const existing = document.getElementById('welcome-wizard-overlay');
@@ -132,10 +136,13 @@ class WelcomeWizardUI {
     const backBtn = overlay.querySelector('#ww-back');
     const skipBtn = overlay.querySelector('#ww-skip');
 
-    const finish = () => {
+    const finish = (skipped = false) => {
       localStorage.setItem('erp_onboarding_complete', 'true');
       overlay.style.opacity = '0';
       document.getElementById('ww-modal').classList.remove('visible');
+      
+      Analytics.track(skipped ? 'Onboarding Skipped' : 'Onboarding Completed', { step: this.currentStep });
+
       setTimeout(() => {
         overlay.remove();
         if (this.onComplete) this.onComplete();
@@ -158,7 +165,7 @@ class WelcomeWizardUI {
       }
     });
 
-    skipBtn.addEventListener('click', finish);
+    skipBtn.addEventListener('click', () => finish(true));
   }
 }
 
