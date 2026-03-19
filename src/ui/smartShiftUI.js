@@ -9,7 +9,7 @@ class SmartShiftUI {
     this.container = container;
     this.module = new SmartShift(aiEngine, pocketBooks);
     this.iotService = new IoTService(this.module);
-    this.currentView = 'dashboard';
+    this.currentView = 'scheduler';
   }
 
   async render() {
@@ -30,8 +30,7 @@ class SmartShiftUI {
         </header>
 
         <div class="module-nav">
-          <button class="btn-tab active" data-view="dashboard">Dashboard</button>
-          <button class="btn-tab" data-view="scheduler"><i class="ph-duotone ph-calendar"></i> Scheduler</button>
+          <button class="btn-tab active" data-view="scheduler"><i class="ph-duotone ph-calendar"></i> Scheduler</button>
           <button class="btn-tab" data-view="machines">Machines</button>
           <button class="btn-tab" data-view="orders">Production Orders</button>
           <button class="btn-tab" data-view="shifts">Shifts</button>
@@ -45,7 +44,7 @@ class SmartShiftUI {
 
     this.attachNavHandlers();
     this.injectStyles();
-    await this.loadView('dashboard');
+    await this.loadView('scheduler');
   }
 
   attachNavHandlers() {
@@ -118,9 +117,6 @@ class SmartShiftUI {
     content.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
     switch (view) {
-      case 'dashboard':
-        await this.renderDashboard(content);
-        break;
       case 'scheduler':
         await this.renderScheduler(content);
         break;
@@ -222,13 +218,16 @@ class SmartShiftUI {
               </tr>
             </thead>
             <tbody>
-              ${orders.filter(o => !o.assignedMachineId).map(o => `
+              ${orders.filter(o => !o.assignedMachineId).map(o => {
+      const productStr = o.product || o.productName || 'Order';
+      return `
                 <tr>
-                  <td>${o.product} (${o.quantity})</td>
+                  <td>${productStr} (${o.quantity})</td>
                   <td>${new Date(o.dueDate).toLocaleDateString()}</td>
                   <td><button class="btn-sm btn-primary assign-btn" data-id="${o.id}">Quick Assign</button></td>
                 </tr>
-              `).join('')}
+              `;
+    }).join('')}
               ${orders.filter(o => !o.assignedMachineId).length === 0 ? '<tr><td colspan="3" class="text-center text-muted">All orders assigned</td></tr>' : ''}
             </tbody>
           </table>
@@ -420,13 +419,17 @@ class SmartShiftUI {
 
       <!-- Add Machine Modal (Simplistic) -->
       <!-- Add Machine Modal -->
-      <dialog id="add-machine-modal">
+      <dialog id="add-machine-modal" class="item-modal">
         <form method="dialog">
-          <h3>Add New Machine</h3>
-          <input type="text" id="machine-name" name="name" placeholder="Machine Name" required />
-          <input type="text" id="machine-type" name="type" placeholder="Type (e.g., CNC)" required />
-          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <button type="button" class="btn btn-secondary cancel-btn" style="flex: 1;">Cancel</button>
+          <h3 style="color:var(--text-primary)">Add New Machine</h3>
+          <div class="form-group" style="margin-top:1rem;">
+            <input type="text" id="machine-name" name="name" placeholder="Machine Name" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+          </div>
+          <div class="form-group" style="margin-top:1rem;">
+            <input type="text" id="machine-type" name="type" placeholder="Type (e.g., CNC)" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary cancel-btn" style="flex: 1; padding:0.5rem; border-radius:4px; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary);">Cancel</button>
             <button type="submit" class="btn btn-primary save-btn" style="flex: 1;">Save</button>
           </div>
         </form>
@@ -526,33 +529,49 @@ class SmartShiftUI {
             </tr>
           </thead>
           <tbody>
-            ${orders.map(o => `
+            ${orders.map(o => {
+      const orderNum = o.orderNumber || `PO-${o.id}`;
+      const productStr = o.product || o.productName || 'Custom Order';
+      const unitStr = o.unit || 'units';
+      return `
               <tr>
-                <td>${o.orderNumber}</td>
-                <td>${o.product}</td>
-                <td>${o.quantity} ${o.unit}</td>
+                <td>${orderNum}</td>
+                <td>${productStr}</td>
+                <td>${o.quantity} ${unitStr}</td>
                 <td>${new Date(o.dueDate).toLocaleDateString()}</td>
                 <td><span class="badge ${o.status}">${o.status}</span></td>
-                <td>${Math.round(o.progress)}%</td>
+                <td>${Math.round(o.progress || 0)}%</td>
                 <td>
                   ${o.status === 'completed'
-        ? `<button class="btn-sm btn-outline-primary generate-coc-btn" data-id="${o.id}"><i class="ph ph-file-pdf"></i> CoC</button>`
-        : '-'}
+          ? `<button class="btn-sm btn-outline-primary generate-coc-btn" data-id="${o.id}"><i class="ph ph-file-pdf"></i> CoC</button>`
+          : '-'}
                 </td>
               </tr>
-            `).join('')}
+            `;
+    }).join('')}
           </tbody>
         </table>
       </div>
 
-  <dialog id="add-order-modal">
+  <dialog id="add-order-modal" class="item-modal">
     <form method="dialog">
-      <h3>New Production Order</h3>
-      <input type="text" name="product" placeholder="Product Name" required />
-      <input type="number" name="quantity" placeholder="Quantity" required />
-      <input type="date" name="dueDate" required />
-      <button value="cancel">Cancel</button>
-      <button value="save" class="btn btn-primary">Create</button>
+      <h3 style="color:var(--text-primary)">New Production Order</h3>
+      <div class="form-group">
+        <label style="color:var(--text-secondary)">Product Name</label>
+        <input type="text" name="product" placeholder="Product Name" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+      </div>
+      <div class="form-group">
+        <label style="color:var(--text-secondary)">Quantity</label>
+        <input type="number" name="quantity" placeholder="Quantity" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+      </div>
+      <div class="form-group">
+        <label style="color:var(--text-secondary)">Due Date</label>
+        <input type="date" name="dueDate" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+      </div>
+      <div style="display:flex; gap:1rem; margin-top:1.5rem">
+        <button value="cancel" style="flex:1; padding:0.5rem; border-radius:4px; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary);">Cancel</button>
+        <button value="save" class="btn btn-primary" style="flex:1;">Create</button>
+      </div>
     </form>
   </dialog>
 `;
@@ -642,32 +661,43 @@ class SmartShiftUI {
         </table>
       </div>
       
-      <dialog id="add-shift-modal">
+      <dialog id="add-shift-modal" class="item-modal">
         <form method="dialog">
-          <h3>Schedule New Shift</h3>
-          <label>Date</label>
-          <input type="date" name="date" required />
+          <h3 style="color:var(--text-primary)">Schedule New Shift</h3>
           
-          <label>Start Time</label>
-          <input type="time" name="startTime" required />
+          <div class="form-group" style="margin-top:1rem;">
+            <label style="color:var(--text-secondary)">Date</label>
+            <input type="date" name="date" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+          </div>
           
-          <label>Duration (Hours)</label>
-          <input type="number" name="duration" value="8" min="1" max="12" required />
+          <div class="form-group" style="margin-top:1rem;">
+            <label style="color:var(--text-secondary)">Start Time</label>
+            <input type="time" name="startTime" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+          </div>
           
-          <label>Machine</label>
-          <select name="machineId" required>
-            <option value="">Select Machine</option>
-            ${machines.map(m => `<option value="${m.id}">${m.name} (${m.status})</option>`).join('')}
-          </select>
+          <div class="form-group" style="margin-top:1rem;">
+            <label style="color:var(--text-secondary)">Duration (Hours)</label>
+            <input type="number" name="duration" value="8" min="1" max="12" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);" />
+          </div>
           
-          <label>Worker</label>
-          <select name="workerId" required>
-            <option value="">Select Worker</option>
-            ${workers.map(w => `<option value="${w.id}">${w.name} (${w.availability})</option>`).join('')}
-          </select>
+          <div class="form-group" style="margin-top:1rem;">
+            <label style="color:var(--text-secondary)">Machine</label>
+            <select name="machineId" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);">
+              <option value="">Select Machine</option>
+              ${machines.map(m => `<option value="${m.id}">${m.name} (${m.status})</option>`).join('')}
+            </select>
+          </div>
           
-          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <button value="cancel" style="flex: 1;">Cancel</button>
+          <div class="form-group" style="margin-top:1rem;">
+            <label style="color:var(--text-secondary)">Worker</label>
+            <select name="workerId" required style="width:100%;padding:0.5rem;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);">
+              <option value="">Select Worker</option>
+              ${workers.map(w => `<option value="${w.id}">${w.name} (${w.availability})</option>`).join('')}
+            </select>
+          </div>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button value="cancel" style="flex: 1; padding:0.5rem; border-radius:4px; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-primary);">Cancel</button>
             <button value="save" class="btn btn-primary" style="flex: 1;">Schedule</button>
           </div>
         </form>

@@ -269,6 +269,9 @@ class IndustrialERPApp {
     Analytics.init();
 
     try {
+      // Force Dark Mode
+      document.documentElement.setAttribute('data-theme', 'dark');
+
       // Initialize IndexedDB
       await db.init();
       console.log('✅ Database ready');
