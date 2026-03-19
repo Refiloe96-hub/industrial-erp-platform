@@ -66,32 +66,11 @@ export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '
   document.body.appendChild(overlay);
   document.body.appendChild(panel);
 
-  // Push a history entry so the phone back button has something to pop
-  // instead of navigating away from the app.
-  history.pushState({ panel: true }, '');
-
   const close = () => {
     panel.remove();
     overlay.remove();
-    // Remove the popstate listener — no longer needed
-    window.removeEventListener('popstate', onPopState);
-    // If we're still on the pushed state, go back to clean up history
-    // (only if the user closed via X or overlay, not via back button)
-    if (history.state?.panel) {
-      history.back();
-    }
   };
 
-  // Handle phone / browser back button
-  const onPopState = (e) => {
-    // popstate fires AFTER the state has already been popped,
-    // so history.state is now the previous (non-panel) state.
-    panel.remove();
-    overlay.remove();
-    window.removeEventListener('popstate', onPopState);
-  };
-
-  window.addEventListener('popstate', onPopState);
   panel.querySelector('#dp-close-btn').addEventListener('click', close);
   overlay.addEventListener('click', close);
 

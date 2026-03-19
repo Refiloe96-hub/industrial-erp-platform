@@ -302,6 +302,7 @@ class IndustrialERPApp {
       }
 
       // Render initial UI
+      this.initNotifications();
       this.render();
 
       // Register PWA Service Worker for offline asset caching
@@ -1139,7 +1140,6 @@ class IndustrialERPApp {
         <button class="menu-toggle" id="menu-toggle"><i class="ph ph-list"></i></button>
         <h1>${this.currentUser.businessName}</h1>
         <div style="display: flex; gap: 0.5rem;">
-          <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><i class="ph-duotone ph-moon"></i></button>
           <button class="btn-icon notification-btn" id="mobile-notification-btn"><i class="ph-duotone ph-bell"></i></button>
         </div>
       </header>
@@ -1172,7 +1172,6 @@ class IndustrialERPApp {
            <div class="sidebar-footer">
             <button id="upgrade-btn" class="btn-block btn-primary btn-sm" style="margin-bottom: 0.5rem; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;"><i class="ph-duotone ph-rocket"></i> Upgrade Plan</button>
             <button id="install-btn" class="btn-primary btn-sm" style="display: none;"><i class="ph-duotone ph-download-simple"></i> Install</button>
-            <button class="theme-toggle" id="desktop-theme-toggle" title="Toggle Theme"><i class="ph-duotone ph-moon"></i></button>
             <button id="logout-btn" class="btn-secondary btn-sm"><i class="ph-duotone ph-sign-out"></i> Logout</button>
           </div>
         </nav>
