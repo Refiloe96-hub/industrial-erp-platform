@@ -1186,19 +1186,20 @@ class IndustrialERPApp {
       <div class="app-layout">
         <nav class="sidebar" id="sidebar">
           <div class="sidebar-header">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <h2 style="display: flex; align-items: center; gap: 0.5rem;" class="brand">
-                  <span class="logo" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 6px;">
-                    ${this.config?.businessLogo ? `<img src="${this.config.businessLogo}" style="width: 100%; height: 100%; object-fit: contain;">` : '<i class="ph-duotone ph-buildings"></i>'}
-                  </span>
-                  <span>Business</span>
-                </h2>
-                <button id="sidebar-toggle-btn" class="btn-icon" title="Toggle Sidebar" aria-label="Toggle Sidebar" style="background: transparent; color: var(--text-primary); width: 32px; height: 32px; padding: 4px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                </button>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+              <div style="display:flex;align-items:center;gap:0.625rem;min-width:0;">
+                <span style="width:28px;height:28px;border-radius:6px;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  ${this.config?.businessLogo ? `<img src="${this.config.businessLogo}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;">` : '<i class="ph-bold ph-buildings" style="font-size:0.875rem;color:#60a5fa;"></i>'}
+                </span>
+                <div style="min-width:0;">
+                  <p class="business-name">${esc(this.currentUser.businessName)}</p>
+                  <p class="business-type">${businessLabel}</p>
+                </div>
+              </div>
+              <button id="sidebar-toggle-btn" class="btn-icon" aria-label="Collapse sidebar" style="background:transparent;border:none;width:28px;height:28px;padding:4px;flex-shrink:0;color:var(--text-muted);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
             </div>
-            <p class="business-name">${esc(this.currentUser.businessName)}</p>
-            <p class="business-type">${businessLabel}</p>
           </div>
           
           <ul class="nav-menu">
@@ -1294,94 +1295,54 @@ class IndustrialERPApp {
           </div>
         </div>
 
-        <!-- AI Advisor Card -->
-        <div class="card ai-advisor-card" id="ai-advisor-card" style="
-          grid-column: 1/-1;
-          border-left: 4px solid #6366f1;
-          margin-bottom: 0.5rem;
-        ">
-          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
-            <div style="display:flex;align-items:center;gap:0.75rem;">
-              <i class="ph-duotone ph-robot" style="font-size:1.5rem;color:#6366f1;"></i>
-              <div>
-                <h3 style="margin:0;font-size:1rem;">AI Business Advisor</h3>
-                <p style="margin:0;font-size:0.75rem;color:var(--text-secondary);">Cross-module analysis</p>
-              </div>
+        <!-- Charts Section -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3>Cash Flow</h3>
+          </div>
+          <div class="card-body" id="chart-cashflow"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3>Inventory Breakdown</h3>
+          </div>
+          <div class="card-body" id="chart-inventory"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3>Machine Status</h3>
+          </div>
+          <div class="card-body" id="chart-machines"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3>Syndicate Health</h3>
+          </div>
+          <div class="card-body" id="chart-syndicates"></div>
+        </div>
+
+        <!-- Business Insights — below charts, not the first thing you see -->
+        <div class="card full-width" id="ai-advisor-card" style="margin-top:0.25rem;">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div>
+              <h3 style="margin:0;font-size:0.875rem;font-weight:600;">Business Insights</h3>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-muted);">Across all modules</p>
             </div>
-            <button id="ai-refresh-btn" class="btn-icon" style="
-              background:none;border:1px solid var(--border,#e5e7eb);border-radius:8px;
-              padding:0.4rem 0.75rem;cursor:pointer;color:var(--text-secondary);font-size:0.8rem;
-              display:flex;align-items:center;gap:0.4rem;
-            " title="Refresh insights">
+            <button id="ai-refresh-btn" style="background:none;border:1px solid var(--border);border-radius:6px;padding:0.3rem 0.625rem;cursor:pointer;color:var(--text-secondary);font-size:0.75rem;display:flex;align-items:center;gap:0.3rem;" aria-label="Refresh insights">
               <i class="ph ph-arrows-clockwise"></i> Refresh
             </button>
           </div>
           <div class="card-body">
-            <!-- Module Health Scores Row -->
-            <div id="ai-module-scores" style="
-              display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;
-              padding-bottom:0.75rem;border-bottom:1px solid var(--border,#e5e7eb);
-            ">
-              <span style="font-size:0.75rem;color:var(--text-secondary);align-self:center;">Loading scores...</span>
+            <div id="ai-module-scores" style="display:flex;gap:0.625rem;flex-wrap:wrap;margin-bottom:0.875rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);"></div>
+            <div id="ai-insights-list" style="display:flex;flex-direction:column;gap:0.375rem;">
+              <span style="font-size:0.8125rem;color:var(--text-muted);">Analysing your data...</span>
             </div>
-            <!-- Insight Bullets -->
-            <div id="ai-insights-list" style="display:flex;flex-direction:column;gap:0.5rem;">
-              <div style="display:flex;align-items:center;gap:0.5rem;color:var(--text-secondary);font-size:0.875rem;">
-                <i class="ph ph-circle-notch" style="animation:spin 1s linear infinite;"></i>
-                Analysing your business...
-              </div>
-            </div>
-            <p id="ai-source-note" style="margin:0.75rem 0 0;font-size:0.7rem;color:var(--text-secondary);display:none;">
-              💡 Add a Groq API key in Settings for AI-powered insights. Currently showing rule-based analysis.
+            <p id="ai-source-note" style="margin:0.75rem 0 0;font-size:0.6875rem;color:var(--text-muted);display:none;">
+              Add a Groq API key in Settings for deeper analysis.
             </p>
-          </div>
-        </div>
-
-        <!-- Recent Activity -->
-
-        <div class="card full-width">
-          <div class="card-header">
-            <h3>Recent Activity</h3>
-          </div>
-          <div class="card-body">
-            <p class="text-muted">No recent activity. Start by exploring modules.</p>
-          </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-chart-line-up"></i> Cash Flow Trend</h3>
-          </div>
-          <div class="card-body" id="chart-cashflow">
-            <p class="text-muted">Loading chart...</p>
-          </div>
-        </div>
-
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-package"></i> Inventory Breakdown</h3>
-          </div>
-          <div class="card-body" id="chart-inventory">
-            <p class="text-muted">Loading chart...</p>
-          </div>
-        </div>
-
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-gear"></i> Machine Status</h3>
-          </div>
-          <div class="card-body" id="chart-machines">
-            <p class="text-muted">Loading chart...</p>
-          </div>
-        </div>
-
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-handshake"></i> Syndicate Health</h3>
-          </div>
-          <div class="card-body" id="chart-syndicates">
-            <p class="text-muted">Loading chart...</p>
           </div>
         </div>
       </div>
@@ -1392,22 +1353,34 @@ class IndustrialERPApp {
     return `
       <style>
         :root {
-          /* Platform is permanently in Dark Mode */
-          --bg-primary: #1e1e1e;
-          --bg-secondary: #121212;
-          --bg-sidebar: #000000;
-          --bg-tertiary: #2a2b32;
-          --text-primary: #f8fafc;
-          --text-secondary: #94a3b8;
-          --border: #333333;
-          --border-color: #333333;
-          --accent-primary: #fb923c;
-          --accent-hover: #f97316;
-          --primary-color: #6366f1;
+          --bg-base:        #0d0d0f;
+          --bg-sidebar:     #0d0d0f;
+          --bg-secondary:   #111113;
+          --bg-primary:     #18181b;
+          --bg-elevated:    #232326;
+          --bg-hover:       rgba(255,255,255,0.04);
+
+          --text-primary:   #f4f4f5;
+          --text-secondary: #a1a1aa;
+          --text-muted:     #52525b;
+
+          --border:         rgba(255,255,255,0.08);
+          --border-color:   rgba(255,255,255,0.08);
+          --border-strong:  rgba(255,255,255,0.14);
+
+          /* Single accent — consistent with landing page */
+          --accent:         #2563eb;
+          --accent-hover:   #1d4ed8;
+          --primary:        #2563eb;
+          --primary-color:  #2563eb;
+          --accent-primary: #2563eb;
+
           --success: #10b981;
           --warning: #f59e0b;
-          --danger: #ef4444;
-          --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+          --danger:  #ef4444;
+
+          --card-shadow:  0 1px 3px rgba(0,0,0,0.4);
+          --modal-shadow: 0 24px 48px rgba(0,0,0,0.6);
         }
 
         /* Global dark dialog override - browser renders dialog with white Canvas background by default */
@@ -1506,9 +1479,9 @@ class IndustrialERPApp {
           font-size: 0.85rem;
         }
         
-        .risk-score.good { background: #d1fae5; color: #065f46; }
-        .risk-score.medium { background: #fef3c7; color: #92400e; }
-        .risk-score.bad { background: #fee2e2; color: #991b1b; }
+        .risk-score.good   { background: rgba(16,185,129,0.12); color: #34d399; }
+        .risk-score.medium { background: rgba(245,158,11,0.12); color: #fbbf24; }
+        .risk-score.bad    { background: rgba(239,68,68,0.12);  color: #f87171; }
 
         .app-layout {
           display: flex;
@@ -1642,34 +1615,32 @@ class IndustrialERPApp {
         }
         
         .sidebar-header {
-          padding: 1rem 1.5rem;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
+          padding: 1rem 1rem 1rem 1.25rem;
+          border-bottom: 1px solid var(--border);
           flex-shrink: 0;
-          cursor: pointer; /* clickable */
         }
 
-        .sidebar-header:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        
         .sidebar-header h2 {
-          margin-bottom: 0.1rem;
-          font-size: 1.25rem;
+          margin-bottom: 0.25rem;
+          font-size: 0.9375rem;
+          font-weight: 600;
+          letter-spacing: -0.01em;
         }
-        
+
         .business-name {
-          font-size: 0.8rem;
-          color: #9ca3af;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .business-type {
           font-size: 0.75rem;
-          color: #93c5fd; /* Light blue text */
-          margin-top: 0.25rem;
-          padding: 0.25rem 0.5rem;
-          background: rgba(37, 99, 235, 0.2); /* Blue background */
-          border-radius: 4px;
-          display: inline-block;
+          color: var(--text-muted);
+          margin-top: 0.125rem;
+          text-transform: capitalize;
         }
         
         .nav-menu {
@@ -1694,23 +1665,32 @@ class IndustrialERPApp {
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.6rem 1.5rem; /* Reduced padding */
+          gap: 0.625rem;
+          padding: 0.5rem 0.875rem;
+          margin: 1px 0.5rem;
+          border-radius: 6px;
           cursor: pointer;
-          transition: background 0.2s;
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          transition: background 0.15s, color 0.15s;
         }
-        
+
+        .nav-item:hover {
+          background: var(--bg-hover);
+          color: var(--text-primary);
+        }
+
+        .nav-item.active {
+          background: rgba(37,99,235,0.1);
+          color: #93c5fd;
+        }
+
         .nav-icon {
-          font-size: 1.1rem;
+          font-size: 1rem;
+          flex-shrink: 0;
         }
-        
-        .nav-badge {
-          margin-left: auto;
-          font-size: 0.7rem;
-          padding: 0.15rem 0.4rem;
-          background: rgba(255,255,255,0.1);
-          border-radius: 4px;
-        }
+
+        .nav-badge { display: none; }
         
         .sidebar-footer {
           padding: 1rem;
@@ -1720,21 +1700,22 @@ class IndustrialERPApp {
         /* NOTE: duplicate removed - see .main-content above */
         
         .content-header {
-          background: var(--bg-primary);
-          padding: 1rem 2rem;
+          background: var(--bg-secondary);
+          padding: 0.875rem 1.75rem;
           border-bottom: 1px solid var(--border);
           display: flex;
           align-items: center;
           justify-content: space-between;
           position: sticky;
           top: 0;
-          top: 0;
           z-index: 10;
         }
-        
+
         .content-header h1 {
           margin: 0;
-          font-size: 1.5rem;
+          font-size: 1rem;
+          font-weight: 600;
+          letter-spacing: -0.01em;
         }
         
         .header-actions {
@@ -1790,8 +1771,10 @@ class IndustrialERPApp {
         }
         
         .card-header h3 {
-          font-size: 1.125rem;
+          font-size: 0.875rem;
           font-weight: 600;
+          letter-spacing: -0.005em;
+          color: var(--text-primary);
         }
         
         .ai-alert {
@@ -1806,44 +1789,40 @@ class IndustrialERPApp {
         .ai-alert .btn-primary:hover { background: #4f46e5; }
         
         .stat-card {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          border-left: 3px solid var(--border);
+          padding: 1.125rem 1.25rem;
+          cursor: pointer;
+          transition: background 0.15s;
         }
-        .stat-card:hover { border-left-color: var(--accent-primary); }
-        
-        .stat-icon {
-          font-size: 1.75rem;
-          color: var(--text-secondary);
-          opacity: 0.6;
-          flex-shrink: 0;
-        }
-        
-        .stat-content {
-          flex: 1;
-        }
-        
+        .stat-card:hover { background: var(--bg-elevated); }
+
+        .stat-icon { display: none; }
+
+        .stat-content { display: block; }
+
         .stat-label {
-          color: var(--text-secondary);
-          font-size: 0.875rem;
-          margin-bottom: 0.25rem;
+          font-size: 0.6875rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: var(--text-muted);
+          margin-bottom: 0.375rem;
         }
-        
+
         .stat-value {
-          font-size: 1.75rem;
+          font-size: 1.5rem;
           font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text-primary);
           margin-bottom: 0.25rem;
+          line-height: 1.2;
         }
-        
+
         .stat-change {
-          font-size: 0.875rem;
-          color: var(--text-secondary);
+          font-size: 0.75rem;
+          color: var(--text-muted);
         }
-        
-        .stat-change.positive {
-          color: var(--success);
-        }
+
+        .stat-change.positive { color: var(--success); }
         
         .btn-secondary {
           background: rgba(255,255,255,0.1);
@@ -1922,16 +1901,17 @@ class IndustrialERPApp {
         }
 
         .btn-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            font-weight: 500;
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 600;
         }
 
         /* SmartShift Styles */
         .big-number {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--primary);
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
         }
 
         .action-bar {
@@ -1970,16 +1950,16 @@ class IndustrialERPApp {
             text-transform: uppercase;
         }
 
-        .badge.operational, .badge.available, .badge.completed { background: #d1fae5; color: #065f46; }
-        .badge.broken, .badge.blocked, .badge.failed { background: #fee2e2; color: #991b1b; }
-        .badge.maintenance, .badge.pending, .badge.warning { background: #fef3c7; color: #92400e; }
-        .badge.in_progress, .badge.scheduled { background: #dbeafe; color: #1e40af; }
+        .badge.operational, .badge.available, .badge.completed { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+        .badge.broken, .badge.blocked, .badge.failed { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .badge.maintenance, .badge.pending, .badge.warning { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+        .badge.in_progress, .badge.scheduled { background: rgba(37,99,235,0.12); color: #60a5fa; border: 1px solid rgba(37,99,235,0.2); }
 
         .progress-bar {
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            margin: 1rem 0 0.5rem 0;
+            height: 6px;
+            background: var(--border-strong);
+            border-radius: 3px;
+            margin: 0.75rem 0 0.5rem;
             overflow: hidden;
         }
 
@@ -1989,26 +1969,7 @@ class IndustrialERPApp {
             transition: width 0.3s ease;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .data-table th, .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .data-table th {
-            background: #f9fafb;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
+        /* .data-table duplicate removed — defined above with correct dark-mode styles */
 
         /* Modal */
         dialog {
