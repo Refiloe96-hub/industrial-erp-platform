@@ -1024,11 +1024,12 @@ class ReportsUI {
 
         .stat-badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: #e0e7ff;
-            color: #4f46e5;
-            border-radius: 999px;
-            font-size: 0.75rem;
+            padding: 0.2rem 0.625rem;
+            background: rgba(37,99,235,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(37,99,235,0.2);
+            border-radius: 4px;
+            font-size: 0.6875rem;
             font-weight: 600;
         }
 

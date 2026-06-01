@@ -301,7 +301,7 @@ class PoolStockUI {
                 .ip-chart-wrap { margin-bottom:1.5rem; }
                 .ip-chart-row { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; }
                 .ip-chart-label { font-size:0.75rem; color:var(--text-secondary,#6b7280); width:100px; flex-shrink:0; }
-                .ip-bar-track { flex:1; height:10px; background:var(--bg-secondary,#f0f0f0); border-radius:999px; overflow:hidden; }
+                .ip-bar-track { flex:1; height:8px; background:var(--border-strong,rgba(255,255,255,0.14)); border-radius:999px; overflow:hidden; }
                 .ip-bar-fill { height:100%; border-radius:999px; transition:width 0.6s ease; }
                 .ip-bar-val { font-size:0.8rem; font-weight:600; color:var(--text-primary,#111); width:40px; text-align:right; flex-shrink:0; }
                 .ip-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }

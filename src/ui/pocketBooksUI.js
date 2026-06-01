@@ -1109,9 +1109,8 @@ class PocketBooksUI {
                 cursor: pointer;
             }
             .report-card:hover {
-                transform: translateY(-2px);
-                border-color: var(--accent-primary);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                border-color: var(--border-strong);
+                background: var(--bg-elevated, #232326);
             }
             .report-icon {
                 width: 40px;

@@ -77,17 +77,16 @@ class TrustCircleUI {
 
             .pool-visualizer { text-align: center; }
             .pot-circle {
-                width: 200px;
-                height: 200px;
+                width: 160px;
+                height: 160px;
                 border-radius: 50%;
-                border: 8px solid var(--accent-primary);
+                border: 6px solid rgba(37,99,235,0.3);
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                margin: 2rem auto;
-                background: rgba(255,255,255,0.02);
-                box-shadow: 0 0 30px rgba(37, 99, 235, 0.1);
+                margin: 1.5rem auto;
+                background: rgba(37,99,235,0.04);
             }
             .pot-circle .amount { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
             .pot-circle .label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; }
