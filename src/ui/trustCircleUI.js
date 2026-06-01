@@ -90,7 +90,7 @@ class TrustCircleUI {
                 align-items: center;
                 margin: 2rem auto;
                 background: rgba(255,255,255,0.02);
-                box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+                box-shadow: 0 0 30px rgba(37, 99, 235, 0.1);
             }
             .pot-circle .amount { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
             .pot-circle .label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; }
@@ -162,7 +162,7 @@ class TrustCircleUI {
             .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
                 outline: none;
                 border-color: var(--accent-primary);
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             }
 
             .form-container {
@@ -325,8 +325,8 @@ class TrustCircleUI {
             <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Result-based cooperation for SMEs</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            <button id="tc-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
-              <i class="ph-duotone ph-robot"></i> AI Insights
+            <button id="tc-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
+              Insights
             </button>
             <button id="create-syndicate-btn" class="btn btn-primary"><i class="ph ph-plus"></i> New Syndicate</button>
           </div>
@@ -381,13 +381,13 @@ class TrustCircleUI {
             );
 
             const insightsHTML = insights.map(ins => `
-                                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#2563eb'}">
                                     <span style="display:block; font-size:0.95rem;">${ins.text}</span>
                                 </li>
                             `).join('');
 
             showDetailPanel({
-                title: '🤝 TrustCircle AI Insights',
+                title: 'TrustCircle Insights',
                 subtitle: `Syndicate Trust Score: ${result.score}/100`,
                 bodyHTML: `
                     <div class="dp-section">
@@ -444,7 +444,7 @@ class TrustCircleUI {
             <div class="dp-section">
             <div class="dp-section-title">By Type</div>
                         ${Object.entries(byType).map(([type, count]) =>
-                    dpBar(type.replace(/_/g, ' '), count, maxType, '#6366f1')).join('')
+                    dpBar(type.replace(/_/g, ' '), count, maxType, '#2563eb')).join('')
                     }
                     </div>
                 <div class="dp-section">
@@ -642,7 +642,7 @@ class TrustCircleUI {
                 </section>
 
                 <section class="ai-insights">
-                    <h3><i class="ph-duotone ph-robot"></i> TrustCircle AI Insights</h3>
+                    <h3>Syndicate Insights</h3>
                     <div class="insights-list">
                         ${insights.map(i => `
                                 <div class="insight-card ${i.type}">
@@ -1002,8 +1002,8 @@ class TrustCircleUI {
                                             <td>${r.description || '—'}</td>
                                             <td>${r.repaymentTerms || '—'}</td>
                                             <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
-                                            <td class="text-success">👍 ${r.votesFor || 0}</td>
-                                            <td class="text-danger">👎 ${r.votesAgainst || 0}</td>
+                                            <td class="text-success">${r.votesFor || 0} for</td>
+                                            <td class="text-danger">${r.votesAgainst || 0} against</td>
                                             <td>${r.votesRequired || '—'}</td>
                                             <td>${new Date(r.requestDate).toLocaleDateString()}</td>
                                         </tr>
@@ -1177,9 +1177,9 @@ class TrustCircleUI {
                 <div class="form-group">
                     <label>Payment Status</label>
                     <select name="status" required>
-                        <option value="paid">Paid (On Time) 📈</option>
-                        <option value="late">Late (-5 Trust Score) 📉</option>
-                        <option value="missed">Missed (-15 Trust Score) 🚨</option>
+                        <option value="paid">Paid (On Time)</option>
+                        <option value="late">Late (−5 Trust Score)</option>
+                        <option value="missed">Missed (−15 Trust Score)</option>
                     </select>
                 </div>
 

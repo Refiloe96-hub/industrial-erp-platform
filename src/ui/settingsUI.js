@@ -59,7 +59,7 @@ class SettingsUI {
               <i class="ph-duotone ph-wifi-slash"></i> Offline P2P Sync
             </button>
             <button class="nav-item" data-target="pane-ai">
-              <i class="ph-duotone ph-robot"></i> AI & Forecasting
+              <i class="ph-duotone ph-cpu"></i> AI & Forecasting
             </button>
           </div>
         </div>
@@ -430,7 +430,7 @@ class SettingsUI {
       const horizon = container.querySelector('#set-forecast-horizon')?.value || '14';
       localStorage.setItem('erp_groq_api_key', key);
       localStorage.setItem('erp_forecast_horizon', horizon);
-      alert(key ? '✅ Groq API key saved! AI insights are now enabled.' : '✅ AI settings saved (rule-based insights mode).');
+      alert(key ? 'API key saved. AI insights enabled.' : 'Settings saved (rule-based analysis mode).');
     });
 
     // P2P Offline Sync (WebRTC)
@@ -529,7 +529,7 @@ class SettingsUI {
     // Restore
     const restoreInput = container.querySelector('#file-restore');
     container.querySelector('#btn-restore').addEventListener('click', () => {
-      if (confirm('⚠️ WARNING: Restoring will OVERWRITE all current data. Are you sure?')) {
+      if (confirm('Restore backup? This will overwrite all current data and cannot be undone.')) {
         restoreInput.click();
       }
     });
@@ -673,7 +673,7 @@ class SettingsUI {
                     </div>
                 `;
         } catch (err) {
-          alert(`❌ Import Failed: ${err.message}`);
+          alert(`Import failed: ${err.message}`);
           container.querySelector('#btn-select-import').innerHTML = originalText;
           container.querySelector('#btn-select-import').disabled = false;
         }
@@ -727,7 +727,7 @@ class SettingsUI {
             }
           }
         }
-        alert('✅ Data restored successfully! Reloading...');
+        alert('Data restored successfully. Reloading...');
         location.reload();
       } catch (err) {
         console.error(err);
@@ -1062,7 +1062,7 @@ class SettingsUI {
           <div class="modal-body">
             <div class="step mb-4">
               <label class="block mb-2 font-bold">1. Business Type Detected</label>
-              <div class="p-3 bg-blue-50 text-blue-800 rounded border border-blue-200">
+              <div style="padding:0.75rem;background:rgba(37,99,235,0.08);color:#93c5fd;border-radius:6px;border:1px solid rgba(37,99,235,0.2);">
                 <i class="ph-fill ph-check-circle"></i> Using template for: <strong>${displayType}</strong>
               </div>
               <p class="text-xs text-muted mt-2">
@@ -1102,7 +1102,7 @@ class SettingsUI {
             <form id="support-form">
                 <div class="form-group">
                     <label>Current Type</label>
-                    <input type="text" value="${getSession()?.businessType || 'Unknown'}" disabled class="bg-gray-100">
+                    <input type="text" value="${getSession()?.businessType || 'Unknown'}" disabled style="background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;padding:0.5rem;">
                 </div>
                 <div class="form-group">
                     <label>Requested Type</label>

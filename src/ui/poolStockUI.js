@@ -42,7 +42,7 @@ class PoolStockUI {
                     <div class="ps-tab-bar">
                         <button class="ps-tab active" data-tab="inventory"><i class="ph ph-package"></i> Inventory</button>
                         <button class="ps-tab" data-tab="purchase-orders"><i class="ph ph-clipboard-text"></i> Purchase Orders</button>
-                        <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast 🤖</button>
+                        <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast</button>
                     </div>
 
                     <!-- Stats Cards -->
@@ -226,7 +226,7 @@ class PoolStockUI {
                     <div class="dp-section">
                         <div class="dp-section-title">Items by Category</div>
                         ${Object.entries(byCategory).sort((a, b) => b[1].count - a[1].count).map(([cat, d]) =>
-                    dpBar(cat, d.count, maxCat, '#6366f1')).join('')}
+                    dpBar(cat, d.count, maxCat, '#2563eb')).join('')}
                     </div>
                     <div class="dp-section">
                         <div class="dp-section-title">Stock Health</div>
@@ -705,7 +705,7 @@ class PoolStockUI {
     }
 
     async loadForecastView() {
-        this.container.innerHTML = '<div class="loading">🤖 Generating forecast...</div>';
+        this.container.innerHTML = '<div class="loading">Generating forecast...</div>';
         try {
             const { default: aiEngine } = await import('../services/aiEngine.js');
             const [items, movements] = await Promise.all([
@@ -761,7 +761,7 @@ class PoolStockUI {
                             <p style="color:var(--text-secondary);margin-top:1rem">No inventory data yet. Add items and record stock movements to see forecasts.</p>
                         </div>` : `
 
-                    <div class="card" style="margin-bottom:1rem;border-left:4px solid #6366f1">
+                    <div class="card" style="margin-bottom:1rem;border-left:4px solid #2563eb">
                         <div class="card-header"><h3>📊 Urgency Ranking — ${result.urgencyList.length} SKUs</h3>
                             <span style="font-size:0.8rem;color:var(--text-secondary)">Score: <strong style="color:${result.score >= 70 ? '#10b981' : result.score >= 40 ? '#f59e0b' : '#ef4444'}">${result.score}/100</strong></span>
                         </div>
@@ -773,8 +773,8 @@ class PoolStockUI {
                         </div>
                     </div>
 
-                    <div class="card" id="forecast-insights-card" style="border-left:4px solid #6366f1">
-                        <div class="card-header"><i class="ph-duotone ph-robot" style="color:#6366f1"></i> <h3 style="display:inline;margin-left:0.5rem">AI Inventory Insights</h3></div>
+                    <div class="card" id="forecast-insights-card" style="border-left:4px solid #2563eb">
+                        <div class="card-header"><h3>Inventory Insights</h3></div>
                         <div class="card-body" id="forecast-insights">
                             <div style="color:var(--text-secondary);font-size:0.875rem;display:flex;align-items:center;gap:0.4rem">
                                 <i class="ph ph-circle-notch" style="animation:spin 1s linear infinite"></i> Generating insights...
@@ -791,11 +791,11 @@ class PoolStockUI {
                 if (!el) return;
                 el.innerHTML = insights.map(ins => `
                     <div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:8px;
-                        background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#6366f1'};margin-bottom:0.5rem">
+                        background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#2563eb'};margin-bottom:0.5rem">
                         <span style="font-size:0.875rem;line-height:1.5;color:var(--text-primary)">${ins.text}</span>
                     </div>`).join('');
                 if (!apiKey) {
-                    el.insertAdjacentHTML('beforeend', '<p style="margin:0.5rem 0 0;font-size:0.7rem;color:var(--text-secondary)">💡 Add a Groq API key in Settings → AI for smarter insights.</p>');
+                    el.insertAdjacentHTML('beforeend', '<p style="margin:0.5rem 0 0;font-size:0.7rem;color:var(--text-secondary)">Add a Groq API key in Settings for smarter forecasting.</p>');
                 }
             }).catch(() => { });
 
@@ -1441,7 +1441,7 @@ class PoolStockUI {
             }
             .stat-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
 
-            .stat-card.primary { border-left-color: #6366f1; }
+            .stat-card.primary { border-left-color: #2563eb; }
             .stat-card.warning { border-left-color: #f59e0b; }
             .stat-card.danger { border-left-color: #ef4444; }
             .stat-card.success { border-left-color: #10a37f; }
@@ -1506,7 +1506,7 @@ class PoolStockUI {
             .badge.danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
             .badge.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
             .badge.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-            .badge.category { background: rgba(99, 102, 241, 0.1); color: #818cf8; }
+            .badge.category { background: rgba(37, 99, 235, 0.1); color: #93c5fd; }
 
             .inventory-row:hover { background: var(--bg-secondary) !important; }
 

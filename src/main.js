@@ -524,8 +524,9 @@ class IndustrialERPApp {
       <div class="auth-container">
         <div class="auth-card">
           <div class="auth-header">
-            <h1>Log in or sign up</h1>
-            <p>You'll get smarter operations and can upload files, records, and more.</p>
+            <div class="auth-logo"><i class="ph-bold ph-buildings"></i></div>
+            <h1>Industrial ERP</h1>
+            <p>Sign in to your workspace or create a new account.</p>
           </div>
           
           <div id="auth-social-buttons">
@@ -608,70 +609,59 @@ class IndustrialERPApp {
           align-items: center;
           justify-content: center;
           padding: 1rem;
-          /* Animated deep vibrant gradient */
-          background: linear-gradient(-45deg, #0f172a, #1e3a8a, #312e81, #4c1d95);
-          background-size: 400% 400%;
-          animation: gradientBG 15s ease infinite;
-        }
-
-        @keyframes gradientBG {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          background: #0d0d0f;
         }
 
         .auth-card {
-          /* Premium Glassmorphism */
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 24px;
-          padding: 2.5rem 2.5rem;
-          max-width: 440px;
+          background: #18181b;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          padding: 2.25rem 2.5rem;
+          max-width: 420px;
           width: 100%;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
           color: white;
-          animation: floatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          transform: translateY(20px);
-          opacity: 0;
         }
 
-        @keyframes floatIn {
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
+        .auth-logo {
+          width: 40px; height: 40px;
+          background: rgba(37,99,235,0.12);
+          border: 1px solid rgba(37,99,235,0.2);
+          border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 1.1rem; color: #60a5fa;
+          margin: 0 auto 1.25rem;
         }
 
-        .auth-header { text-align: center; margin-bottom: 2rem; }
-        .auth-header h1 { 
-          font-size: 2rem; 
-          margin-bottom: 0.5rem; 
-          color: #ffffff;
+        .auth-header { text-align: center; margin-bottom: 1.75rem; }
+        .auth-header h1 {
+          font-size: 1.25rem;
           font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 0.375rem;
+          color: #f4f4f5;
         }
-        .auth-header p { color: #cbd5e1; font-size: 1rem; line-height: 1.4; }
+        .auth-header p { color: #a1a1aa; font-size: 0.875rem; line-height: 1.5; }
 
         .btn-social {
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
+          gap: 0.625rem;
           background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          color: white;
-          border-radius: 9999px;
-          padding: 0.85rem;
-          margin-bottom: 0.75rem;
-          font-size: 1rem;
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #e4e4e7;
+          border-radius: 8px;
+          padding: 0.625rem 1rem;
+          margin-bottom: 0.625rem;
+          font-size: 0.875rem;
           font-weight: 500;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: background 0.15s, border-color 0.15s;
         }
-        .btn-social:hover { background: rgba(255, 255, 255, 0.1); }
-        .btn-social i { font-size: 1.25rem; }
+        .btn-social:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.18); }
+        .btn-social i { font-size: 1rem; }
 
         .auth-divider {
           display: flex;
@@ -689,55 +679,50 @@ class IndustrialERPApp {
         .auth-divider span { padding: 0 10px; }
 
         .form-group { margin-bottom: 1rem; }
-        .form-group input, .form-group select { 
-          width: 100%; 
-          padding: 1rem 1.2rem; 
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.3); 
-          color: white;
-          border-radius: 9999px; 
-          font-size: 1rem; 
-          transition: all 0.3s ease;
+        .form-group input, .form-group select {
+          width: 100%;
+          padding: 0.625rem 0.875rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #f4f4f5;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          transition: border-color 0.15s;
         }
-        /* Make select have rounded look, but standard options styling */
-        .form-group select option { background: #1e293b; color: white; }
-        
-        .form-group input::placeholder { color: rgba(255, 255, 255, 0.6); }
-        .form-group input:focus, .form-group select:focus { 
-          outline: none; 
-          border-color: #60a5fa; 
-          box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3); 
+        .form-group select option { background: #18181b; color: #f4f4f5; }
+        .form-group input::placeholder { color: #52525b; }
+        .form-group input:focus, .form-group select:focus {
+          outline: none;
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
         }
 
-        .btn-primary { 
+        .btn-primary {
           width: 100%;
-          padding: 1rem 1.2rem; 
-          border: none; 
-          border-radius: 9999px; 
-          font-size: 1rem; 
-          font-weight: 600; 
-          cursor: pointer; 
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-          background: white; 
-          color: #1a1a1a; 
+          padding: 0.625rem 1rem;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s;
+          background: #2563eb;
+          color: white;
         }
-        .btn-primary:hover { 
-          background: #f1f5f9;
-          transform: scale(1.02);
-        }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .btn-primary:hover  { background: #1d4ed8; }
+        .btn-primary:active { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .auth-email-display {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 9999px;
-          padding: 0.5rem 1.2rem;
-          margin-bottom: 1.5rem;
-          font-size: 0.95rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          padding: 0.5rem 0.875rem;
+          margin-bottom: 1rem;
+          font-size: 0.875rem;
         }
         .back-btn {
           background: transparent;
@@ -773,7 +758,7 @@ class IndustrialERPApp {
             <i class="ph-bold ph-plus"></i> Create Passkey
           </button>
           
-          <button id="skip-passkey-btn" class="btn btn-block" style="background: transparent; color: #6b7280; border: 1px solid #d1d5db; padding: 1rem;">
+          <button id="skip-passkey-btn" class="btn btn-block" style="background: transparent; color: var(--text-secondary); border: 1px solid var(--border); padding: 0.625rem 1rem; border-radius: 8px; cursor: pointer;">
             Skip for now
           </button>
         </div>
@@ -3099,7 +3084,7 @@ class IndustrialERPApp {
     const app = document.getElementById('app');
     app.innerHTML = `
       <div style="padding: 2rem; text-align: center;">
-        <h1>⚠️ Initialization Error</h1>
+        <h1>Initialization Error</h1>
         <p style="color: #ef4444;">${error.message}</p>
         <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 1rem;">
           Retry
@@ -3348,7 +3333,7 @@ class IndustrialERPApp {
       const chartCashflow = document.getElementById('chart-cashflow');
       if (chartCashflow) {
         chartCashflow.innerHTML = `<div class="text-center p-3">
-            <p class="text-danger">⚠️ Chart Error</p>
+            <p class="text-danger">Chart unavailable</p>
             <small class="text-muted">${error.message}</small>
           </div>`;
       }
@@ -3464,7 +3449,7 @@ class IndustrialERPApp {
     const notifications = notificationService.getAll();
 
     if (notifications.length === 0) {
-      list.innerHTML = '<p class="empty-notifications">✅ All clear! No alerts.</p>';
+      list.innerHTML = '<p class="empty-notifications">No alerts.</p>';
       return;
     }
 

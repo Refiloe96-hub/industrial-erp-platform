@@ -37,8 +37,8 @@ class SalesUI {
             <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Sales, checkout, and receipt printing</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            <button id="sales-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
-              <i class="ph-duotone ph-robot"></i> AI Insights
+            <button id="sales-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
+              Insights
             </button>
           </div>
         </header>
@@ -160,9 +160,9 @@ class SalesUI {
     const sorted = [...items].sort((a, b) => (b.reorderLevel || 0) - (a.reorderLevel || 0));
 
     const openItemBtn = `
-      <button class="product-card open-item-btn" style="border-left: 4px solid #6366f1;">
+      <button class="product-card open-item-btn" style="border-left: 4px solid #2563eb;">
         <div class="prod-name" style="color: var(--text-primary);">Open Item</div>
-        <div class="prod-price" style="font-size: 1rem; color: #6366f1;">Enter Price</div>
+        <div class="prod-price" style="font-size: 1rem; color: #2563eb;">Enter Price</div>
         <div class="prod-stock">Custom Sale</div>
       </button>
     `;
@@ -174,7 +174,7 @@ class SalesUI {
         <input type="number" id="open-item-price" placeholder="Price (${this.currencySym})" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border, #334155); border-radius: 8px; margin-bottom: 1rem; font-size: 1.5rem; text-align: center; box-sizing: border-box; background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc);" step="0.01">
         <div style="display: flex; gap: 0.5rem;">
           <button id="cancel-open-item" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border, #334155); background: var(--bg-secondary, #0f172a); color: var(--text-primary, #f8fafc); border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Cancel</button>
-          <button id="add-open-item" style="flex: 1; padding: 0.75rem; border: none; background: #6366f1; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">Add</button>
+          <button id="add-open-item" style="flex: 1; padding: 0.75rem; border: none; background: #2563eb; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">Add</button>
         </div>
       </dialog>
     `;
@@ -222,7 +222,7 @@ class SalesUI {
       );
 
       showDetailPanel({
-        title: '📈 Sales AI Insights',
+        title: 'Sales Insights',
         subtitle: `Sales Momentum: ${result.score}/100`,
         bodyHTML: `
           <div class="dp-section">
@@ -238,7 +238,7 @@ class SalesUI {
             <div class="dp-section-title">AI Advisor</div>
             <ul class="dp-list" style="gap:0.75rem;">
               ${insights.map(ins => `
-                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#2563eb'}">
                   <span style="display:block; font-size:0.95rem;">${ins.text}</span>
                 </li>
               `).join('')}
@@ -631,7 +631,7 @@ class SalesUI {
       </tr>
     `).join('');
 
-    const payBadge = { cash: '#10b981', card: '#6366f1', mobile: '#f59e0b', mpesa: '#16a34a' }[paymentMethod] || '#6b7280';
+    const payBadge = { cash: '#10b981', card: '#2563eb', mobile: '#f59e0b', mpesa: '#16a34a' }[paymentMethod] || '#6b7280';
 
     const modal = document.createElement('dialog');
     modal.className = 'invoice-modal';
@@ -812,7 +812,7 @@ class SalesUI {
           align-items: center;
         }
         .badge.cash { background: #10b981; color: white; }
-        .badge.card { background: #6366f1; color: white; }
+        .badge.card { background: #2563eb; color: white; }
         .badge.mobile { background: #f59e0b; color: white; }
         .badge.mpesa { background: #16a34a; color: white; }
         .today-revenue { border-left: 4px solid #10b981; }

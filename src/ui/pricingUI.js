@@ -276,7 +276,7 @@ export default class PricingUI {
         </div>
         
         <div style="text-align: center; margin-top: 3rem; color: #6b7280;">
-            <p>Need a different business type? <a href="#" id="change-biz-type" style="color: #6366f1;">Contact Support</a> to switch vertical.</p>
+            <p>Need a different business type? <a href="#" id="change-biz-type" style="color: #2563eb;">Contact Support</a> to switch vertical.</p>
         </div>
       </div>
       ${this.renderSupportModal(businessType)}
@@ -344,13 +344,13 @@ export default class PricingUI {
         }
 
         .pricing-card.highlight {
-          background: linear-gradient(145deg, rgba(99, 102, 241, 0.05), rgba(0, 0, 0, 0.2));
+          background: linear-gradient(145deg, rgba(37, 99, 235, 0.05), rgba(0, 0, 0, 0.2));
           border: 1px solid var(--accent-primary);
-          box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+          box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
         }
 
         .pricing-card.highlight:hover {
-          box-shadow: 0 0 40px rgba(99, 102, 241, 0.25);
+          box-shadow: 0 0 40px rgba(37, 99, 235, 0.25);
         }
 
         .pricing-tag {

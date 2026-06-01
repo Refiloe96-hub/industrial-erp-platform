@@ -23,8 +23,8 @@ class SmartShiftUI {
             <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Production & Machine Management</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            <button id="ss-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
-              <i class="ph-duotone ph-robot"></i> AI Insights
+            <button id="ss-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
+              Insights
             </button>
           </div>
         </header>
@@ -76,7 +76,7 @@ class SmartShiftUI {
       const maxScore = 100;
 
       showDetailPanel({
-        title: '⚙️ SmartShift AI Insights',
+        title: 'SmartShift Insights',
         subtitle: `Production Score: ${result.score}/100`,
         bodyHTML: `
           <div class="dp-section">
@@ -93,7 +93,7 @@ class SmartShiftUI {
             <div class="dp-section-title">AI Advisor</div>
             <ul class="dp-list" style="gap:0.75rem;">
               ${insights.map(ins => `
-                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#6366f1'}">
+                <li style="background:var(--bg-secondary); padding:0.75rem; border-radius:8px; border-left:3px solid ${sevColors[ins.severity] || '#2563eb'}">
                   <span style="display:block; font-size:0.95rem;">${ins.text}</span>
                 </li>
               `).join('')}
@@ -175,7 +175,7 @@ class SmartShiftUI {
         const durationHours = o.estimatedDuration || Math.max(1, Math.floor(o.quantity / 50));
         const leftPercentage = (startHourDecimal / 24) * 100;
         const widthPercentage = (durationHours / 24) * 100;
-        const color = o.status === 'in_progress' ? '#3b82f6' : o.status === 'completed' ? '#10b981' : '#6366f1';
+        const color = o.status === 'in_progress' ? '#3b82f6' : o.status === 'completed' ? '#10b981' : '#2563eb';
 
         return `
                     <div class="order-block" title="${o.product} (${o.quantity} units)" style="
@@ -909,126 +909,54 @@ class SmartShiftUI {
     const style = document.createElement('style');
     style.id = 'smartshift-styles';
     style.textContent = `
-  /* Machine Card Styles */
-  .machine - card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop - filter: blur(16px);
-  -webkit - backdrop - filter: blur(16px);
-  border - radius: var(--radius - lg);
-  padding: 1.5rem;
-  box - shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border - color);
-  border - left: 4px solid var(--border - color);
-  transition: transform 0.2s, border - color 0.2s;
-}
+  .machine-card {
+    background: var(--bg-elevated, #232326);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    transition: border-color 0.15s;
+  }
+  .machine-card:hover { border-color: var(--border-strong); }
+  .machine-card.operational { border-left-color: #10b981; }
+  .machine-card.maintenance { border-left-color: #f59e0b; }
+  .machine-card.offline     { border-left-color: #ef4444; }
 
-        .machine - card:hover {
-  transform: translateY(-2px);
-  border - color: var(--accent - primary);
-}
+  .machine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
 
-        .machine - card.operational { border - left - color: #10a37f; }
-        .machine - card.maintenance { border - left - color: #f59e0b; }
-        .machine - card.offline { border - left - color: #ef4444; }
+  .insight-list { list-style: none; padding: 0; }
+  .insight-item {
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-item.warning    { border-left: 2px solid #f59e0b; padding-left: 0.75rem; }
+  .insight-item.efficiency { border-left: 2px solid #10b981; padding-left: 0.75rem; }
 
-        .machine - header {
-  display: flex;
-  justify - content: space - between;
-  align - items: center;
-  margin - bottom: 0.5rem;
-}
-
-        .progress - bar {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border - radius: 3px;
-  overflow: hidden;
-  margin: 0.5rem 0;
-}
-
-        .progress - bar.fill {
-  height: 100 %;
-  background: var(--accent - primary);
-}
-
-        /* Insight List */
-        .insight - list {
-  list - style: none;
-  padding: 0;
-}
-
-        .insight - item {
-  padding: 1rem;
-  border - bottom: 1px dashed var(--border - color);
-  display: flex;
-  flex - direction: column;
-  gap: 0.25rem;
-}
-
-        .insight - item: last - child {
-  border - bottom: none;
-}
-
-        .insight - item.warning { border - left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-        .insight - item.efficiency { border - left: 3px solid #10a37f; background: rgba(16, 163, 127, 0.05); }
-
-        /* Dialogs */
-        dialog {
-  background: var(--bg - primary);
-  backdrop - filter: blur(16px);
-  -webkit - backdrop - filter: blur(16px);
-  color: var(--text - primary);
-  border: 1px solid var(--border - color);
-  border - radius: var(--radius - lg);
-  padding: 2.5rem;
-  max - width: 500px;
-  width: 90 %;
-  box - shadow: var(--shadow - lg);
-}
-
-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-        dialog input, dialog select {
-  width: 100 %;
-  padding: 0.75rem;
-  border: 1px solid var(--border - color);
-  border - radius: var(--radius - md);
-  margin - bottom: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text - primary);
-}
-
-        dialog h3 {
-  margin - top: 0;
-  margin - bottom: 1.5rem;
-  font - size: 1.5rem;
-}
-
-        /* Tables */
-        .smart - shift - layout table {
-  background: transparent!important;
-  width: 100 %;
-  border - collapse: collapse;
-}
-
-        .smart - shift - layout tr {
-  background: transparent;
-  color: var(--text - primary);
-  border - bottom: 1px solid var(--border - color);
-}
-
-        .smart - shift - layout tr:hover {
-  background: rgba(255, 255, 255, 0.02)!important;
-}
-
-        .smart - shift - layout td,
-        .smart - shift - layout th {
-  padding: 1rem;
-  text - align: left;
-  border - color: var(--border - color);
-}
+  .smart-shift-layout table {
+    background: transparent !important;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .smart-shift-layout tr {
+    background: transparent;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+  }
+  .smart-shift-layout tr:hover { background: var(--bg-hover) !important; }
+  .smart-shift-layout td,
+  .smart-shift-layout th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+  }
 `;
     document.head.appendChild(style);
   }

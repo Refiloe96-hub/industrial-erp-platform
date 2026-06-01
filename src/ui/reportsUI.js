@@ -1053,7 +1053,7 @@ class ReportsUI {
         }
 
         .stat-card.profit.positive {
-          border-left: 4px solid #6366f1;
+          border-left: 4px solid #2563eb;
         }
 
         .stat-card.profit.negative {

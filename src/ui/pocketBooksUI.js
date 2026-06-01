@@ -30,8 +30,8 @@ class PocketBooksUI {
                             <p>Financial Ledger & Cash Flow Management</p>
                         </div>
                         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-                            <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #6366f1;color:#6366f1">
-                                <i class="ph-duotone ph-robot"></i> AI Insights
+                            <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
+                                Insights
                             </button>
                             <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
                         </div>
@@ -502,7 +502,7 @@ class PocketBooksUI {
             const maxFc = Math.max(...result.forecast, 1);
             const fcBars = result.forecast.slice(0, 14).map((v, i) => {
                 const h = Math.round((v / maxFc) * 40);
-                return `<rect x="${i * 14 + 2}" y="${44 - h}" width="11" height="${h}" rx="2" fill="#6366f1" opacity="0.7"/>`;
+                return `<rect x="${i * 14 + 2}" y="${44 - h}" width="11" height="${h}" rx="2" fill="#2563eb" opacity="0.7"/>`;
             }).join('');
             const fcSvg = `<svg width="210" height="46" viewBox="0 0 210 46" style="display:block;margin:0.5rem 0">${fcBars}</svg>`;
 
@@ -514,7 +514,7 @@ class PocketBooksUI {
             );
 
             showDetailPanel({
-                title: '💰 PocketBooks AI Insights',
+                title: 'PocketBooks Insights',
                 subtitle: `Financial score: ${result.score}/100 — ${result.trend} trend`,
                 bodyHTML: `
                     <div class="dp-section">
@@ -534,7 +534,7 @@ class PocketBooksUI {
                     </div>
                     <div class="dp-section">
                         <div class="dp-section-title">AI Insights</div>
-                        ${insights.map(ins => `<div style="padding:0.5rem 0.75rem;border-radius:8px;background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#6366f1'};margin-bottom:0.5rem;font-size:0.875rem;">${ins.text}</div>`).join('')}
+                        ${insights.map(ins => `<div style="padding:0.5rem 0.75rem;border-radius:8px;background:var(--bg-secondary);border-left:3px solid ${sevColors[ins.severity] || '#2563eb'};margin-bottom:0.5rem;font-size:0.875rem;">${ins.text}</div>`).join('')}
                     </div>
                 `
             });
