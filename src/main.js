@@ -318,22 +318,7 @@ class IndustrialERPApp {
         console.log('✅ Service Worker registered');
       }
 
-      // Add Seed Data Button (Dev Tool)
-      const nav = document.querySelector('nav');
-      if (nav) {
-        const seedBtn = document.createElement('button');
-        seedBtn.className = 'btn btn-outline-light mt-4 w-100';
-        seedBtn.innerHTML = '<i class="ph-duotone ph-plant"></i> Seed Data';
-        seedBtn.style.marginTop = 'auto'; // Push to bottom
-        seedBtn.onclick = () => SeedData.init();
-        nav.appendChild(seedBtn);
-
-        const wizardBtn = document.createElement('button');
-        wizardBtn.className = 'btn btn-outline-light mt-2 w-100';
-        wizardBtn.innerHTML = '<i class="ph-duotone ph-hand-waving"></i> Test Onboarding';
-        wizardBtn.onclick = () => WelcomeWizardUI.show(() => console.log('Wizard test complete'));
-        nav.appendChild(wizardBtn);
-      }
+      // Seed data and onboarding test are accessible from Settings → Data & Storage
 
       this.isInitialized = true;
       console.log('✅ Industrial ERP Platform ready');
@@ -1264,38 +1249,30 @@ class IndustrialERPApp {
         <!-- Quick Stats: 2-column sub-grid on mobile -->
         <div class="dashboard-stats-row">
           <div class="card stat-card" data-card="cashflow" style="cursor:pointer" title="Click for details">
-            <div class="stat-icon"><i class="ph-duotone ph-wallet"></i></div>
             <div class="stat-content">
               <p class="stat-label">Cash Flow</p>
-              <h3 id="stat-cash-flow" class="stat-value">Loading...</h3>
-              <p class="stat-change positive"><i class="ph-bold ph-arrow-up"></i> Track via PocketBooks</p>
+              <h3 id="stat-cash-flow" class="stat-value">—</h3>
             </div>
           </div>
-          
+
           <div class="card stat-card" data-card="inventory" style="cursor:pointer" title="Click for details">
-            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
             <div class="stat-content">
-              <p class="stat-label">Inventory Health</p>
-              <h3 id="stat-inventory" class="stat-value">Loading...</h3>
-              <p class="stat-change"><i class="ph-bold ph-arrow-up-right"></i> View in PoolStock</p>
+              <p class="stat-label">Inventory</p>
+              <h3 id="stat-inventory" class="stat-value">—</h3>
             </div>
           </div>
-          
+
           <div class="card stat-card" data-card="machines" style="cursor:pointer" title="Click for details">
-            <div class="stat-icon"><i class="ph-duotone ph-gear"></i></div>
             <div class="stat-content">
               <p class="stat-label">Machine Utilization</p>
-              <h3 id="stat-machine-util" class="stat-value">Loading...</h3>
-              <p class="stat-change"><i class="ph-bold ph-arrow-right"></i> Optimize in SmartShift</p>
+              <h3 id="stat-machine-util" class="stat-value">—</h3>
             </div>
           </div>
-          
+
           <div class="card stat-card" data-card="syndicates" style="cursor:pointer" title="Click for details">
-            <div class="stat-icon"><i class="ph-duotone ph-users-three"></i></div>
             <div class="stat-content">
-              <p class="stat-label">Syndicate Status</p>
-              <h3 id="stat-syndicates" class="stat-value">Loading...</h3>
-              <p class="stat-change"><i class="ph-bold ph-check"></i> Active in TrustCircle</p>
+              <p class="stat-label">Syndicates</p>
+              <h3 id="stat-syndicates" class="stat-value">—</h3>
             </div>
           </div>
         </div>
@@ -1876,6 +1853,13 @@ class IndustrialERPApp {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
           gap: 1rem;
+        }
+
+        .dashboard-stats-row {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+          grid-column: 1 / -1;
         }
         
         .card {

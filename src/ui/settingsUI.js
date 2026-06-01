@@ -81,18 +81,18 @@ class SettingsUI {
             <div class="pane-body">
               <div class="form-group">
                 <label>Business Logo</label>
-                <div style="display:flex; align-items:center; gap: 1rem;">
-                  <div id="logo-preview" style="width: 60px; height: 60px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed rgba(255,255,255,0.2);">
-                    ${this.settings.businessLogo ? `<img src="${this.settings.businessLogo}" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<i class="ph-duotone ph-image" style="font-size: 1.5rem; color: #64748b;"></i>'}
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div id="logo-preview" style="width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+                    ${this.settings.businessLogo ? `<img src="${this.settings.businessLogo}" style="max-width:100%;max-height:100%;object-fit:contain;">` : '<i class="ph-duotone ph-image" style="font-size:1.25rem;color:var(--text-muted);"></i>'}
                   </div>
-                  <input type="file" id="set-logo" accept="image/*" class="btn btn-outline-secondary" style="padding: 0.5rem;">
+                  <input type="file" id="set-logo" accept="image/*" style="font-size:0.8125rem;color:var(--text-secondary);">
                 </div>
-                <small class="text-muted">Displays in the sidebar and on printed receipts. Maximum 1MB.</small>
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown in the sidebar and on receipts. Max 1MB.</small>
               </div>
               <div class="form-group">
                 <label>Business Name</label>
                 <input type="text" id="set-name" value="${this.settings.businessName}" placeholder="My Shop">
-                <small class="text-muted">This appears on your receipts and financial documents.</small>
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown on receipts and financial documents.</small>
               </div>
               <div class="form-group">
                 <label>Default Currency</label>
@@ -103,7 +103,7 @@ class SettingsUI {
                    <option value="USD" ${this.settings.currency === 'USD' ? 'selected' : ''}>US Dollar (USD)</option>
                    <option value="EUR" ${this.settings.currency === 'EUR' ? 'selected' : ''}>Euro (EUR)</option>
                 </select>
-                <small class="text-muted">Sets the primary symbol used across dashboards (R, KSh, ₦, $, €).</small>
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Sets the currency symbol across dashboards and receipts.</small>
               </div>
               <div class="pane-actions">
                 <button class="btn btn-primary" id="save-settings-business">Save Changes</button>
@@ -121,7 +121,7 @@ class SettingsUI {
               <div class="form-group">
                 <label>VAT / Tax Rate (%)</label>
                 <input type="number" id="set-tax" value="${this.settings.taxRate}" min="0" max="100">
-                <small class="text-muted">This rate is used to extract VAT automatically at the Point of Sale.</small>
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Applied automatically at the Point of Sale to calculate VAT.</small>
               </div>
               <div class="pane-actions">
                 <button class="btn btn-primary" id="save-settings-finance">Save Changes</button>
@@ -136,7 +136,7 @@ class SettingsUI {
               <p>Manage staff access and roles for your business.</p>
             </div>
             <div class="pane-body">
-              <button class="btn btn-outline-primary mb-4" id="btn-add-team-member" style="width:auto;">
+              <button class="btn btn-secondary" id="btn-add-team-member" style="margin-bottom:1rem;">
                 <i class="ph-bold ph-user-plus"></i> Add Team Member
               </button>
               <div id="team-list" class="slim-list">
@@ -152,24 +152,43 @@ class SettingsUI {
               <p>Back up your database, restore from a file, or import templates.</p>
             </div>
             <div class="pane-body">
-              <div class="data-actions">
-                <button class="btn btn-secondary w-100 mb-3" id="btn-backup">
-                  <i class="ph-bold ph-download-simple"></i> Download Backup (JSON)
-                </button>
-                <button class="btn btn-outline-danger w-100 mb-4" id="btn-restore">
-                  <i class="ph-bold ph-upload-simple"></i> Restore Backup
-                </button>
-                <input type="file" id="file-restore" style="display: none" accept=".json">
-              </div>
-              
-              <div class="settings-section-divider"></div>
-              
               <div class="form-group">
-                <label>System Import Wizard</label>
-                <p class="text-sm text-muted mb-3">Initialize your workspace with industry-specific inventory templates.</p>
-                <button class="btn btn-primary w-100" id="btn-import-wizard">
-                  <i class="ph-bold ph-magic-wand"></i> Open Import Wizard
+                <label>Backup & Restore</label>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                  <button class="btn btn-secondary" id="btn-backup" style="justify-content:flex-start;">
+                    <i class="ph-bold ph-download-simple"></i> Download Backup (JSON)
+                  </button>
+                  <button class="btn btn-secondary" id="btn-restore" style="justify-content:flex-start;color:var(--danger);border-color:rgba(239,68,68,0.3);">
+                    <i class="ph-bold ph-upload-simple"></i> Restore from Backup
+                  </button>
+                  <input type="file" id="file-restore" style="display:none;" accept=".json">
+                </div>
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;display:block;">Restore will overwrite all current data.</small>
+              </div>
+
+              <div class="settings-section-divider"></div>
+
+              <div class="form-group">
+                <label>Import Wizard</label>
+                <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0 0 0.75rem;">Load your workspace with industry-specific inventory templates.</p>
+                <button class="btn btn-secondary" id="btn-import-wizard" style="justify-content:flex-start;">
+                  Open Import Wizard
                 </button>
+              </div>
+
+              <div class="settings-section-divider"></div>
+
+              <div class="form-group">
+                <label>Developer Tools</label>
+                <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0 0 0.75rem;">Populate your workspace with realistic sample data for testing.</p>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                  <button class="btn btn-secondary" id="btn-seed-data" style="justify-content:flex-start;">
+                    Load Sample Data
+                  </button>
+                  <button class="btn btn-secondary" id="btn-test-onboarding" style="justify-content:flex-start;">
+                    Preview Onboarding
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -554,6 +573,28 @@ class SettingsUI {
     // Close Modal
     closeWizard?.addEventListener('click', () => {
       wizardModal.style.display = 'none';
+    });
+
+    // Developer tools — seed data and onboarding test
+    container.querySelector('#btn-seed-data')?.addEventListener('click', async () => {
+      const btn = container.querySelector('#btn-seed-data');
+      const orig = btn.textContent;
+      btn.textContent = 'Loading...';
+      btn.disabled = true;
+      try {
+        const { default: SeedData } = await import('../utils/seedData.js');
+        await SeedData.init();
+        btn.textContent = 'Done';
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+      } catch (err) {
+        btn.textContent = orig;
+        btn.disabled = false;
+        alert('Seed failed: ' + err.message);
+      }
+    });
+    container.querySelector('#btn-test-onboarding')?.addEventListener('click', async () => {
+      const { default: WelcomeWizardUI } = await import('./welcomeWizardUI.js');
+      WelcomeWizardUI.show(() => {});
     });
 
     // Template Download
@@ -958,9 +999,24 @@ class SettingsUI {
         .x-modal-header h3 { margin: 0; font-weight: 800; font-size: 1.25rem; }
         .x-modal-body { padding: 0 1.5rem 1.5rem; }
 
+        /* Utility classes used in pane content */
+        .w-100   { width: 100%; }
+        .mt-2    { margin-top: 0.5rem; }
+        .mt-4    { margin-top: 1rem; }
+        .mb-2    { margin-bottom: 0.5rem; }
+        .mb-3    { margin-bottom: 0.75rem; }
+        .mb-4    { margin-bottom: 1rem; }
+        .text-xs   { font-size: 0.75rem; color: var(--text-muted); }
+        .text-sm   { font-size: 0.8125rem; }
+        .text-muted { color: var(--text-muted); }
+        .text-accent { color: var(--accent); }
+        .underline { text-decoration: underline; }
+        .block     { display: block; }
+        .font-bold { font-weight: 700; }
+
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(5px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 768px) {
