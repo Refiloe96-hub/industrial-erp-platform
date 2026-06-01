@@ -201,10 +201,7 @@ class CustomersUI {
             border: 1px solid var(--border-color);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .customer-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
+        .customer-card:hover { border-color: var(--border-strong); }
         .card-header {
             display: flex;
             justify-content: space-between;

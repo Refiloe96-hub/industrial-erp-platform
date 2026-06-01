@@ -177,14 +177,11 @@ class PocketWalletUI {
         style.id = 'pocketwallet-styles';
         style.textContent = `
         .wallet-card {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: var(--bg-elevated, #232326);
             color: var(--text-primary);
-            padding: 2.5rem;
+            padding: 1.75rem;
             border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -195,39 +192,38 @@ class PocketWalletUI {
         .balance-section .wallet-id { font-family: monospace; background: rgba(255,255,255,0.05); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); display: inline-block; color: var(--text-secondary); border: 1px solid var(--border-color); }
 
         .actions { display: flex; gap: 1rem; }
-        .btn-light { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); backdrop-filter: blur(8px); }
-        .btn-light:hover { background: rgba(16, 185, 129, 0.2); }
-        .btn-outline-light { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); backdrop-filter: blur(8px); }
-        .btn-outline-light:hover { border-color: var(--text-primary); }
+        .btn-light { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+        .btn-light:hover { background: rgba(16,185,129,0.18); }
+        .btn-outline-light { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+        .btn-outline-light:hover { border-color: var(--border-strong); }
 
-        .tx-list { background: transparent; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
-        .tx-item { display: flex; align-items: center; padding: 1.25rem; border-bottom: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .tx-list { background: var(--bg-primary); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+        .tx-item { display: flex; align-items: center; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); background: transparent; }
+        .tx-item:hover { background: var(--bg-hover); }
         .tx-item:last-child { border-bottom: none; }
         .tx-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 1.25rem; }
-        .tx-icon.credit { background: rgba(16, 185, 129, 0.1); color: #10a37f; }
+        .tx-icon.credit { background: rgba(16, 185, 129, 0.1); color: #10b981; }
         .tx-icon.debit { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
         .tx-details { flex: 1; }
         .tx-desc { display: block; font-weight: 500; color: var(--text-primary); }
         .tx-date { font-size: 0.8rem; color: var(--text-secondary); }
         .tx-amount { font-weight: 600; font-size: 1.1rem; }
-        .tx-amount.credit { color: #10a37f; }
+        .tx-amount.credit { color: #10b981; }
         .tx-amount.debit { color: #ef4444; }
 
         /* Dialog overrides */
         .form-container {
             max-width: 500px;
             margin: 0 auto;
-            background: var(--bg-primary, rgba(15, 23, 42, 0.95));
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            background: var(--bg-primary);
             border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
+            padding: 1.75rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--modal-shadow);
         }
         .form-container h2 { margin-top: 0; margin-bottom: 2rem; color: var(--text-primary); }
         .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500; }
-        .form-group input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.05); color: var(--text-primary); margin-bottom: 1.25rem; }
+        .form-group input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(255,255,255,0.04); color: var(--text-primary); margin-bottom: 1rem; font-size: 0.875rem; }
         .form-group small { color: var(--text-secondary); }
       `;
         document.head.appendChild(style);

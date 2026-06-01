@@ -1366,6 +1366,12 @@ class IndustrialERPApp {
 
           --card-shadow:  0 1px 3px rgba(0,0,0,0.4);
           --modal-shadow: 0 24px 48px rgba(0,0,0,0.6);
+
+          --radius-sm: 6px;
+          --radius-md: 8px;
+          --radius-lg: 10px;
+          --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+          --shadow-lg:  0 24px 48px rgba(0,0,0,0.6);
         }
 
         /* Global dark dialog override - browser renders dialog with white Canvas background by default */

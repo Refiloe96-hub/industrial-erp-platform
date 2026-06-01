@@ -68,14 +68,11 @@ class TrustCircleUI {
 
             /* Custom Sections */
             .pool-visualizer, .members-section, .ai-insights, .group-buys-section, .funding-section {
-                background: rgba(255, 255, 255, 0.03);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
+                background: var(--bg-primary);
                 border-radius: var(--radius-lg);
-                padding: 1.5rem;
-                border: 1px solid var(--border-color);
-                box-shadow: var(--shadow-md);
-                margin-bottom: 1.5rem;
+                padding: 1.25rem;
+                border: 1px solid var(--border);
+                margin-bottom: 1.25rem;
             }
 
             .pool-visualizer { text-align: center; }
@@ -104,7 +101,7 @@ class TrustCircleUI {
             }
             .insight-card.warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
             .insight-card.danger { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
-            .insight-card.success { border-left-color: #10a37f; background: rgba(16, 163, 127, 0.05); }
+            .insight-card.success { border-left-color: #10b981; background: rgba(16, 163, 127, 0.05); }
             .insight-card.info { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
             .insight-card p { margin: 0 0 0.25rem 0; font-weight: 500; font-size: 0.95rem; }
             .insight-card small { color: var(--text-secondary); }
@@ -113,14 +110,12 @@ class TrustCircleUI {
             .tc-modal {
                 max-width: 600px;
                 width: 95%;
-                padding: 2.5rem;
+                padding: 2rem;
                 border-radius: var(--radius-lg);
-                background: var(--bg-primary, rgba(15, 23, 42, 0.95));
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
+                background: var(--bg-primary);
                 color: var(--text-primary);
-                border: 1px solid var(--border-color);
-                box-shadow: var(--shadow-lg);
+                border: 1px solid var(--border);
+                box-shadow: var(--modal-shadow);
             }
             
             .tc-modal::backdrop, dialog::backdrop {
@@ -150,13 +145,14 @@ class TrustCircleUI {
 
             .form-group input, .form-group select, .form-group textarea, dialog input, dialog select {
                 width: 100%;
-                padding: 0.75rem 1rem;
-                border: 1px solid var(--border-color);
+                padding: 0.5rem 0.75rem;
+                border: 1px solid var(--border);
                 border-radius: var(--radius-md);
-                background: rgba(255, 255, 255, 0.05);
+                background: rgba(255,255,255,0.04);
                 color: var(--text-primary);
                 font-family: inherit;
-                margin-bottom: 1.25rem;
+                margin-bottom: 1rem;
+                font-size: 0.875rem;
             }
             
             .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -168,12 +164,10 @@ class TrustCircleUI {
             .form-container {
                 max-width: 600px;
                 margin: 0 auto;
-                background: rgba(255,255,255,0.03);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
+                background: var(--bg-primary);
                 border-radius: var(--radius-lg);
-                padding: 2rem;
-                border: 1px solid var(--border-color);
+                padding: 1.5rem;
+                border: 1px solid var(--border);
             }
             .form-container h2 {
                 margin-top: 0;
@@ -239,30 +233,26 @@ class TrustCircleUI {
             margin-bottom: 2rem;
         }
         .trustcircle-dashboard .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s, border-color 0.2s;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: 1.125rem 1.25rem;
+            border: 1px solid var(--border);
+            transition: border-color 0.15s;
         }
-        .trustcircle-dashboard .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent-primary);
-        }
+        .trustcircle-dashboard .stat-card:hover { border-color: var(--border-strong); }
         .trustcircle-dashboard .stat-card h3 {
-            margin: 0;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+            margin: 0 0 0.375rem;
+            font-size: 0.6875rem;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
         }
         .trustcircle-dashboard .stat-card .value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
+            letter-spacing: -0.02em;
             color: var(--text-primary);
-            margin-top: 0.5rem;
         }
         .syndicates-list {
             display: grid;
@@ -270,20 +260,14 @@ class TrustCircleUI {
             gap: 1.5rem;
         }
         .syndicate-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
             overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: border-color 0.15s;
             cursor: pointer;
         }
-        .syndicate-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-primary);
-        }
+        .syndicate-card:hover { border-color: var(--border-strong); }
         .syndicate-card .card-header {
             padding: 1.25rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
@@ -333,7 +317,7 @@ class TrustCircleUI {
         </header>
 
         <div class="stats-overview">
-          <div class="stat-card" data-card="trust_score" style="cursor:pointer; border-left: 4px solid ${trustProfile.color}; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(${parseInt(trustProfile.color.slice(1, 3), 16)}, ${parseInt(trustProfile.color.slice(3, 5), 16)}, ${parseInt(trustProfile.color.slice(5, 7), 16)}, 0.05) 100%);" title="Click for details">
+          <div class="stat-card" data-card="trust_score" style="cursor:pointer;" title="Click for details">
             <h3 style="color:${trustProfile.color}; font-weight:700;"><i class="ph-duotone ph-shield-check"></i> FinTech Trust Score</h3>
             <div class="value" style="display:flex; align-items:baseline; gap:0.5rem;">
                 ${trustProfile.score} <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:500;">/ 1000</span>

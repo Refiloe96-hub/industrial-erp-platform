@@ -280,7 +280,7 @@ class PoolStockUI {
 
         const overlay = document.createElement('div');
         overlay.className = 'item-detail-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1200;backdrop-filter:blur(8px);';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1200;';
 
         const panel = document.createElement('div');
         panel.className = 'item-detail-panel';
@@ -761,7 +761,7 @@ class PoolStockUI {
                             <p style="color:var(--text-secondary);margin-top:1rem">No inventory data yet. Add items and record stock movements to see forecasts.</p>
                         </div>` : `
 
-                    <div class="card" style="margin-bottom:1rem;border-left:4px solid #2563eb">
+                    <div class="card" style="margin-bottom:1rem;">
                         <div class="card-header"><h3>📊 Urgency Ranking — ${result.urgencyList.length} SKUs</h3>
                             <span style="font-size:0.8rem;color:var(--text-secondary)">Score: <strong style="color:${result.score >= 70 ? '#10b981' : result.score >= 40 ? '#f59e0b' : '#ef4444'}">${result.score}/100</strong></span>
                         </div>
@@ -773,7 +773,7 @@ class PoolStockUI {
                         </div>
                     </div>
 
-                    <div class="card" id="forecast-insights-card" style="border-left:4px solid #2563eb">
+                    <div class="card" id="forecast-insights-card">
                         <div class="card-header"><h3>Inventory Insights</h3></div>
                         <div class="card-body" id="forecast-insights">
                             <div style="color:var(--text-secondary);font-size:0.875rem;display:flex;align-items:center;gap:0.4rem">
@@ -1424,27 +1424,21 @@ class PoolStockUI {
             }
 
             /* Stats */
-            /* Stats */
             .stat-card {
-                background: rgba(255, 255, 255, 0.03);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                border-radius: var(--radius-lg);
-                padding: 1.5rem;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-                border: 1px solid var(--border-color);
-                border-left: 4px solid var(--border-color);
-                transition: transform 0.2s, border-color 0.2s;
+                background: var(--bg-primary);
+                border-radius: var(--radius-md);
+                padding: 1rem 1.25rem;
+                display: block;
+                border: 1px solid var(--border);
+                border-left: 3px solid var(--border);
+                transition: border-color 0.15s;
             }
-            .stat-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+            .stat-card:hover { border-color: var(--border-strong); }
 
             .stat-card.primary { border-left-color: #2563eb; }
             .stat-card.warning { border-left-color: #f59e0b; }
-            .stat-card.danger { border-left-color: #ef4444; }
-            .stat-card.success { border-left-color: #10a37f; }
+            .stat-card.danger  { border-left-color: #ef4444; }
+            .stat-card.success { border-left-color: #10b981; }
 
             .stat-content {
                 display: flex;
@@ -1464,7 +1458,7 @@ class PoolStockUI {
 
             .stat-card.warning .stat-value { color: #f59e0b; }
             .stat-card.danger .stat-value { color: #ef4444; }
-            .stat-card.success .stat-value { color: #10a37f; }
+            .stat-card.success .stat-value { color: #10b981; }
             
             .stat-icon {
                 font-size: 2.5rem;
@@ -1638,14 +1632,12 @@ class PoolStockUI {
             .po-modal {
                 max-width: 680px;
                 width: 95%;
-                padding: 2.5rem;
+                padding: 1.75rem;
                 border-radius: var(--radius-lg);
-                background: var(--bg-primary, rgba(15, 23, 42, 0.95));
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
+                background: var(--bg-primary);
                 color: var(--text-primary);
-                border: 1px solid var(--border-color);
-                box-shadow: var(--shadow-lg);
+                border: 1px solid var(--border);
+                box-shadow: var(--modal-shadow);
             }
             .po-modal::backdrop {
                 background: rgba(0,0,0,0.7);
