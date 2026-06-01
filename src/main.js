@@ -1191,10 +1191,31 @@ class IndustrialERPApp {
             ${navItems}
           </ul>
           
-           <div class="sidebar-footer">
-            <button id="upgrade-btn" class="btn btn-primary btn-sm" style="width:100%;margin-bottom:0.5rem;">Upgrade Plan</button>
-            <button id="install-btn" class="btn btn-secondary btn-sm" style="display:none;width:100%;">Install App</button>
-            <button id="logout-btn" class="btn btn-secondary btn-sm" style="width:100%;">Log out</button>
+          <div class="sidebar-footer" style="position:relative;">
+            <!-- User dropdown (opens upward) -->
+            <div id="user-dropdown" class="user-dropdown" aria-hidden="true">
+              <div class="ud-header">
+                <span class="ud-hname">${esc(this.currentUser.businessName)}</span>
+                <span class="ud-hemail">${esc(this.currentUser.email || '')}</span>
+              </div>
+              <div class="ud-section">
+                <button class="ud-item" id="settings-nav-btn"><i class="ph ph-gear-six"></i> Settings</button>
+                <button class="ud-item" id="upgrade-btn"><i class="ph ph-arrow-circle-up"></i> Upgrade Plan</button>
+                <button class="ud-item" id="install-btn" style="display:none;"><i class="ph ph-device-mobile"></i> Install App</button>
+              </div>
+              <div class="ud-section ud-section--danger">
+                <button class="ud-item ud-item--danger" id="logout-btn"><i class="ph ph-sign-out"></i> Log out</button>
+              </div>
+            </div>
+            <!-- Trigger -->
+            <button id="user-menu-btn" class="user-profile-trigger" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
+              <div class="user-avatar">${esc(this.currentUser.businessName.charAt(0).toUpperCase())}</div>
+              <div class="user-meta">
+                <span class="user-meta-name">${esc(this.currentUser.businessName)}</span>
+                <span class="user-meta-email">${esc(this.currentUser.email || '')}</span>
+              </div>
+              <i class="ph ph-dots-three user-menu-dots"></i>
+            </button>
           </div>
         </nav>
         
@@ -1501,15 +1522,149 @@ class IndustrialERPApp {
 
         /* Footer always pinned to the bottom of the sidebar */
         .sidebar-footer {
-          margin-top: auto;
           flex-shrink: 0;
           position: sticky;
           bottom: 0;
           background: var(--bg-sidebar);
-          padding: 1rem;
-          border-top: 1px solid rgba(255,255,255,0.08);
+          padding: 0.5rem;
+          border-top: 1px solid var(--border);
           z-index: 2;
         }
+
+        /* ── User profile trigger ── */
+        .user-profile-trigger {
+          display: flex;
+          align-items: center;
+          gap: 0.625rem;
+          width: 100%;
+          padding: 0.5rem 0.625rem;
+          background: none;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          text-align: left;
+          transition: background 0.15s;
+          color: var(--text-primary);
+          min-width: 0;
+        }
+        .user-profile-trigger:hover { background: var(--bg-hover); }
+
+        .user-avatar {
+          width: 28px; height: 28px;
+          border-radius: 50%;
+          background: rgba(37,99,235,0.18);
+          border: 1px solid rgba(37,99,235,0.25);
+          color: #93c5fd;
+          font-size: 0.6875rem;
+          font-weight: 700;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          text-transform: uppercase;
+        }
+
+        .user-meta {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+        }
+        .user-meta-name {
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+        }
+        .user-meta-email {
+          font-size: 0.6875rem;
+          color: var(--text-muted);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+        }
+        .user-menu-dots {
+          color: var(--text-muted);
+          flex-shrink: 0;
+          font-size: 1.1rem;
+        }
+
+        /* ── User dropdown ── */
+        .user-dropdown {
+          position: absolute;
+          bottom: calc(100% + 6px);
+          left: 0.375rem;
+          right: 0.375rem;
+          background: var(--bg-elevated, #232326);
+          border: 1px solid var(--border-strong, rgba(255,255,255,0.14));
+          border-radius: 10px;
+          box-shadow: 0 -8px 24px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+          overflow: hidden;
+          z-index: 300;
+          display: none;
+          animation: udFadeIn 0.12s ease;
+        }
+        @keyframes udFadeIn {
+          from { opacity:0; transform:translateY(6px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+        .user-dropdown.open { display: block; }
+
+        .ud-header {
+          padding: 0.875rem 1rem 0.75rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .ud-hname {
+          display: block;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          line-height: 1.3;
+        }
+        .ud-hemail {
+          display: block;
+          font-size: 0.6875rem;
+          color: var(--text-muted);
+          margin-top: 0.125rem;
+          word-break: break-all;
+        }
+        .ud-section {
+          padding: 0.3rem;
+        }
+        .ud-section--danger {
+          border-top: 1px solid var(--border);
+          padding: 0.3rem;
+        }
+        .ud-item {
+          display: flex;
+          align-items: center;
+          gap: 0.625rem;
+          width: 100%;
+          padding: 0.5rem 0.75rem;
+          background: none;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.8125rem;
+          color: var(--text-primary);
+          text-align: left;
+          transition: background 0.1s;
+          font-family: inherit;
+        }
+        .ud-item:hover { background: var(--bg-hover); }
+        .ud-item i { color: var(--text-muted); font-size: 0.9375rem; flex-shrink: 0; }
+        .ud-item--danger { color: var(--danger, #ef4444); }
+        .ud-item--danger i { color: var(--danger, #ef4444); }
+        .ud-item--danger:hover { background: rgba(239,68,68,0.08); }
+
+        /* Collapsed sidebar: hide meta, center avatar */
+        .sidebar.collapsed .user-meta,
+        .sidebar.collapsed .user-menu-dots { display: none; }
+        .sidebar.collapsed .user-profile-trigger { justify-content: center; padding: 0.5rem; }
+        .sidebar.collapsed .user-dropdown { left: 100%; bottom: 0; top: auto; margin-left: 4px; width: 220px; }
 
         .sidebar.collapsed {
             width: 4.375rem; /* 70px -> rem */
@@ -1524,29 +1679,7 @@ class IndustrialERPApp {
             display: none;
         }
         
-        /* Show footer buttons as icon-only when collapsed */
-        .sidebar.collapsed #upgrade-btn,
-        .sidebar.collapsed #logout-btn,
-        .sidebar.collapsed #install-btn,
-        .sidebar.collapsed #seed-data-btn {
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-size: 0;
-        }
-        
-        .sidebar.collapsed #upgrade-btn i,
-        .sidebar.collapsed #logout-btn i,
-        .sidebar.collapsed #install-btn i,
-        .sidebar.collapsed #seed-data-btn i {
-            font-size: 1.25rem;
-            margin: 0;
-        }
+        /* Collapsed footer handled by .user-profile-trigger rules above */
 
         /* Ensure header layout adapts */
         .sidebar.collapsed .sidebar-header div {
@@ -2775,8 +2908,30 @@ class IndustrialERPApp {
       if (item) this.navigateTo(item.dataset.module);
     });
 
+    // User menu dropdown toggle
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    userMenuBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = userDropdown?.classList.toggle('open');
+      userMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#user-menu-btn') && !e.target.closest('#user-dropdown')) {
+        userDropdown?.classList.remove('open');
+        userMenuBtn?.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Settings from dropdown
+    document.getElementById('settings-nav-btn')?.addEventListener('click', () => {
+      userDropdown?.classList.remove('open');
+      this.navigateTo('settings');
+    });
+
     // Upgrade Button
     document.getElementById('upgrade-btn')?.addEventListener('click', () => {
+      userDropdown?.classList.remove('open');
       this.navigateTo('pricing');
     });
 

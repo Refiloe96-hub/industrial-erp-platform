@@ -744,84 +744,80 @@ class SettingsUI {
           display: flex;
           height: calc(100vh - 60px);
           width: 100%;
-          max-width: 1200px;
+          max-width: 1100px;
           margin: 0 auto;
           background: var(--bg-secondary);
           color: var(--text-primary);
-          overflow-x: hidden !important;
+          overflow-x: hidden;
           overflow-y: hidden;
           position: relative;
         }
 
-        /* --- NAV COLUMN (Master) --- */
+        /* --- NAV COLUMN --- */
         .settings-nav {
-          width: 320px;
+          width: 200px;
           flex-shrink: 0;
-          border-right: 1px solid var(--border-color);
+          border-right: 1px solid var(--border);
           overflow-y: auto;
           background: var(--bg-secondary);
           height: 100%;
+          padding: 0.5rem 0;
         }
-        
+
         .nav-header {
-          padding: 1rem 1.5rem;
+          padding: 0.75rem 1rem 0.5rem;
           position: sticky;
           top: 0;
           background: var(--bg-secondary);
           z-index: 10;
         }
-        
+
         .nav-header h2 {
           margin: 0;
-          font-size: 1.25rem;
-          font-weight: 700;
+          font-size: 0.6875rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: var(--text-muted);
         }
 
         .nav-menu {
           display: flex;
           flex-direction: column;
-          padding: 0 0 1rem 0;
+          padding: 0.25rem 0.5rem 1rem;
+          gap: 1px;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.625rem;
           width: 100%;
-          padding: 1rem 1.5rem;
+          padding: 0.5rem 0.75rem;
           background: transparent;
           border: none;
-          color: var(--text-primary);
-          font-size: 1rem;
+          border-radius: 6px;
+          color: var(--text-secondary);
+          font-size: 0.875rem;
           text-align: left;
           cursor: pointer;
-          transition: background 0.15s;
+          transition: background 0.12s, color 0.12s;
+          font-family: inherit;
         }
-        
-        /* The chevron chevron */
-        .nav-item::after {
-          content: '›';
-          margin-left: auto;
-          font-size: 1.5rem;
-          color: var(--text-secondary);
-          opacity: 0;
-          transition: opacity 0.2s;
-        }
-        
+        .nav-item i { font-size: 0.9375rem; flex-shrink: 0; }
+
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--bg-hover);
+          color: var(--text-primary);
         }
-        
+
         .nav-item.active {
-          border-right: 3px solid var(--accent-primary);
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(37,99,235,0.1);
+          color: #93c5fd;
         }
+        .nav-item.active i { color: #93c5fd; }
 
-        .nav-item:hover::after, .nav-item.active::after {
-          opacity: 1;
-        }
-
-        /* --- CONTENT PANE (Detail) --- */
+        /* --- CONTENT PANE --- */
         .settings-pane {
           flex: 1;
           overflow-y: auto;
@@ -832,53 +828,58 @@ class SettingsUI {
 
         .pane-content {
           display: none;
-          padding: 2rem 2.5rem;
-          max-width: 680px;
-          animation: fadeIn 0.3s ease;
+          padding: 1.75rem 2rem;
+          max-width: 600px;
+          animation: fadeIn 0.2s ease;
         }
-        .pane-content.active {
-          display: block;
-        }
+        .pane-content.active { display: block; }
 
         .pane-header {
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
+          padding-bottom: 1.25rem;
+          border-bottom: 1px solid var(--border);
         }
         .pane-header h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1.5rem;
-          font-weight: 800;
+          margin: 0 0 0.25rem;
+          font-size: 1.125rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
         }
         .pane-header p {
           margin: 0;
-          color: var(--text-secondary);
-          font-size: 0.9rem;
+          color: var(--text-muted);
+          font-size: 0.8125rem;
+          line-height: 1.5;
         }
 
-        /* --- FORM ELEMENTS (X-Style Minimal) --- */
+        /* --- FORM ELEMENTS --- */
         .form-group {
-          margin-bottom: 2rem;
+          margin-bottom: 1.25rem;
         }
         .form-group label {
           display: block;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-          font-size: 0.95rem;
+          font-size: 0.75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--text-muted);
+          margin-bottom: 0.375rem;
         }
         .form-group input, .form-group select {
           width: 100%;
-          padding: 0.85rem 1rem;
-          background: transparent;
-          border: 1px solid var(--border-color);
-          border-radius: 4px; /* Less rounded, more technical */
+          padding: 0.5rem 0.75rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid var(--border);
+          border-radius: 8px;
           color: var(--text-primary);
           font-family: inherit;
-          font-size: 1rem;
-          transition: border-color 0.2s;
+          font-size: 0.875rem;
+          transition: border-color 0.15s;
         }
         .form-group input:focus, .form-group select:focus {
           outline: none;
-          border-color: var(--accent-primary);
-          box-shadow: 0 0 0 1px var(--accent-primary);
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
         }
         
         /* Flex Input Row (for buttons next to inputs) */
@@ -896,28 +897,27 @@ class SettingsUI {
 
         .settings-section-divider {
           height: 1px;
-          background: var(--border-color);
-          margin: 2rem 0;
+          background: var(--border);
+          margin: 1.5rem 0;
         }
 
         .pane-actions {
-          margin-top: 2rem;
+          margin-top: 1.5rem;
           display: flex;
           justify-content: flex-end;
         }
         .pane-actions .btn {
-          padding: 0.75rem 2rem;
-          border-radius: 8px;
-          font-weight: 700;
+          padding: 0.5rem 1.25rem;
+          font-weight: 600;
         }
 
         .status-box {
-          margin-top: 1rem;
-          font-size: 0.85rem;
-          padding: 0.75rem;
-          border-radius: 4px;
+          margin-top: 0.75rem;
+          font-size: 0.8125rem;
+          padding: 0.625rem 0.875rem;
+          border-radius: 8px;
           background: rgba(255,255,255,0.02);
-          border: 1px solid var(--border-color);
+          border: 1px solid var(--border);
           text-align: center;
           color: var(--text-secondary);
         }
@@ -963,12 +963,11 @@ class SettingsUI {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Always show chevron on mobile-sized items */
         @media (max-width: 768px) {
           .settings-layout {
             position: relative;
             overflow: hidden;
-            height: calc(100vh - 120px); /* Account for app header + bottom nav */
+            height: calc(100vh - 120px);
           }
 
           .settings-nav {
@@ -978,11 +977,15 @@ class SettingsUI {
             overflow-y: auto;
             transition: transform 0.3s ease;
             background: var(--bg-secondary);
+            padding: 0.5rem 0;
           }
 
-          /* Always show the chevron arrow on mobile */
+          /* Show chevron on mobile to indicate drill-down */
           .nav-item::after {
-            opacity: 1 !important;
+            content: '›';
+            margin-left: auto;
+            font-size: 1.125rem;
+            color: var(--text-muted);
           }
 
           .settings-pane {
