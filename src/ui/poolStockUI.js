@@ -312,8 +312,8 @@ class PoolStockUI {
                 .ip-footer { padding:1rem 1.5rem; border-top:1px solid var(--border,#e5e7eb); display:flex; gap:0.75rem; }
                 .ip-btn { flex:1; padding:0.6rem; border:1px solid var(--border,#e5e7eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#6b7280); }
                 .ip-btn:hover { background:var(--bg-secondary,#f8fafc); }
-                .ip-btn-primary { background:#f97316; color:#fff; border-color:#f97316; font-weight:600; }
-                .ip-btn-primary:hover { background:#ea580c; }
+                .ip-btn-primary { background:#2563eb; color:#fff; border-color:#2563eb; font-weight:600; }
+                .ip-btn-primary:hover { background:#1d4ed8; }
             </style>
             <div class="ip-header">
                 <h2>Item Details</h2>

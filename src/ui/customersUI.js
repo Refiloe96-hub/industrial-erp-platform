@@ -67,7 +67,11 @@ class CustomersUI {
 
   renderCustomerParams(customers) {
     if (customers.length === 0) {
-      return `<p class="text-center text-muted col-span-full">No customers found. Add your first one!</p>`;
+      return `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+        <i class="ph-duotone ph-users" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.4;"></i>
+        <p style="font-size:0.9375rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.375rem;">No customers yet</p>
+        <p style="font-size:0.8125rem;margin:0;">Click "New Customer" to add your first one.</p>
+      </div>`;
     }
 
     return customers.map(c => `
@@ -79,7 +83,7 @@ class CustomersUI {
         <div class="card-body">
           <p><i class="ph-duotone ph-phone"></i> ${c.phone || 'No phone'}</p>
           <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: R ${(c.totalSpent || 0).toLocaleString()}</p>
-          <p class="text-sm text-muted">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
+          <p style="font-size:0.75rem;color:var(--text-muted);margin:0.375rem 0 0;">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
           <button class="btn btn-secondary btn-edit" data-id="${c.id}" style="font-size:0.75rem;padding:0.3rem 0.75rem;margin-top:0.5rem;">Edit</button>
         </div>
       </div>
@@ -322,6 +326,9 @@ class CustomersUI {
             background: var(--bg-secondary);
             color: var(--text-primary);
         }
+
+        /* Also remove backdrop-filter from modal overlay */
+        #customer-modal { backdrop-filter: none !important; }
       </style>
     `;
   }

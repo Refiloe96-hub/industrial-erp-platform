@@ -1096,7 +1096,7 @@ class PocketBooksUI {
                 gap: 1rem;
             }
             .report-card {
-                background: var(--surface-light);
+                background: var(--bg-elevated, #232326);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-md);
                 padding: 1rem;
