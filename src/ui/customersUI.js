@@ -198,7 +198,7 @@ class CustomersUI {
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .customer-card:hover { border-color: var(--border-strong); }
@@ -232,7 +232,7 @@ class CustomersUI {
         .form-control {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 6px;
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -261,7 +261,7 @@ class CustomersUI {
            width: 90%;
            max-width: 500px;
            background: var(--bg-primary);
-           border: 1px solid var(--border-color);
+           border: 1px solid var(--border);
            border-radius: 12px;
            box-shadow: var(--shadow-lg);
            color: var(--text-primary);
@@ -269,7 +269,7 @@ class CustomersUI {
 
         .modal-header {
             padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -287,7 +287,7 @@ class CustomersUI {
 
         .modal-footer {
             padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--border);
             background: var(--bg-secondary);
             border-radius: 0 0 12px 12px;
             display: flex;

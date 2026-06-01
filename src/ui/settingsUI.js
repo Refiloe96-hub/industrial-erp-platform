@@ -965,13 +965,13 @@ class SettingsUI {
 
         /* Custom Slim List (for Team members) */
         .slim-list {
-          border: 1px solid var(--border-color);
+          border: 1px solid var(--border);
           border-radius: 8px;
           overflow: hidden;
         }
         .slim-list > div {
           padding: 1rem;
-          border-bottom: 1px solid var(--border-color);
+          border-bottom: 1px solid var(--border);
         }
         .slim-list > div:last-child {
           border-bottom: none;

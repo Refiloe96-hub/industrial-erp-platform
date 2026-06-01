@@ -954,7 +954,7 @@ class PocketBooksUI {
 
             .filter-group select {
                 padding: 0.5rem 1rem;
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 border-radius: 6px;
                 background: var(--bg-secondary);
                 color: var(--text-primary);
@@ -991,7 +991,7 @@ class PocketBooksUI {
             .transactions-section td, 
             .transactions-section th {
                 background: transparent !important;
-                border-color: var(--border-color);
+                border-color: var(--border);
             }
 
             .reference {
@@ -1018,7 +1018,7 @@ class PocketBooksUI {
                 backdrop-filter: blur(24px); /* Increase from 16px to 24px */
                 -webkit-backdrop-filter: blur(24px);
                 color: var(--text-primary);
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 box-shadow: var(--shadow-lg);
             }
 
@@ -1050,7 +1050,7 @@ class PocketBooksUI {
             .form-group select {
                 width: 100%;
                 padding: 0.75rem;
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 border-radius: 6px;
                 font-size: 1rem;
                 background: var(--bg-secondary);
@@ -1069,7 +1069,7 @@ class PocketBooksUI {
                 margin: 2rem 0;
                 padding: 1.5rem;
                 background: rgba(255, 255, 255, 0.02);
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 border-radius: var(--radius-lg);
             }
             .reports-header {
@@ -1097,7 +1097,7 @@ class PocketBooksUI {
             }
             .report-card {
                 background: var(--surface-light);
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 border-radius: var(--radius-md);
                 padding: 1rem;
                 display: flex;

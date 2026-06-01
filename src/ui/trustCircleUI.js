@@ -26,7 +26,7 @@ class TrustCircleUI {
             .detail-tab-nav {
                 display: flex;
                 gap: 0;
-                border-bottom: 2px solid var(--border-color);
+                border-bottom: 2px solid var(--border);
                 margin-bottom: 1.5rem;
             }
             .detail-tab {
@@ -97,7 +97,7 @@ class TrustCircleUI {
                 padding: 1rem;
                 border-radius: var(--radius-md);
                 margin-bottom: 0.75rem;
-                border-left: 3px solid var(--border-color);
+                border-left: 3px solid var(--border);
             }
             .insight-card.warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
             .insight-card.danger { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
@@ -270,7 +270,7 @@ class TrustCircleUI {
         .syndicate-card:hover { border-color: var(--border-strong); }
         .syndicate-card .card-header {
             padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;

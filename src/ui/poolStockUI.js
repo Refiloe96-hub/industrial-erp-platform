@@ -1468,7 +1468,7 @@ class PoolStockUI {
             /* Filters */
             .filter-group.search input {
                 padding: 0.5rem 1rem;
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
                 border-radius: var(--radius-md);
                 min-width: 200px;
                 background: rgba(255, 255, 255, 0.05);
@@ -1484,7 +1484,7 @@ class PoolStockUI {
             .inventory-row {
                 background: transparent;
                 color: var(--text-primary);
-                border-bottom: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border);
             }
 
             .sku {
@@ -1580,7 +1580,7 @@ class PoolStockUI {
                 height: 40px;
                 object-fit: cover;
                 border-radius: var(--radius-sm);
-                border: 1px solid var(--border-color);
+                border: 1px solid var(--border);
             }
 
             .product-thumb-placeholder {
@@ -1603,7 +1603,7 @@ class PoolStockUI {
             .ps-tab-bar {
                 display: flex;
                 gap: 0;
-                border-bottom: 2px solid var(--border-color);
+                border-bottom: 2px solid var(--border);
                 margin-bottom: 1.5rem;
             }
             .ps-tab {
@@ -1645,10 +1645,10 @@ class PoolStockUI {
             .po-items-section { margin: 1.5rem 0; }
             .po-items-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
             .po-total-row { text-align: right; margin-top: .75rem; font-size: 1.1rem; }
-            .po-lines-table select, .po-lines-table input { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 4px; padding: .25rem .5rem; color: var(--text-primary); }
+            .po-lines-table select, .po-lines-table input { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 4px; padding: .25rem .5rem; color: var(--text-primary); }
 
             /* Scanner Modal */
-            .scanner-modal { padding: 1.5rem; border-radius: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); max-width: 400px; width: 95%; }
+            .scanner-modal { padding: 1.5rem; border-radius: 12px; background: var(--bg-primary); border: 1px solid var(--border); max-width: 400px; width: 95%; }
             .scanner-content { display: flex; flex-direction: column; gap: .75rem; }
 
             /* Misc */

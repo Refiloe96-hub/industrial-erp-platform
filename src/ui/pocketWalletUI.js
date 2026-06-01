@@ -189,7 +189,7 @@ class PocketWalletUI {
         
         .balance-section .label { color: var(--text-secondary); font-size: 0.9rem; }
         .balance-section .balance { font-size: 2.5rem; margin: 0.5rem 0; color: var(--text-primary); }
-        .balance-section .wallet-id { font-family: monospace; background: rgba(255,255,255,0.05); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); display: inline-block; color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .balance-section .wallet-id { font-family: monospace; background: rgba(255,255,255,0.05); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); display: inline-block; color: var(--text-secondary); border: 1px solid var(--border); }
 
         .actions { display: flex; gap: 1rem; }
         .btn-light { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
