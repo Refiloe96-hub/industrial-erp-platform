@@ -668,7 +668,7 @@ class PocketBooksUI {
 
         const panel = document.createElement('div');
         panel.className = 'tx-detail-panel';
-        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:#0f172a;z-index:1201;box-shadow:-4px 0 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;border-left:1px solid rgba(255,255,255,0.08);';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(420px,100vw);background:var(--bg-secondary,#111113);z-index:1201;box-shadow:-2px 0 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.2s ease;border-left:1px solid rgba(255,255,255,0.08);';
 
         panel.innerHTML = `
             <style>
@@ -1125,7 +1125,7 @@ class PocketBooksUI {
             }
             .report-icon.pl { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
             .report-icon.cf { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-            .report-icon.bs { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+            .report-icon.bs { background: rgba(37, 99, 235, 0.1); color: #60a5fa; }
             .report-icon.tax { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
             
             .report-info h4 {

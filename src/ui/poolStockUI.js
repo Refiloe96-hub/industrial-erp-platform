@@ -284,7 +284,7 @@ class PoolStockUI {
 
         const panel = document.createElement('div');
         panel.className = 'item-detail-panel';
-        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(460px,100vw);background:#0f172a;z-index:1201;box-shadow:-4px 0 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;border-left:1px solid rgba(255,255,255,0.08);';
+        panel.style.cssText = 'position:fixed;top:0;right:0;height:100%;width:min(460px,100vw);background:var(--bg-secondary,#111113);z-index:1201;box-shadow:-4px 0 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;animation:slideInRight 0.25s ease;border-left:1px solid rgba(255,255,255,0.08);';
 
         panel.innerHTML = `
             <style>

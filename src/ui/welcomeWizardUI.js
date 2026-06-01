@@ -29,8 +29,8 @@ class WelcomeWizardUI {
     overlay.innerHTML = `
       <style>
         .ww-modal {
-          background: #0f172a; border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+          background: var(--bg-primary, #18181b); border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px; box-shadow: 0 24px 48px rgba(0,0,0,0.6);
           width: 90%; max-width: 540px; overflow: hidden;
           transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           display: flex; flex-direction: column;
@@ -39,7 +39,7 @@ class WelcomeWizardUI {
         .ww-header { padding: 2.5rem 2.5rem 1.5rem; text-align: center; }
         .ww-icon { 
           width: 64px; height: 64px; margin: 0 auto 1.5rem; border-radius: 16px; 
-          background: rgba(37,99,235,0.1); color: #3b82f6; 
+          background: rgba(37,99,235,0.1); color: #60a5fa; 
           display: flex; align-items: center; justify-content: center; font-size: 2rem;
         }
         .ww-title { font-size: 1.5rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.5rem; letter-spacing: -0.02em; }

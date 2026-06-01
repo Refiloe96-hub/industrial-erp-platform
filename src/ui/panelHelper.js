@@ -10,14 +10,14 @@ export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '
   const overlay = document.createElement('div');
   overlay.className = 'dp-overlay';
   overlay.style.cssText =
-    'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1200;backdrop-filter:blur(8px);';
+    'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1200;';
 
   const panel = document.createElement('div');
   panel.className = 'dp-panel';
   panel.style.cssText =
     'position:fixed;top:0;right:0;height:100%;width:min(440px,100vw);' +
-    'background:#0f172a;z-index:1201;display:flex;flex-direction:column;' +
-    'box-shadow:-4px 0 32px rgba(0,0,0,0.5);overflow:hidden;animation:dpSlideIn 0.22s ease;border-left:1px solid rgba(255,255,255,0.08);';
+    'background:var(--bg-secondary,#111113);z-index:1201;display:flex;flex-direction:column;' +
+    'box-shadow:-2px 0 24px rgba(0,0,0,0.5);overflow:hidden;animation:dpSlideIn 0.2s ease;border-left:1px solid rgba(255,255,255,0.08);';
 
   panel.innerHTML = `
     <style>
@@ -49,8 +49,8 @@ export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '
       .dp-list li:last-child { border-bottom:none; }
       .dp-list .dp-badge { padding:0.15rem 0.5rem; border-radius:999px; font-size:0.7rem; font-weight:600; }
       .dp-empty { text-align:center; padding:2rem 1rem; color:var(--text-secondary,#9ca3af); font-size:0.875rem; }
-      .dp-nav-btn { width:100%; padding:0.65rem; border:1px solid var(--accent-primary,#f97316); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--accent-primary,#f97316); font-weight:600; }
-      .dp-nav-btn:hover { background:var(--accent-primary,#f97316); color:#fff; }
+      .dp-nav-btn { width:100%; padding:0.625rem; border:1px solid var(--accent,#2563eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--accent,#2563eb); font-weight:600; }
+      .dp-nav-btn:hover { background:var(--accent,#2563eb); color:#fff; }
     </style>
     <div class="dp-header">
       <div class="dp-header-text">
@@ -78,7 +78,7 @@ export function showDetailPanel({ title, subtitle = '', bodyHTML, footerHTML = '
 }
 
 /** Make a horizontal bar row */
-export function dpBar(label, value, max, color = '#f97316', fmt = v => v) {
+export function dpBar(label, value, max, color = '#2563eb', fmt = v => v) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   return `
     <div class="dp-bar-row">

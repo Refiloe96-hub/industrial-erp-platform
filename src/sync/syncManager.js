@@ -89,7 +89,7 @@ class SyncManager {
     const toast = document.createElement('div');
     toast.id = 'cloud-reauth-toast';
     toast.innerHTML = `
-      <div style="position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg-primary, #0f172a); border: 1px solid var(--accent-primary, #3b82f6); box-shadow: 0 10px 25px rgba(0,0,0,0.5); padding: 1rem 1.5rem; border-radius: 9999px; display: flex; align-items: center; gap: 1rem; z-index: 10000; backdrop-filter: blur(10px);">
+      <div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg-elevated,#232326);border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,0.5);padding:0.875rem 1.25rem;border-radius:10px;display:flex;align-items:center;gap:1rem;z-index:10000;white-space:nowrap;">
         <i class="ph-duotone ph-cloud-warning" style="font-size: 1.5rem; color: #f59e0b;"></i>
         <div style="color: white; font-size: 0.9rem;">
           <strong>Cloud Sync Paused</strong><br>

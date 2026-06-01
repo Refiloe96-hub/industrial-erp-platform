@@ -414,9 +414,9 @@ class IndustrialERPApp {
                   <div class="form-group" style="margin-bottom:2rem;">
                       <label style="display:block;margin-bottom:0.5rem;font-weight:700;">Business Type *</label>
                       <select id="oauth-biz-type" required style="width:100%;padding:0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:white;">
-                          <option value="shopowner" style="background:#0f172a">Retail / Spaza Shop (POS, Inventory, Ledgers)</option>
-                          <option value="warehouse" style="background:#0f172a">Warehouse / Distribution (Bulk Stock, POs, Clients)</option>
-                          <option value="manufacturer" style="background:#0f172a">Manufacturing / Factory (Raw Materials, Production)</option>
+                          <option value="shopowner" style="background:#18181b">Retail / Spaza Shop (POS, Inventory, Ledgers)</option>
+                          <option value="warehouse" style="background:#18181b">Warehouse / Distribution (Bulk Stock, POs, Clients)</option>
+                          <option value="manufacturer" style="background:#18181b">Manufacturing / Factory (Raw Materials, Production)</option>
                       </select>
                   </div>
 
@@ -426,8 +426,8 @@ class IndustrialERPApp {
             
             // Minimal reset for dialog just in case app styles ain't fully mounted
             Object.assign(modal.style, {
-              background: '#0f172a', color: 'white', padding: '2.5rem', borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.8)',
+              background: '#18181b', color: 'white', padding: '2rem', borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 48px rgba(0,0,0,0.7)',
               maxWidth: '500px', width: '90%'
             });
 
@@ -1192,9 +1192,9 @@ class IndustrialERPApp {
           </ul>
           
            <div class="sidebar-footer">
-            <button id="upgrade-btn" class="btn-block btn-primary btn-sm" style="margin-bottom: 0.5rem; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none;"><i class="ph-duotone ph-rocket"></i> Upgrade Plan</button>
-            <button id="install-btn" class="btn-primary btn-sm" style="display: none;"><i class="ph-duotone ph-download-simple"></i> Install</button>
-            <button id="logout-btn" class="btn-secondary btn-sm"><i class="ph-duotone ph-sign-out"></i> Logout</button>
+            <button id="upgrade-btn" class="btn btn-primary btn-sm" style="width:100%;margin-bottom:0.5rem;">Upgrade Plan</button>
+            <button id="install-btn" class="btn btn-secondary btn-sm" style="display:none;width:100%;">Install App</button>
+            <button id="logout-btn" class="btn btn-secondary btn-sm" style="width:100%;">Log out</button>
           </div>
         </nav>
         
@@ -1202,8 +1202,7 @@ class IndustrialERPApp {
           <header class="content-header">
             <h1 id="module-title">${businessLabel}</h1>
             <div class="header-actions">
-              <button class="btn-icon" title="AI Insights"><i class="ph-duotone ph-magic-wand"></i></button>
-              <button class="btn-icon notification-btn" id="notification-btn" title="Notifications">
+              <button class="btn-icon notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">
                 <i class="ph-duotone ph-bell"></i>
                 <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
               </button>
@@ -1770,14 +1769,14 @@ class IndustrialERPApp {
         
         .ai-alert {
           background: var(--bg-primary);
-          border-left: 4px solid #6366f1;
+          border-left: 3px solid var(--accent);
           position: relative;
           overflow: hidden;
         }
-        .ai-alert .card-header h3 { color: #6366f1; }
-        .ai-alert .alert-text { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
-        .ai-alert .btn-primary { background: #6366f1; font-size: 0.875rem; padding: 0.5rem 1.25rem; }
-        .ai-alert .btn-primary:hover { background: #4f46e5; }
+        .ai-alert .card-header h3 { color: var(--accent); }
+        .ai-alert .alert-text { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; }
+        .ai-alert .btn-primary { background: var(--accent); font-size: 0.875rem; padding: 0.5rem 1.25rem; }
+        .ai-alert .btn-primary:hover { background: var(--accent-hover); }
         
         .stat-card {
           padding: 1.125rem 1.25rem;
@@ -2053,7 +2052,7 @@ class IndustrialERPApp {
         }
 
         .notification-item:hover {
-            background: #f9fafb;
+            background: var(--bg-hover);
         }
 
         .notification-item.unread {
@@ -3157,7 +3156,7 @@ class IndustrialERPApp {
               ${dpKV('Total Value', 'R ' + items.reduce((s, i) => s + (i.quantity * (i.unitPrice || 0)), 0).toLocaleString())}
             </div></div>
             <div class="dp-section"><div class="dp-section-title">By Category</div>
-              ${Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([cat, n]) => dpBar(cat, n, maxCat, '#6366f1')).join('')}
+              ${Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([cat, n]) => dpBar(cat, n, maxCat, '#2563eb')).join('')}
             </div>`
           },
           machines: {
