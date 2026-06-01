@@ -12,3 +12,22 @@ export const supabaseClient = (supabaseUrl && supabaseKey)
   : null;
 
 export const isSupabaseEnabled = () => supabaseClient !== null;
+
+// Ping the Supabase auth health endpoint before any operation that would
+// redirect the browser (OAuth) or make a network request. Returns false if
+// the project is paused, deleted, or the device is offline.
+export const checkSupabaseReachable = async () => {
+  if (!supabaseUrl) return false;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(`${supabaseUrl}/auth/v1/health`, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return res.status < 500;
+  } catch {
+    return false;
+  }
+};

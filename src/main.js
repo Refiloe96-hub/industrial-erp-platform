@@ -5,7 +5,7 @@ import { initRouter } from './router.js';
 import { initSync } from './sync/syncManager.js';
 import { registerSW } from 'virtual:pwa-register';
 import { AIEngine } from './ai/engine.js';
-import { supabaseClient, isSupabaseEnabled } from './services/supabase.js';
+import { supabaseClient, isSupabaseEnabled, checkSupabaseReachable } from './services/supabase.js';
 import SmartShiftUI from './ui/smartShiftUI.js';
 import TrustCircleUI from './ui/trustCircleUI.js';
 import PocketWalletUI from './ui/pocketWalletUI.js';
@@ -792,9 +792,12 @@ class IndustrialERPApp {
     let currentAction = 'login'; // 'login' or 'register'
     let localUser = null;
 
+    const CLOUD_UNREACHABLE_MSG = 'Cloud backend is currently unreachable.\n\nYour Supabase project may be paused or deleted.\nPlease use email + password to sign in, or contact the site owner to restore cloud access.';
+
     // --- Social & OAuth Login Handlers ---
     document.getElementById('btn-google')?.addEventListener('click', async () => {
       if (!isSupabaseEnabled()) return alert('Google login requires cloud sync to be enabled.');
+      if (!await checkSupabaseReachable()) return alert(CLOUD_UNREACHABLE_MSG);
       try {
         const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
         if (error) throw error;
@@ -803,6 +806,7 @@ class IndustrialERPApp {
 
     document.getElementById('btn-apple')?.addEventListener('click', async () => {
       if (!isSupabaseEnabled()) return alert('Apple login requires cloud sync to be enabled.');
+      if (!await checkSupabaseReachable()) return alert(CLOUD_UNREACHABLE_MSG);
       try {
         const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin } });
         if (error) throw error;
@@ -811,6 +815,7 @@ class IndustrialERPApp {
 
     document.getElementById('btn-phone')?.addEventListener('click', async () => {
       if (!isSupabaseEnabled()) return alert('Phone login requires cloud sync to be enabled.');
+      if (!await checkSupabaseReachable()) return alert(CLOUD_UNREACHABLE_MSG);
       const phone = prompt("Enter your phone number (e.g. +1234567890):");
       if (!phone) return;
       try {
@@ -862,7 +867,7 @@ class IndustrialERPApp {
         localUser = allUsers.find(u => u.email && u.email.toLowerCase() === email) || null;
 
         // If not found locally but cloud is enabled, check the cloud profiles
-        if (!localUser && isSupabaseEnabled()) {
+        if (!localUser && isSupabaseEnabled() && await checkSupabaseReachable()) {
           const { data: cloudProfile } = await supabaseClient.from('profiles').select('*').eq('email', email).maybeSingle();
           if (cloudProfile) {
             // Mock enough of a localUser to confidently route them to the login path
@@ -952,6 +957,10 @@ class IndustrialERPApp {
 
           if (!isSupabaseEnabled()) {
             throw new Error('Invalid email or password. (Supabase disabled)');
+          }
+
+          if (!await checkSupabaseReachable()) {
+            throw new Error('Cloud backend is unreachable. Your Supabase project may be paused or deleted. Please contact the site owner.');
           }
 
           const { data: sbData, error: sbError } = await supabaseClient.auth.signInWithPassword({ email, password });
