@@ -3005,7 +3005,7 @@ class IndustrialERPApp {
               const dayLabel = new Date(dayStart).toLocaleDateString('en-ZA', { weekday: 'short' });
               dailyData.push({ label: dayLabel, value: Math.max(0, net) });
             }
-            chartCashflow.innerHTML = ChartUtils.renderBarChart(dailyData, { width: 280, height: 150 });
+            chartCashflow.innerHTML = ChartUtils.renderBarChart(dailyData);
           }
         }
       } catch (e) {
@@ -3036,7 +3036,7 @@ class IndustrialERPApp {
             }, {});
             const catData = Object.entries(categories).slice(0, 4).map(([label, value]) => ({ label, value }));
             if (catData.length) {
-              chartInventory.innerHTML = ChartUtils.renderDonutChart(catData, { size: 140, thickness: 25 });
+              chartInventory.innerHTML = ChartUtils.renderDonutChart(catData);
             } else {
               chartInventory.innerHTML = '<p class="text-muted">No inventory data</p>';
             }
@@ -3071,7 +3071,6 @@ class IndustrialERPApp {
           if (machines.length) {
             const operational = machines.filter(m => m.status === 'operational' || m.status === 'running').length;
             chartMachines.innerHTML = ChartUtils.renderGauge(operational, machines.length, {
-              size: 140,
               color: operational / machines.length > 0.7 ? '#10b981' : '#f59e0b',
               label: 'Operational'
             });
@@ -3104,7 +3103,7 @@ class IndustrialERPApp {
             ].filter(d => d.value > 0);
 
             if (statusData.length) {
-              chartSyndicates.innerHTML = ChartUtils.renderDonutChart(statusData, { size: 140, thickness: 25 });
+              chartSyndicates.innerHTML = ChartUtils.renderDonutChart(statusData);
             } else {
               chartSyndicates.innerHTML = `<p class="text-muted">${syndicates.length} syndicate(s), no contributions yet</p>`;
             }
@@ -3245,22 +3244,21 @@ class IndustrialERPApp {
 
       const severityColor = { critical: '#ef4444', warning: '#f59e0b', good: '#10b981' };
       insightsEl.innerHTML = insights.map(ins => `
-        <div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:8px;
-          background:var(--bg-secondary);border-left:3px solid ${severityColor[ins.severity] || '#6366f1'};">
-          <span style="font-size:0.875rem;line-height:1.5;color:var(--text-primary)">${ins.text}</span>
-          ${ins.source === 'ai' ? '<span style="margin-left:auto;font-size:0.65rem;color:var(--text-secondary);flex-shrink:0;align-self:center;">AI</span>' : ''}
+        <div style="display:flex;align-items:flex-start;gap:0.625rem;padding:0.5rem 0.75rem;
+          border-radius:6px;border-left:2px solid ${severityColor[ins.severity] || '#2563eb'};">
+          <span style="font-size:0.8125rem;line-height:1.55;color:var(--text-primary)">${ins.text}</span>
         </div>`).join('');
 
       if (!apiKey && noteEl) noteEl.style.display = 'block';
 
     } catch (err) {
       console.warn('AI Advisor load error:', err.message);
-      if (insightsEl) insightsEl.innerHTML = `<p style="font-size:0.875rem;color:var(--text-secondary)">⚡ Analysis unavailable — add data to your modules to see insights.</p>`;
+      if (insightsEl) insightsEl.innerHTML = `<p style="font-size:0.8125rem;color:var(--text-muted)">Add data to your modules to generate insights.</p>`;
     }
 
     // Wire Refresh button
     document.getElementById('ai-refresh-btn')?.addEventListener('click', () => {
-      if (insightsEl) insightsEl.innerHTML = '<div style="color:var(--text-secondary);font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;"><i class="ph ph-circle-notch" style="animation:spin 1s linear infinite;"></i> Refreshing...</div>';
+      if (insightsEl) insightsEl.innerHTML = '<p style="font-size:0.8125rem;color:var(--text-muted);">Refreshing...</p>';
       this.loadAIAdvisor();
     });
   }
