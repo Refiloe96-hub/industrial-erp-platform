@@ -293,6 +293,7 @@ class SyncManager {
             if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
               // Add/Update the incoming record into our IndexedDB
               // We set synced: true so we don't accidentally push it back up.
+              if (!payload.new) return;
               const incomingData = { ...payload.new, synced: true };
               // Map Supabase IDs back to IndexedDB conventions if necessary, 
               // but Supabase uses 'id' just like IndexedDB does.

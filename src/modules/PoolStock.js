@@ -25,6 +25,13 @@ class PoolStock {
 
   // Add/Update inventory item
   async updateInventory(data) {
+    const qty = Number(data.quantity);
+    const cost = Number(data.unitCost);
+    const price = Number(data.unitPrice);
+    if (!Number.isFinite(qty) || qty < 0) throw new Error('Quantity must be a non-negative number.');
+    if (!Number.isFinite(cost) || cost < 0) throw new Error('Unit cost must be a non-negative number.');
+    if (!Number.isFinite(price) || price < 0) throw new Error('Unit price must be a non-negative number.');
+
     const item = {
       sku: data.sku,
       name: data.name,

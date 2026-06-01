@@ -1,3 +1,4 @@
+import { getSession, safeParseJSON } from '../utils/safeJson.js';
 import db from '../db/index.js';
 import DataImportService from '../services/DataImportService.js';
 import HardwareService from '../services/HardwareService.js';
@@ -405,7 +406,7 @@ class SettingsUI {
         if (brandName && newSettings.businessName) brandName.textContent = newSettings.businessName;
 
         // Update user profile
-        const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+        const currentUser = getSession();
         if (currentUser) {
           currentUser.businessName = newSettings.businessName;
           localStorage.setItem('erp_session', JSON.stringify(currentUser));
@@ -557,7 +558,7 @@ class SettingsUI {
 
     // Template Download
     container.querySelector('#btn-download-template')?.addEventListener('click', () => {
-      const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+      const currentUser = getSession();
       const type = currentUser?.businessType || 'shop'; // Default to shop if undefined
       const url = DataImportService.generateTemplateFile(type);
       const a = document.createElement('a');
@@ -600,7 +601,7 @@ class SettingsUI {
     // Create Staff Account
     container.querySelector('#add-team-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const currentUser = JSON.parse(localStorage.getItem('erp_session') || '{}');
+      const currentUser = getSession() ?? {};
       const formData = new FormData(e.target);
       const username = formData.get('username');
       const password = formData.get('password');
@@ -1047,7 +1048,7 @@ class SettingsUI {
     `;
   }
   renderImportModal() {
-    const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+    const currentUser = getSession();
     const businessType = currentUser?.businessType || 'shop';
     const displayType = businessType.charAt(0).toUpperCase() + businessType.slice(1);
 
@@ -1101,7 +1102,7 @@ class SettingsUI {
             <form id="support-form">
                 <div class="form-group">
                     <label>Current Type</label>
-                    <input type="text" value="${JSON.parse(localStorage.getItem('erp_session'))?.businessType || 'Unknown'}" disabled class="bg-gray-100">
+                    <input type="text" value="${getSession()?.businessType || 'Unknown'}" disabled class="bg-gray-100">
                 </div>
                 <div class="form-group">
                     <label>Requested Type</label>

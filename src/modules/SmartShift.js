@@ -3,6 +3,7 @@
 // Role: Floor Manager
 // NOT: Gig marketplace or worker discovery platform
 
+import { getSession } from '../utils/safeJson.js';
 import db, { STORES } from '../db/index.js';
 
 class SmartShift {
@@ -360,7 +361,7 @@ class SmartShift {
   async generateCoC(orderId) {
     try {
       const genealogy = await this.traceProduct(orderId);
-      const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
+      const currentUser = getSession() ?? {};
       const businessName = currentUser.businessName || 'Industrial ERP Co.';
 
       const printWindow = window.open('', '_blank');

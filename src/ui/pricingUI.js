@@ -492,7 +492,7 @@ export default class PricingUI {
         // Persist the new plan
         try {
           // Update localStorage user
-          const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          const userData = (() => { try { return JSON.parse(localStorage.getItem('currentUser')) ?? {}; } catch { return {}; } })();
           userData.planId = planId;
           userData.planName = plan.name;
           localStorage.setItem('currentUser', JSON.stringify(userData));

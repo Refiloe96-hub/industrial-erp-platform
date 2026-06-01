@@ -1,3 +1,4 @@
+import { getSession } from '../utils/safeJson.js';
 import sales from '../modules/Sales.js';
 import PoolStock from '../modules/PoolStock.js';
 import PocketBooks from '../modules/PocketBooks.js';
@@ -539,7 +540,7 @@ class SalesUI {
         const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT
         const subtotal = grandTotal - vatAmount; // True subtotal before VAT
 
-        const session = JSON.parse(localStorage.getItem('erp_session') || '{}');
+        const session = getSession() ?? {};
         const cashierName = session.name || session.username || 'Admin User';
         const customerId = customerSelect.value ? parseInt(customerSelect.value) : null;
 
@@ -616,7 +617,7 @@ class SalesUI {
   }
 
   showInvoiceModal(sale, customerName, paymentMethod) {
-    const session = JSON.parse(localStorage.getItem('erp_session') || '{}');
+    const session = getSession() ?? {};
     const businessName = session.businessName || 'My Business';
     const invoiceDate = new Date(sale.timestamp).toLocaleString();
     const invoiceNo = sale.id ? sale.id.replace('sale_', 'INV-') : `INV-${Date.now()}`;

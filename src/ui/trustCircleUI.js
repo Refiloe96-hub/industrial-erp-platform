@@ -1,3 +1,4 @@
+import { getSession } from '../utils/safeJson.js';
 import TrustCircle from '../modules/TrustCircle.js';
 import TrustScoreEngine from '../modules/TrustScoreEngine.js';
 import PocketWallet from '../modules/PocketWallet.js';
@@ -208,7 +209,7 @@ class TrustCircleUI {
             }
         } catch (err) {
             console.error('Error loading view:', err);
-            this.container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            this.container.textContent = `Error: ${err.message}`; this.container.className = 'error';
         }
     }
 
@@ -539,7 +540,7 @@ class TrustCircleUI {
             e.preventDefault();
             const formData = new FormData(e.target);
 
-            const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+            const currentUser = getSession();
             const userId = currentUser ? currentUser.id : 'anonymous';
             const businessName = currentUser ? (currentUser.businessName || currentUser.username || userId) : userId;
 
@@ -868,7 +869,7 @@ class TrustCircleUI {
         modal.querySelector('#gb-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fd = new FormData(e.target);
-            const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+            const currentUser = getSession();
             try {
                 await this.module.createGroupBuy({
                     syndicateId: parseInt(syndicateId),
@@ -924,7 +925,7 @@ class TrustCircleUI {
             modal.querySelector('#join-gb-form').addEventListener('submit', async (ev) => {
                 ev.preventDefault();
                 const fd = new FormData(ev.target);
-                const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+                const currentUser = getSession();
                 const walletModule = new PocketWallet();
                 const wallet = await walletModule.getWalletByBusiness(currentUser?.supabaseId || currentUser?.id || 'unknown');
 
@@ -1083,7 +1084,7 @@ class TrustCircleUI {
         modal.querySelector('#fr-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fd = new FormData(e.target);
-            const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+            const currentUser = getSession();
             try {
                 await this.module.requestFunding({
                     syndicateId: parseInt(syndicateId),

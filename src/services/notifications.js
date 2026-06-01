@@ -2,13 +2,14 @@
 // Notification Service - AI-Powered Business Alerts
 // Generates contextual alerts based on business data analysis
 
+import { safeParseJSON } from '../utils/safeJson.js';
 import db from '../db/index.js';
 
 class NotificationService {
     constructor() {
         this.notifications = [];
         this.checkInterval = null;
-        this.readIds = new Set(JSON.parse(localStorage.getItem('erp_read_notifications') || '[]'));
+        this.readIds = new Set(safeParseJSON(localStorage.getItem('erp_read_notifications'), []));
     }
 
     async init() {

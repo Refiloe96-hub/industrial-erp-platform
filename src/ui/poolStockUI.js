@@ -1,4 +1,5 @@
 
+import { getSession } from '../utils/safeJson.js';
 import PoolStock from '../modules/PoolStock.js';
 import db, { STORES } from '../db/index.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
@@ -150,7 +151,7 @@ class PoolStockUI {
 
         } catch (err) {
             console.error('Error loading PoolStock:', err);
-            this.container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            this.container.textContent = `Error: ${err.message}`; this.container.className = 'error';
         }
     }
 
@@ -799,7 +800,7 @@ class PoolStockUI {
             }).catch(() => { });
 
         } catch (err) {
-            this.container.innerHTML = `<p class="error">Forecast error: ${err.message}</p>`;
+            this.container.textContent = `Forecast error: ${err.message}`; this.container.className = 'error';
         }
     }
 
@@ -1075,7 +1076,7 @@ class PoolStockUI {
                     if (!o) return;
 
                     const supplierName = supplierMap[o.supplierId] || `Supplier #${o.supplierId}`;
-                    const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+                    const currentUser = getSession();
                     const myBiz = currentUser?.businessName || 'Our Business';
 
                     let waText = `*Purchase Order: PO-${o.id}*\n_From: ${myBiz}_\n_To: ${supplierName}_\nDate: ${new Date(o.orderDate).toLocaleDateString()}\n\n*Items Ordered:*\n`;
@@ -1092,7 +1093,7 @@ class PoolStockUI {
 
             this.injectStyles();
         } catch (err) {
-            this.container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            this.container.textContent = `Error: ${err.message}`; this.container.className = 'error';
         }
     }
 
@@ -1102,7 +1103,7 @@ class PoolStockUI {
         const localSuppliers = await this.module.getSuppliers();
         const networkSuppliers = await this.module.getNetworkSuppliers();
 
-        const currentUser = JSON.parse(localStorage.getItem('erp_session'));
+        const currentUser = getSession();
 
         const modal = document.createElement('dialog');
         modal.className = 'po-modal';

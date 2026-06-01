@@ -222,7 +222,7 @@ class PocketBooks {
 
   // Proprietary Local Engine: Time-series anomaly detection (Z-score)
   detectAnomalies(transactions, threshold = 2.0) {
-    const expenseTx = transactions.filter(t => t.type === 'expense' && typeof t.amount === 'number');
+    const expenseTx = transactions.filter(t => t.type === 'expense' && Number.isFinite(t.amount));
     if (expenseTx.length < 4) return [];
 
     const amounts = expenseTx.map(t => t.amount);

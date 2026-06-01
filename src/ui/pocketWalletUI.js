@@ -42,7 +42,7 @@ class PocketWalletUI {
             }
         } catch (err) {
             console.error('Error loading view:', err);
-            this.container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            this.container.textContent = `Error: ${err.message}`; this.container.className = 'error';
         }
     }
 

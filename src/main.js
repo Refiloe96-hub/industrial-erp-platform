@@ -6,6 +6,7 @@ import { initSync } from './sync/syncManager.js';
 import { registerSW } from 'virtual:pwa-register';
 import { AIEngine } from './ai/engine.js';
 import { supabaseClient, isSupabaseEnabled, checkSupabaseReachable } from './services/supabase.js';
+import { esc } from './utils/safeJson.js';
 import SmartShiftUI from './ui/smartShiftUI.js';
 import TrustCircleUI from './ui/trustCircleUI.js';
 import PocketWalletUI from './ui/pocketWalletUI.js';
@@ -130,12 +131,15 @@ class IndustrialERPApp {
     document.getElementById('module-title').textContent = titles[module] || businessLabel;
 
     let contentArea = document.getElementById('content-area');
+    if (!contentArea) return;
 
     // Performance Fix: Destroy all stale event listeners from previous modules
     // This prevents massive memory leaks when navigating between tabs
-    const newContentArea = contentArea.cloneNode(false);
-    contentArea.parentNode.replaceChild(newContentArea, contentArea);
-    contentArea = newContentArea;
+    if (contentArea.parentNode) {
+      const newContentArea = contentArea.cloneNode(false);
+      contentArea.parentNode.replaceChild(newContentArea, contentArea);
+      contentArea = newContentArea;
+    }
     contentArea.innerHTML = '<div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading...</div>';
 
     const sidebar = document.getElementById('sidebar');
@@ -154,7 +158,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering SmartShiftUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
       }
     } else if (module === 'trustcircle') {
       console.log('Instantiating TrustCircleUI...');
@@ -163,7 +167,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering TrustCircleUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
       }
     } else if (module === 'pocketwallet') {
       console.log('Instantiating PocketWalletUI...');
@@ -172,7 +176,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering PocketWalletUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
       }
     } else if (module === 'pocketbooks') {
       try {
@@ -181,7 +185,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('PocketBooksUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading PocketBooks: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading PocketBooks: ${esc(err.message)}</p>`;
       }
     } else if (module === 'poolstock') {
       try {
@@ -190,7 +194,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('PoolStockUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading PoolStock: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading PoolStock: ${esc(err.message)}</p>`;
       }
     } else if (module === 'sales') {
       try {
@@ -198,7 +202,7 @@ class IndustrialERPApp {
         await SalesUI.render(contentArea);
       } catch (err) {
         console.error('SalesUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Sales: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading Sales: ${esc(err.message)}</p>`;
       }
     } else if (module === 'reports') {
       try {
@@ -206,7 +210,7 @@ class IndustrialERPApp {
         await ReportsUI.render(contentArea);
       } catch (err) {
         console.error('ReportsUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Reports: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading Reports: ${esc(err.message)}</p>`;
       }
     } else if (module === 'settings') {
       try {
@@ -215,7 +219,7 @@ class IndustrialERPApp {
         await SettingsUI.render(contentArea);
       } catch (err) {
         console.error('SettingsUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Settings: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading Settings: ${esc(err.message)}</p>`;
       }
     } else if (module === 'customers') {
       try {
@@ -224,7 +228,7 @@ class IndustrialERPApp {
         await CustomersUI.render(contentArea);
       } catch (err) {
         console.error('CustomersUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Customers: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading Customers: ${esc(err.message)}</p>`;
       }
     } else if (module === 'pricing') {
       try {
@@ -233,7 +237,7 @@ class IndustrialERPApp {
         await PricingUI.render(contentArea, this.currentUser);
       } catch (err) {
         console.error('PricingUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Pricing: ${err.message}</p>`;
+        contentArea.innerHTML = `<p class="error">Error loading Pricing: ${esc(err.message)}</p>`;
       }
     } else if (module === 'dashboard' || !module) {
       const userModules = this.getModulesForUser();
@@ -832,12 +836,29 @@ class IndustrialERPApp {
     });
     // -------------------------------------
 
-    // Helper: Hash Password
+    // Password hashing — PBKDF2 with random salt (format: "pbkdf2v1:{salt64}:{hash64}")
+    // Legacy format is 64-char hex SHA-256; detected automatically for migration.
+    const _pbkdf2Key = async (password, salt) => {
+      const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 100000 }, km, 256);
+      return new Uint8Array(bits);
+    };
     const hashPassword = async (password) => {
-      const msgBuffer = new TextEncoder().encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const hash = await _pbkdf2Key(password, salt);
+      return `pbkdf2v1:${btoa(String.fromCharCode(...salt))}:${btoa(String.fromCharCode(...hash))}`;
+    };
+    const verifyPassword = async (password, stored) => {
+      if (!stored) return false;
+      if (stored.startsWith('pbkdf2v1:')) {
+        const [, salt64, hash64] = stored.split(':');
+        const salt = Uint8Array.from(atob(salt64), c => c.charCodeAt(0));
+        const hash = await _pbkdf2Key(password, salt);
+        return btoa(String.fromCharCode(...hash)) === hash64;
+      }
+      // Legacy SHA-256 — compare and upgrade on success
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('') === stored;
     };
 
     // Go back to Step 1
@@ -946,11 +967,14 @@ class IndustrialERPApp {
       finalSubmitBtn.disabled = true;
 
       try {
-        const hashedPassword = await hashPassword(password);
-
         if (currentAction === 'login') {
           // LOGIN PATH
-          if (localUser && localUser.password === hashedPassword) {
+          if (localUser && await verifyPassword(password, localUser.password)) {
+            // Transparently upgrade legacy SHA-256 hashes to PBKDF2 on next login
+            if (localUser.password && !localUser.password.startsWith('pbkdf2v1:')) {
+              localUser.password = await hashPassword(password);
+              try { await db.update('users', localUser); } catch {}
+            }
             await this.completeLogin(localUser, password);
             return;
           }
@@ -970,7 +994,7 @@ class IndustrialERPApp {
 
           const rebuiltUser = {
             username: profile?.username || email.split('@')[0],
-            password: hashedPassword,
+            password: await hashPassword(password),
             email: email,
             businessName: profile?.business_name || '',
             businessType: profile?.business_type || 'shopowner',
@@ -991,7 +1015,7 @@ class IndustrialERPApp {
           const username = email.split('@')[0] + Math.floor(Math.random() * 1000); // generate safety username
           const userData = {
             username,
-            password: hashedPassword,
+            password: await hashPassword(password),
             businessName: document.getElementById('reg-biz-name').value,
             businessType: document.getElementById('reg-biz-type').value,
             ownerName: document.getElementById('reg-owner-name').value,
@@ -1149,10 +1173,10 @@ class IndustrialERPApp {
     return `
       <!-- Mobile Header -->
       <header class="mobile-header">
-        <button class="menu-toggle" id="menu-toggle"><i class="ph ph-list"></i></button>
-        <h1>${this.currentUser.businessName}</h1>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu"><i class="ph ph-list"></i></button>
+        <h1>${esc(this.currentUser.businessName)}</h1>
         <div style="display: flex; gap: 0.5rem;">
-          <button class="btn-icon notification-btn" id="mobile-notification-btn"><i class="ph-duotone ph-bell"></i></button>
+          <button class="btn-icon notification-btn" id="mobile-notification-btn" aria-label="Notifications"><i class="ph-duotone ph-bell"></i></button>
         </div>
       </header>
 
@@ -1169,11 +1193,11 @@ class IndustrialERPApp {
                   </span>
                   <span>Business</span>
                 </h2>
-                <button id="sidebar-toggle-btn" class="btn-icon" title="Toggle Sidebar" style="background: transparent; color: var(--text-primary); width: 32px; height: 32px; padding: 4px;">
+                <button id="sidebar-toggle-btn" class="btn-icon" title="Toggle Sidebar" aria-label="Toggle Sidebar" style="background: transparent; color: var(--text-primary); width: 32px; height: 32px; padding: 4px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                 </button>
             </div>
-            <p class="business-name">${this.currentUser.businessName}</p>
+            <p class="business-name">${esc(this.currentUser.businessName)}</p>
             <p class="business-type">${businessLabel}</p>
           </div>
           
@@ -2927,12 +2951,10 @@ class IndustrialERPApp {
       }
     });
 
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const module = item.dataset.module;
-        this.navigateTo(module);
-      });
+    // Navigation — single delegated listener instead of one per item
+    document.querySelector('.nav-menu')?.addEventListener('click', (e) => {
+      const item = e.target.closest('.nav-item[data-module]');
+      if (item) this.navigateTo(item.dataset.module);
     });
 
     // Upgrade Button
@@ -3000,22 +3022,19 @@ class IndustrialERPApp {
       overlay.classList.remove('active');
     });
 
-    // Close sidebar when nav item clicked (mobile)
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        sidebar?.classList.remove('open');
-        overlay?.classList.remove('active');
-      });
+    // Close sidebar when nav item clicked (mobile) — delegated
+    document.querySelector('.nav-menu')?.addEventListener('click', () => {
+      sidebar?.classList.remove('open');
+      overlay?.classList.remove('active');
     });
 
-    // Bottom navigation
-    document.querySelectorAll('.bottom-nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const module = item.dataset.module;
-        document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        this.navigateTo(module);
-      });
+    // Bottom navigation — delegated
+    document.querySelector('.bottom-nav')?.addEventListener('click', (e) => {
+      const item = e.target.closest('.bottom-nav-item[data-module]');
+      if (!item) return;
+      document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      this.navigateTo(item.dataset.module);
     });
 
     // Mobile notification button

@@ -68,7 +68,8 @@ class P2PSyncManager {
             this.setupChannelListeners();
         };
 
-        const offer = JSON.parse(atob(base64Offer));
+        let offer;
+        try { offer = JSON.parse(atob(base64Offer)); } catch { throw new Error('Invalid offer code. Please re-scan.'); }
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
         // Create Answer
@@ -91,7 +92,8 @@ class P2PSyncManager {
      */
     async completeHandshake(base64Answer) {
         if (!this.peerConnection) throw new Error("No host session active.");
-        const answer = JSON.parse(atob(base64Answer));
+        let answer;
+        try { answer = JSON.parse(atob(base64Answer)); } catch { throw new Error('Invalid answer code. Please re-scan.'); }
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
         console.log("🤝 P2P Handshake Completed. Awaiting Data Channel Open...");
     }
@@ -115,7 +117,8 @@ class P2PSyncManager {
         };
 
         this.dataChannel.onmessage = async (event) => {
-            const message = JSON.parse(event.data);
+            let message;
+            try { message = JSON.parse(event.data); } catch { console.warn('P2P: malformed message ignored'); return; }
             await this.handleIncomingMessage(message);
         };
     }

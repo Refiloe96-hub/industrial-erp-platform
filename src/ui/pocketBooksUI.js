@@ -1,4 +1,5 @@
 
+import { getSession } from '../utils/safeJson.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 
@@ -171,7 +172,7 @@ class PocketBooksUI {
 
         } catch (err) {
             console.error('Error loading PocketBooks:', err);
-            this.container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            this.container.textContent = `Error: ${err.message}`; this.container.className = 'error';
         }
     }
 
@@ -198,7 +199,7 @@ class PocketBooksUI {
             const vatCollected = totalVatableIncome * 0.15;
             const period = this.dateRange === 0 ? 'All Time' : `Last ${this.dateRange} Days`;
 
-            const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
+            const currentUser = getSession() ?? {};
             const businessName = currentUser.businessName || 'My Business';
             const ownerName = currentUser.ownerName || 'Owner';
 
@@ -301,7 +302,7 @@ class PocketBooksUI {
     }
 
     _getBusinessContext() {
-        const currentUser = JSON.parse(localStorage.getItem('erp_session')) || {};
+        const currentUser = getSession() ?? {};
         return {
             businessType: currentUser.businessType || 'shopowner',
             businessName: currentUser.businessName || 'My Business',
