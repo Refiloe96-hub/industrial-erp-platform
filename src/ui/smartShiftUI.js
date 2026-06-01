@@ -15,18 +15,12 @@ class SmartShiftUI {
   async render() {
     this.container.innerHTML = `
       <div class="smart-shift-layout">
-        <header class="module-header" style="padding: 1rem 1.5rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
           <div>
-            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;">
-              <i class="ph-duotone ph-gear" style="color:var(--primary-color)"></i> SmartShift
-            </h1>
-            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Production & Machine Management</p>
+            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">SmartShift</h1>
+            <p style="margin:0.125rem 0 0;color:var(--text-muted);font-size:0.8125rem;">Production & machine management</p>
           </div>
-          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            <button id="ss-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
-              Insights
-            </button>
-          </div>
+          <button id="ss-ai-btn" class="btn btn-secondary" style="font-size:0.8125rem;">Insights</button>
         </header>
 
         <div class="module-nav">
@@ -822,10 +816,10 @@ class SmartShiftUI {
     const workers = await this.module.getWorkers();
 
     container.innerHTML = `
-  < div class="action-bar" >
+  <div class="action-bar">
         <h2>Workers</h2>
         <button id="add-worker-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Worker</button>
-      </div >
+      </div>
       
       <div class="machine-grid">
         ${workers.map(w => `

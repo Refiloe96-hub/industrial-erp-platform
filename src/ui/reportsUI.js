@@ -583,8 +583,8 @@ class ReportsUI {
       // Add a header for the PDF
       const title = document.createElement('div');
       title.innerHTML = `
-        <h1 style="color:#111827; margin-bottom: 0.5rem;">Business Status Report</h1>
-        <p style="color:#6b7280; margin-top:0; margin-bottom: 2rem;">Period: ${startDate} to ${endDate}</p>
+        <h1 style="color:#111; margin-bottom:0.5rem;">Business Status Report</h1>
+        <p style="color:#444; margin-top:0; margin-bottom:2rem;">Period: ${startDate} to ${endDate}</p>
       `;
       element.insertBefore(title, element.firstChild);
 
@@ -832,7 +832,7 @@ class ReportsUI {
           bodyHTML: `
             <div class="dp-section">
               <div class="dp-section-title">What is ROI?</div>
-              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+              <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">
                 ROI measures how much profit your inventory investment generates. A higher ROI means your stock is working harder for you.
               </p>
               <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
@@ -843,7 +843,7 @@ class ReportsUI {
               <div class="dp-section-title">Current Performance</div>
               <div class="dp-kv-grid">
                 ${dpKV('ROI', stats.roi.toFixed(1) + '%')}
-                ${dpKV('Rating', stats.roi >= 100 ? '🟢 Excellent' : stats.roi >= 0 ? '🟡 Positive' : '🔴 Negative')}
+                ${dpKV('Rating', stats.roi >= 100 ? '<span style="color:#34d399">Excellent</span>' : stats.roi >= 0 ? '<span style="color:#fbbf24">Positive</span>' : '<span style="color:#f87171">Negative</span>')}
                 ${dpKV('Benchmark', '> 100% is excellent for retail', true)}
               </div>
             </div>
@@ -862,7 +862,7 @@ class ReportsUI {
           bodyHTML: `
             <div class="dp-section">
               <div class="dp-section-title">What is Service Level?</div>
-              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+              <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">
                 Service Level is the percentage of your SKUs that are in stock (above their reorder level). High service levels mean fewer stockouts and better customer satisfaction.
               </p>
             </div>
@@ -870,7 +870,7 @@ class ReportsUI {
               <div class="dp-section-title">Current Performance</div>
               <div class="dp-kv-grid">
                 ${dpKV('Service Level', stats.serviceLevel.toFixed(1) + '%')}
-                ${dpKV('Rating', stats.serviceLevel >= 95 ? '🟢 Excellent' : stats.serviceLevel >= 85 ? '🟡 Good' : '🔴 Needs Work')}
+                ${dpKV('Rating', stats.serviceLevel >= 95 ? '<span style="color:#34d399">Excellent</span>' : stats.serviceLevel >= 85 ? '<span style="color:#fbbf24">Good</span>' : '<span style="color:#f87171">Needs Work</span>')}
                 ${dpKV('Target', '≥ 95% is the industry standard', true)}
               </div>
               ${dpBar('Availability', stats.serviceLevel, 100, stats.serviceLevel >= 95 ? '#16a34a' : stats.serviceLevel >= 85 ? '#f59e0b' : '#dc2626', v => v.toFixed(1) + '%')}
@@ -890,7 +890,7 @@ class ReportsUI {
           bodyHTML: `
             <div class="dp-section">
               <div class="dp-section-title">What is Stock Turnover?</div>
-              <p style="font-size:0.875rem;color:var(--text-secondary,#6b7280);line-height:1.6;">
+              <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">
                 Stock turns measures how many times your entire inventory is sold and replaced in a year. Higher is generally better — it means your stock is moving fast and your cash isn't tied up.
               </p>
               <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
@@ -902,7 +902,7 @@ class ReportsUI {
               <div class="dp-kv-grid">
                 ${dpKV('Stock Turns', stats.stockTurns.toFixed(1) + 'x / year')}
                 ${dpKV('Industry Benchmark', '4–8x is typical for retail')}
-                ${dpKV('Interpretation', stats.stockTurns >= 6 ? 'Fast-moving inventory ✓' : stats.stockTurns >= 3 ? 'Moderate pace' : 'Slow — consider clearance sales', true)}
+                ${dpKV('Interpretation', stats.stockTurns >= 6 ? '<span style="color:#34d399">Fast-moving</span>' : stats.stockTurns >= 3 ? '<span style="color:#fbbf24">Moderate pace</span>' : '<span style="color:#f87171">Slow — consider clearance</span>', true)}
               </div>
             </div>`
         }
@@ -961,7 +961,7 @@ class ReportsUI {
 
         .section-header {
             margin: 1.5rem 0 1rem;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 0.5rem;
         }
         
@@ -1091,8 +1091,8 @@ class ReportsUI {
         }
 
         .summary-item .label {
-          font-size: 0.875rem;
-          color: #6b7280;
+          font-size: 0.8125rem;
+          color: var(--text-secondary);
         }
 
         .summary-item .value {

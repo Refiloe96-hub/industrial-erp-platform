@@ -313,11 +313,11 @@ class SettingsUI {
             <div style="font-weight:600">${u.username || u.email || 'User'}</div>
             <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:capitalize">${u.role || 'staff'}</div>
           </div>
-          <button class="btn btn-sm" style="background:transparent;border:1px solid #ef4444;color:#ef4444;padding:0.25rem 0.5rem" onclick="alert('Account deletion not enabled in demo mode.')">Remove</button>
+          <button class="btn btn-sm" style="background:transparent;border:1px solid var(--danger);color:var(--danger);padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="alert('Account deletion not enabled in demo mode.')">Remove</button>
         </div>
       `).join('');
     } catch {
-      listContainer.innerHTML = '<p style="color:#ef4444;font-size:0.875rem">Error loading team list.</p>';
+      listContainer.innerHTML = '<p style="color:var(--danger);font-size:0.875rem">Error loading team list.</p>';
     }
   }
 
@@ -746,7 +746,7 @@ class SettingsUI {
           width: 100%;
           max-width: 1200px;
           margin: 0 auto;
-          background: #0f172a;
+          background: var(--bg-secondary);
           color: var(--text-primary);
           overflow-x: hidden !important;
           overflow-y: hidden;
@@ -759,7 +759,7 @@ class SettingsUI {
           flex-shrink: 0;
           border-right: 1px solid var(--border-color);
           overflow-y: auto;
-          background: #0f172a;
+          background: var(--bg-secondary);
           height: 100%;
         }
         
@@ -767,9 +767,7 @@ class SettingsUI {
           padding: 1rem 1.5rem;
           position: sticky;
           top: 0;
-          background: rgba(15, 23, 42, 0.9);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: var(--bg-secondary);
           z-index: 10;
         }
         
@@ -827,7 +825,7 @@ class SettingsUI {
         .settings-pane {
           flex: 1;
           overflow-y: auto;
-          background: #0f172a;
+          background: var(--bg-secondary);
           position: relative;
           height: 100%;
         }
@@ -943,7 +941,7 @@ class SettingsUI {
           border: none;
           border-radius: 16px;
           padding: 0;
-          background: #0f172a;
+          background: var(--bg-secondary);
           color: var(--text-primary);
           box-shadow: 0 20px 50px rgba(0,0,0,0.7);
           width: 400px;
@@ -979,7 +977,7 @@ class SettingsUI {
             height: 100%;
             overflow-y: auto;
             transition: transform 0.3s ease;
-            background: #0f172a;
+            background: var(--bg-secondary);
           }
 
           /* Always show the chevron arrow on mobile */
@@ -993,7 +991,7 @@ class SettingsUI {
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0f172a;
+            background: var(--bg-secondary);
             transform: translateX(100%);
             transition: transform 0.3s ease;
             z-index: 20;
@@ -1026,9 +1024,7 @@ class SettingsUI {
             padding: 1rem 1.25rem;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             flex-shrink: 0;
-            background: rgba(15, 23, 42, 0.97);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: var(--bg-secondary);
             z-index: 30;
           }
           .pane-mobile-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
