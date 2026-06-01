@@ -15,8 +15,8 @@ class CustomersUI {
           <button class="btn btn-primary" id="btn-add-customer"><i class="ph ph-plus"></i> New Customer</button>
         </div>
 
-        <div class="search-bar mb-4">
-          <input type="text" id="customer-search" placeholder="Search by name or phone..." class="form-control">
+        <div class="search-bar" style="margin-bottom:1rem;">
+          <input type="text" id="customer-search" placeholder="Search by name or phone...">
         </div>
 
         <div class="customers-grid" id="customers-list">
@@ -80,7 +80,7 @@ class CustomersUI {
           <p><i class="ph-duotone ph-phone"></i> ${c.phone || 'No phone'}</p>
           <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: R ${(c.totalSpent || 0).toLocaleString()}</p>
           <p class="text-sm text-muted">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
-          <button class="btn btn-sm btn-outline-primary mt-2 btn-edit" data-id="${c.id}">Edit</button>
+          <button class="btn btn-secondary btn-edit" data-id="${c.id}" style="font-size:0.75rem;padding:0.3rem 0.75rem;margin-top:0.5rem;">Edit</button>
         </div>
       </div>
     `).join('');
@@ -183,10 +183,7 @@ class CustomersUI {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-        }
-        .page-header h2 {
-            color: var(--text-primary);
+            margin-bottom: 1.25rem;
         }
         .customers-grid {
             display: grid;
@@ -195,23 +192,27 @@ class CustomersUI {
         }
         .customer-card {
             background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
             border: 1px solid var(--border);
-            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            transition: border-color 0.15s;
         }
         .customer-card:hover { border-color: var(--border-strong); }
-        .card-header {
+        .customer-card .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border);
         }
-        .card-header h3 { 
-            margin: 0; 
-            font-size: 1.1rem; 
+        .customer-card .card-header h3 {
+            margin: 0;
+            font-size: 0.9375rem;
+            font-weight: 600;
             color: var(--text-primary);
+        }
+        .customer-card .card-body {
+            padding: 1rem 1.25rem;
         }
         .card-body p {
             color: var(--text-secondary);
