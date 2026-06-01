@@ -2051,7 +2051,7 @@ class IndustrialERPApp {
         }
 
         .notification-item.unread {
-            background: #eff6ff;
+            background: rgba(37,99,235,0.06);
         }
 
         .notification-item.critical {
@@ -2063,7 +2063,7 @@ class IndustrialERPApp {
         }
 
         .notification-item.info {
-            border-left: 4px solid #6366f1;
+            border-left: 4px solid #2563eb;
         }
 
         .notification-icon {
@@ -2117,201 +2117,76 @@ class IndustrialERPApp {
             min-height: 160px;
         }
 
-        /* ========== THEME VARIABLES (OpenAI Glass) ========== */
-        :root, [data-theme="dark"], [data-theme="light"] {
-            font-size: 81.25%; /* ~13px base size (80% zoom emulation) */
-            
-            /* Global OLED Glass Theme */
-            --bg-primary: rgba(255, 255, 255, 0.03); /* Glass Cards */
-            --bg-secondary: transparent;             /* Page Bg (handled by body gradient) */
-            --bg-sidebar: rgba(20, 20, 25, 0.6);     /* Frosty Sidebar */
-            --text-primary: #ffffff;
-            --text-secondary: #c5c5d2;
-            --border-color: rgba(255, 255, 255, 0.08);
-            
-            --accent-primary: #ffffff;   /* Pure white buttons */
-            --accent-hover: #e5e5e5;     
-            --accent-success: #10a37f;
-            --accent-warning: #f59e0b;
-            --accent-danger: #ef4444;
-            
-            --radius-md: 9999px; /* Pill inputs */
-            --radius-lg: 24px;   /* Deeply rounded cards */
-            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Glassmorphism Classes */
-        .glass-panel {
-            background: var(--bg-primary);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-        }
-
-        /* ========== LAYOUT ========== */
-        .dashboard-container {
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            background: transparent; /* Let body gradient show through */
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--bg-sidebar);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            color: var(--text-primary);
-            transition: transform 0.3s ease;
-            z-index: 40;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-weight: 700;
-            font-size: 1.25rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 1rem 0;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.85rem 1.5rem;
-            margin: 0.2rem 1rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-            border-radius: 9999px; /* Pill shaped nav items */
-        }
-
-        .nav-item:hover {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            background: transparent;
-        }
-
-        .top-header {
-            height: 70px;
-            background: rgba(20, 20, 25, 0.4);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            z-index: 30;
-        }
-
-        /* ========== COMPONENTS ========== */
+        /* ========== COMPONENTS (continued) ========== */
         .card {
             background: var(--bg-primary);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
             overflow: hidden;
             color: var(--text-primary);
         }
 
         .card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 0.875rem;
         }
 
-        .card-body {
-            padding: 1.5rem;
-        }
+        .card-body { padding: 1.25rem; }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.85rem 1.5rem;
-            border-radius: var(--radius-md); /* Pill shape */
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s, opacity 0.15s;
             border: none;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
         }
 
         .btn-primary {
-            background: var(--accent-primary);
-            color: #000000; /* Dark text on white button (OpenAI style) */
+            background: #2563eb;
+            color: white;
         }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
+        .btn-primary:hover { background: #1d4ed8; }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-elevated, #232326);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
         }
+        .btn-secondary:hover { background: var(--bg-hover); }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Form Elements - Pill geometry */
+        /* Form elements */
         input, select, textarea {
             width: 100%;
-            padding: 0.85rem 1.25rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); /* Pill */
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-family: inherit;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-            background: rgba(255, 255, 255, 0.05); /* Ghost input */
+            font-size: 0.875rem;
+            transition: border-color 0.15s;
+            background: rgba(255,255,255,0.04);
             color: var(--text-primary);
         }
-
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
         }
-        /* Tables (DeepPCB Style) */
+
+        /* Tables */
         .table-container {
             background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            border: 1px solid var(--border);
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
         }
 
         .data-table {
@@ -2395,15 +2270,11 @@ class IndustrialERPApp {
         .mobile-header {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: rgba(20, 20, 25, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            color: white;
+            top: 0; left: 0; right: 0;
+            height: 52px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
             z-index: 1000;
             padding: 0 1rem;
             align-items: center;
@@ -2427,14 +2298,10 @@ class IndustrialERPApp {
         .bottom-nav {
             display: none;
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(20, 20, 25, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-color);
+            bottom: 0; left: 0; right: 0;
+            height: 56px;
+            background: var(--bg-sidebar);
+            border-top: 1px solid var(--border);
             z-index: 1000;
             padding: 0;
         }

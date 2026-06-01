@@ -33,8 +33,8 @@ class SalesUI {
 
         <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; padding-bottom: 1rem;">
           <div>
-            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;"><i class="ph-duotone ph-shopping-cart"></i> Point of Sale</h1>
-            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Sales, checkout, and receipt printing</p>
+            <h1 style="margin:0; font-size:1.125rem; font-weight:700; letter-spacing:-0.01em;">Point of Sale</h1>
+            <p style="margin:0.125rem 0 0; color:var(--text-muted); font-size:0.8125rem;">Sales, checkout, and receipts</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
             <button id="sales-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
@@ -83,7 +83,7 @@ class SalesUI {
           <div class="cart-section">
             <div class="card cart-card">
               <div class="card-header">
-                <h3><i class="ph-duotone ph-shopping-cart"></i> Current Sale</h3>
+                <h3>Current Sale</h3>
                 <button id="clear-cart" class="btn-text text-danger">Clear</button>
               </div>
               <div class="card-body">
@@ -137,7 +137,7 @@ class SalesUI {
                   </label>
                 </div>
 
-                <div id="mpesa-qr-container" style="display: none; text-align: center; margin-bottom: 1rem; border: 2px dashed #e5e7eb; padding: 1rem; border-radius: 8px;">
+                <div id="mpesa-qr-container" style="display: none; text-align: center; margin-bottom: 1rem; border: 1px dashed var(--border-strong); padding: 1rem; border-radius: 8px;">
                   <p style="margin-bottom: 0.5rem; font-weight: 600;">Scan to Pay with M-Pesa</p>
                   <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=M-PESA-MERCHANT-123456" alt="M-Pesa QR Code" style="width: 150px; height: 150px;">
                   <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.5rem;">Merchant ID: 123456</p>
@@ -801,15 +801,11 @@ class SalesUI {
           margin-bottom: 1rem;
         }
         .stat-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid var(--border-color);
-          padding: 1rem;
-          border-radius: var(--radius-lg);
-          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
+          background: var(--bg-primary);
+          border: 1px solid var(--border);
+          padding: 1rem 1.25rem;
+          border-radius: 8px;
+          display: block;
         }
         .badge.cash { background: #10b981; color: white; }
         .badge.card { background: #2563eb; color: white; }
@@ -942,39 +938,40 @@ class SalesUI {
           scrollbar-width: none;
         }
         .cat-btn {
-          padding: 0.5rem 1rem;
-          background: rgba(255, 255, 255, 0.05); /* Ghost base */
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-md); /* Pill shape */
+          padding: 0.375rem 0.875rem;
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 6px;
           white-space: nowrap;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: border-color 0.15s, background 0.15s, color 0.15s;
           color: var(--text-secondary);
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
+          font-weight: 500;
         }
-        .cat-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(255,255,255,0.1); }
+        .cat-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
         .cat-btn.active {
-          background: var(--accent-primary);
-          color: #000;
-          border-color: var(--accent-primary);
+          background: rgba(37,99,235,0.12);
+          color: #93c5fd;
+          border-color: rgba(37,99,235,0.3);
         }
 
         .payment-option {
           flex: 1;
           text-align: center;
-          padding: 0.75rem;
-          border: 1px solid var(--border-color);
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: var(--radius-md); /* Pill shape */
+          padding: 0.625rem 0.375rem;
+          border: 1px solid var(--border);
+          background: transparent;
+          border-radius: 8px;
           cursor: pointer;
-          font-size: 1.25rem;
+          font-size: 1.1rem;
           color: var(--text-secondary);
-          transition: border-color 0.15s, background 0.15s;
+          transition: border-color 0.15s, background 0.15s, color 0.15s;
         }
         .payment-option:has(input:checked) {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: var(--accent-primary);
-          color: var(--accent-primary);
+          background: rgba(37,99,235,0.1);
+          border-color: rgba(37,99,235,0.4);
+          color: #93c5fd;
         }
 
         .cart-summary { margin-bottom: 1rem; }
@@ -1016,22 +1013,23 @@ class SalesUI {
         .scan-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
 
         .customer-selector select {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--border-color);
+          background: rgba(255,255,255,0.04);
+          border: 1px solid var(--border);
           color: var(--text-primary);
-          border-radius: var(--radius-md);
+          border-radius: 8px;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          width: 100%;
         }
 
         .invoice-modal {
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-lg);
+          border: 1px solid var(--border);
+          border-radius: 10px;
           padding: 0;
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 24px 48px rgba(0,0,0,0.6);
           width: 420px;
           max-width: 95vw;
           background: var(--bg-primary);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
           color: var(--text-primary);
         }
         .invoice-modal::backdrop { background: rgba(0,0,0,0.7); }
@@ -1058,15 +1056,13 @@ class SalesUI {
         .invoice-actions .btn { flex: 1; }
 
         .scanner-modal {
-          border: none;
-          border-radius: 16px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
           padding: 0;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          box-shadow: 0 24px 48px rgba(0,0,0,0.6);
           width: 380px;
           max-width: 95vw;
-          background: var(--bg-primary, rgba(15, 23, 42, 0.95));
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
+          background: var(--bg-primary);
           color: var(--text-primary);
         }
         .scanner-modal::backdrop { background: rgba(0,0,0,0.6); }
