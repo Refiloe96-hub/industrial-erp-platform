@@ -11,7 +11,7 @@ class CustomersUI {
     container.innerHTML = `
       <div class="customers-container">
         <div class="page-header">
-          <h2><i class="ph-duotone ph-users"></i> Customers</h2>
+          <h2 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Customers</h2>
           <button class="btn btn-primary" id="btn-add-customer"><i class="ph ph-plus"></i> New Customer</button>
         </div>
 
@@ -48,7 +48,7 @@ class CustomersUI {
               </div>
               <div class="form-group">
                 <label>Notes</label>
-                <textarea id="cust-notes" rows="3" class="form-control" style="width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.75rem;"></textarea>
+                <textarea id="cust-notes" rows="3" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.04);color:var(--text-primary);font-family:inherit;font-size:0.875rem;resize:vertical;"></textarea>
               </div>
             </form>
           </div>

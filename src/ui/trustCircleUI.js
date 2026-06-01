@@ -303,22 +303,20 @@ class TrustCircleUI {
         }
       </style>
       <div class="trustcircle-dashboard">
-        <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem">
+        <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
           <div>
-            <h1 style="margin:0; font-size:1.5rem; display:flex; align-items:center; gap:0.5rem;"><i class="ph-duotone ph-handshake"></i> TrustCircle Syndicates</h1>
-            <p style="margin:0; color:var(--text-secondary); font-size:0.9rem;">Result-based cooperation for SMEs</p>
+            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">TrustCircle</h1>
+            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Group syndicates & cooperative buying</p>
           </div>
-          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-            <button id="tc-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
-              Insights
-            </button>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <button id="tc-ai-btn" class="btn btn-secondary" style="font-size:0.8125rem;">Insights</button>
             <button id="create-syndicate-btn" class="btn btn-primary"><i class="ph ph-plus"></i> New Syndicate</button>
           </div>
         </header>
 
         <div class="stats-overview">
           <div class="stat-card" data-card="trust_score" style="cursor:pointer;" title="Click for details">
-            <h3 style="color:${trustProfile.color}; font-weight:700;"><i class="ph-duotone ph-shield-check"></i> FinTech Trust Score</h3>
+            <h3 style="margin:0 0 0.375rem;font-size:0.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">Trust Score</h3>
             <div class="value" style="display:flex; align-items:baseline; gap:0.5rem;">
                 ${trustProfile.score} <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:500;">/ 1000</span>
             </div>

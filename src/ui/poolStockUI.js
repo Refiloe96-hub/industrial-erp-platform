@@ -32,8 +32,8 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1><i class="ph-duotone ph-package"></i> PoolStock</h1>
-                            <p>Inventory & Procurement Management</p>
+                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PoolStock</h1>
+                            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Inventory & procurement</p>
                         </div>
                         <button id="add-item-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Item</button>
                     </header>
@@ -80,11 +80,11 @@ class PoolStockUI {
                     <!-- Interactive Analytics Chart (Phase 7) -->
                     <div class="card" style="margin-bottom: 2rem; background: var(--bg-primary); border: 1px solid var(--border); overflow: hidden;">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 1rem 1.5rem;">
-                            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; color: var(--text-primary);"><i class="ph-duotone ph-trend-up"></i> Total Inventory Value Over Time</h3>
-                            <div class="chart-controls" style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-secondary chart-range-btn active" data-days="7" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">1W</button>
-                                <button class="btn btn-secondary chart-range-btn" data-days="30" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">1M</button>
-                                <button class="btn btn-secondary chart-range-btn" data-days="90" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">3M</button>
+                            <h3 style="margin:0;font-size:0.875rem;font-weight:600;">Inventory Value Over Time</h3>
+                            <div class="chart-controls" style="display:flex;gap:0.375rem;">
+                                <button class="btn btn-secondary chart-range-btn active" data-days="7" style="padding:0.25rem 0.625rem;font-size:0.75rem;">1W</button>
+                                <button class="btn btn-secondary chart-range-btn" data-days="30" style="padding:0.25rem 0.625rem;font-size:0.75rem;">1M</button>
+                                <button class="btn btn-secondary chart-range-btn" data-days="90" style="padding:0.25rem 0.625rem;font-size:0.75rem;">3M</button>
                             </div>
                         </div>
                         <div class="card-body" style="padding: 0;">
@@ -749,7 +749,7 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1><i class="ph-duotone ph-chart-line-up"></i> Demand Forecast</h1>
+                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;">Demand Forecast</h1>
                             <p>AI-powered stockout prediction (${aiEngine.getHorizon()}-day horizon)</p>
                         </div>
                         <button id="back-to-inv" class="btn btn-secondary"><i class="ph ph-arrow-left"></i> Back</button>
@@ -1002,8 +1002,8 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1><i class="ph-duotone ph-package"></i> PoolStock</h1>
-                            <p>Inventory & Procurement Management</p>
+                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PoolStock</h1>
+                            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Inventory & procurement</p>
                         </div>
                         <button id="create-po-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Create PO</button>
                     </header>

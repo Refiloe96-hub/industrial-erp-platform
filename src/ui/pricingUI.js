@@ -564,7 +564,7 @@ export default class PricingUI {
       <div id="pricing-support-modal" class="modal" style="display: none; position: fixed; inset: 0; z-index: 2100; align-items: center; justify-content: center;">
     <div class="modal-content" style="width: 90%; max-width: 450px;">
       <div class="modal-header">
-        <h2 style="color: var(--text-primary);"><i class="ph-duotone ph-headset"></i> Contact Support</h2>
+        <h2 style="color:var(--text-primary);font-size:1rem;font-weight:700;margin:0 0 1rem;">Contact Support</h2>
         <button class="btn-icon" id="close-pricing-support"><i class="ph-bold ph-x"></i></button>
       </div>
       <div class="modal-body">

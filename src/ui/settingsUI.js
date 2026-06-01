@@ -907,7 +907,7 @@ class SettingsUI {
         }
         .pane-actions .btn {
           padding: 0.75rem 2rem;
-          border-radius: 999px; /* Pill shape buttons */
+          border-radius: 8px;
           font-weight: 700;
         }
 
@@ -1052,7 +1052,7 @@ class SettingsUI {
       <div id="import-wizard-modal" class="modal" style="display: none; position: fixed; inset: 0; z-index: 2000; align-items: center; justify-content: center;">
         <div class="modal-content" style="width: 90%; max-width: 500px;">
           <div class="modal-header">
-            <h2><i class="ph-duotone ph-magic-wand"></i> Import Wizard</h2>
+            <h2 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Import Data</h2>
             <button class="btn-icon" id="close-import-wizard"><i class="ph-bold ph-x"></i></button>
           </div>
           <div class="modal-body">
@@ -1090,7 +1090,7 @@ class SettingsUI {
       <div id="support-modal" class="modal" style="display: none; position: fixed; inset: 0; z-index: 2100; align-items: center; justify-content: center;">
         <div class="modal-content" style="width: 90%; max-width: 450px;">
           <div class="modal-header">
-            <h2><i class="ph-duotone ph-headset"></i> Contact Support</h2>
+            <h2 style="margin:0 0 1rem;font-size:1rem;font-weight:700;">Contact Support</h2>
             <button class="btn-icon" id="close-support"><i class="ph-bold ph-x"></i></button>
           </div>
           <div class="modal-body">

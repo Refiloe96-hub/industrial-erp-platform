@@ -130,7 +130,7 @@ class PocketBooksUI {
                     <div class="financial-reports-panel">
                         <div class="reports-header">
                             <div>
-                                <h3><i class="ph-duotone ph-file-text"></i> Financial Documents</h3>
+                                <h3>Financial Documents</h3>
                                 <p>Standardized reports configured for your business profile.</p>
                             </div>
                         </div>
@@ -678,7 +678,7 @@ class PocketBooksUI {
                 .tx-detail-body { flex:1; overflow-y:auto; padding:1.5rem; }
                 .tx-amount-hero { text-align:center; padding: 2rem 0 1.5rem; }
                 .tx-amount-hero .amount { font-size: 2.5rem; font-weight: 700; letter-spacing:-1px; color:${amountColor}; }
-                .tx-amount-hero .type-badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:${isIncome ? '#dcfce7' : '#fee2e2'}; color:${amountColor}; margin-top:0.5rem; }
+                .tx-amount-hero .type-badge { display:inline-block; padding:0.2rem 0.625rem; border-radius:4px; font-size:0.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; background:${isIncome ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'}; color:${amountColor}; margin-top:0.5rem; }
                 .tx-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
                 .tx-field { background:rgba(255,255,255,0.05); border-radius:8px; padding:0.875rem 1rem; border:1px solid rgba(255,255,255,0.07); }
                 .tx-field .field-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-secondary,#94a3b8); margin-bottom:0.25rem; }
