@@ -72,7 +72,10 @@ class PocketWalletUI {
         <section class="transaction-history mt-4">
             <h3>Recent Transactions</h3>
             <div class="tx-list">
-                ${recentTx.length === 0 ? '<p>No transactions yet.</p>' :
+                ${recentTx.length === 0 ? `<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);">
+                  <i class="ph-duotone ph-receipt" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.4;"></i>
+                  <p style="font-size:0.875rem;margin:0;">No transactions yet</p>
+                </div>` :
                 recentTx.map(tx => `
                         <div class="tx-item">
                             <div class="tx-icon ${tx.type}">${tx.type === 'credit' ? '<i class="ph ph-arrow-down-left"></i>' : '<i class="ph ph-arrow-up-right"></i>'}</div>

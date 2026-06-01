@@ -293,7 +293,7 @@ class PoolStockUI {
                 .ip-header h2 { font-size: 1rem; font-weight: 600; margin: 0; color: var(--text-primary,#111); }
                 .ip-body { flex:1; overflow-y:auto; padding: 1.5rem; }
                 .ip-hero { display:flex; align-items:center; gap:1rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border,#e5e7eb); margin-bottom:1.25rem; }
-                .ip-hero-icon { width:56px; height:56px; border-radius:12px; background:var(--bg-secondary,#f8fafc); display:flex; align-items:center; justify-content:center; font-size:1.75rem; flex-shrink:0; }
+                .ip-hero-icon { width:56px; height:56px; border-radius:12px; background:var(--bg-secondary,#111113); display:flex; align-items:center; justify-content:center; font-size:1.75rem; flex-shrink:0; }
                 .ip-hero-name { font-size:1.125rem; font-weight:700; color:var(--text-primary,#111); }
                 .ip-hero-sub { font-size:0.8rem; color:var(--text-secondary,#6b7280); margin-top:0.2rem; font-family:monospace; }
                 .ip-status-badge { display:inline-flex; align-items:center; padding:0.2rem 0.65rem; border-radius:999px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:${bg}; color:${color}; margin-top:0.4rem; }
@@ -305,13 +305,13 @@ class PoolStockUI {
                 .ip-bar-fill { height:100%; border-radius:999px; transition:width 0.6s ease; }
                 .ip-bar-val { font-size:0.8rem; font-weight:600; color:var(--text-primary,#111); width:40px; text-align:right; flex-shrink:0; }
                 .ip-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
-                .ip-field { background:var(--bg-secondary,#f8fafc); border-radius:8px; padding:0.75rem 1rem; }
+                .ip-field { background:var(--bg-secondary,#111113); border-radius:8px; padding:0.75rem 1rem; }
                 .ip-field .fl { font-size:0.67rem; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-secondary,#9ca3af); margin-bottom:0.2rem; }
                 .ip-field .fv { font-size:0.925rem; font-weight:600; color:var(--text-primary,#111); }
                 .ip-field.full { grid-column:1/-1; }
                 .ip-footer { padding:1rem 1.5rem; border-top:1px solid var(--border,#e5e7eb); display:flex; gap:0.75rem; }
                 .ip-btn { flex:1; padding:0.6rem; border:1px solid var(--border,#e5e7eb); background:transparent; border-radius:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary,#6b7280); }
-                .ip-btn:hover { background:var(--bg-secondary,#f8fafc); }
+                .ip-btn:hover { background:var(--bg-secondary,#111113); }
                 .ip-btn-primary { background:#2563eb; color:#fff; border-color:#2563eb; font-weight:600; }
                 .ip-btn-primary:hover { background:#1d4ed8; }
             </style>

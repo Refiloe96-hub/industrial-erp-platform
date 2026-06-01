@@ -423,10 +423,7 @@ export default class PricingUI {
           border: none;
         }
 
-        .btn-white:hover {
-          background: #ffffff;
-          transform: translateY(-1px);
-        }
+        .btn-white:hover { background: #f1f5f9; }
 
         .btn-primary {
           background: var(--accent-primary);

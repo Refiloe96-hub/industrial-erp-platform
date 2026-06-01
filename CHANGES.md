@@ -60,3 +60,50 @@ When a user clicked **Google** or **Apple** login, the Supabase JS client perfor
 
 - The app fully supports **local-only / offline mode** — new users can sign up and use all features stored on-device without cloud. Cloud sync is optional.
 - If the project is deleted and cannot be restored, existing cloud users will need to re-register.
+
+---
+
+## Phase 15: Security, Robustness & Professional Redesign
+**Date:** 2026-06-02  
+**Branch:** `deploy`
+
+### Security Fixes
+- **Password hashing**: Upgraded from raw SHA-256 to PBKDF2 (100k iterations, 16-byte salt). Legacy hashes auto-migrate on next login.
+- **XSS prevention**: All user-controlled data escaped via `esc()` utility before innerHTML insertion.
+- **JSON.parse safety**: New `safeParseJSON`/`getSession` utilities wrap all localStorage reads; WebRTC message parsing wrapped in try-catch.
+- **Null guards**: `contentArea.parentNode` checked before replaceChild; `payload.new` null-checked in sync manager.
+- **Input validation**: PoolStock rejects negative/NaN values before writing to IndexedDB.
+- **Supabase connectivity**: Pre-flight health check before OAuth redirects prevents DNS crash page.
+
+### Design System Overhaul
+- **Single accent colour**: Removed competing orange (`#fb923c`) and indigo (`#6366f1`) accents — app-wide `#2563eb` blue.
+- **Glassmorphism removed**: All `backdrop-filter: blur()` and `rgba(255,255,255,0.03)` glass backgrounds removed from every module.
+- **Card system**: `padding: 0` on `.card`, padding provided by `.card-header`/`.card-body`/`.stat-card` per design system.
+- **No hover lift**: All `transform: translateY()` on cards removed app-wide.
+- **Dark-mode badge colours**: Light-mode `#d1fae5`/`#fee2e2` backgrounds replaced with `rgba(16,185,129,0.12)`/`rgba(239,68,68,0.12)`.
+- **CSS tokens unified**: `--border-color` normalised to `--border` across all module files.
+- **Missing variables defined**: `--radius-sm/md/lg`, `--shadow-sm/lg`, `--accent`, `--text-muted` all added to `:root`.
+
+### Auth Screen
+- Removed animated gradient background and glassmorphism.
+- Removed AI-placeholder copy ("You'll get smarter operations...") — replaced with product-appropriate text.
+- Standard 8px-radius inputs and buttons replacing 9999px pills.
+
+### Module-by-Module Fixes
+Each module had its own glassmorphism, undefined CSS classes, and light-mode colours removed. The Sales POS gained full desktop CSS (product grid had no styles at all). SmartShift had a complete CSS parser error (property names with spaces) fixed. Settings pane gained missing utility classes.
+
+### Navigation & Shell
+- Sidebar footer: three separate buttons → Claude-style user profile with click-to-open dropdown (Settings, Upgrade, Log out).
+- Settings page: 320px nav → 200px; form labels → small uppercase muted; section headers smaller.
+- Dashboard: stats now 4-column row on desktop; "Business Insights" moved below charts.
+- Charts rewritten: responsive SVG, dark-mode text colours, single-colour bars.
+- Removed dead "AI Insights" magic wand button from content header.
+- Seed Data moved from broken DOM injection to Settings → Data & Storage.
+
+### Global Utility Classes
+Added globally to main.js: `text-muted`, `text-danger`, `text-success`, `text-center`, `btn-text`, `mt-1`–`mt-4`, `mb-1`–`mb-4`, `w-100`, `col-span-full`.
+
+### Mobile
+- Bottom nav CSS bug fixed (duplicate active rule with misplaced `}`).
+- `padding-top` corrected to match actual 52px mobile header.
+- Stat card flex override on mobile removed.

@@ -835,7 +835,7 @@ class ReportsUI {
               <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">
                 ROI measures how much profit your inventory investment generates. A higher ROI means your stock is working harder for you.
               </p>
-              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
+              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#111113);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
                 ROI = (Total Revenue − Cost) ÷ Inventory Value × 100
               </p>
             </div>
@@ -893,7 +893,7 @@ class ReportsUI {
               <p style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">
                 Stock turns measures how many times your entire inventory is sold and replaced in a year. Higher is generally better — it means your stock is moving fast and your cash isn't tied up.
               </p>
-              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#f8fafc);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
+              <p style="font-size:0.8rem;font-family:monospace;background:var(--bg-secondary,#111113);padding:0.75rem;border-radius:8px;margin-top:0.75rem;">
                 Stock Turns = Cost of Goods Sold ÷ Average Inventory Value
               </p>
             </div>

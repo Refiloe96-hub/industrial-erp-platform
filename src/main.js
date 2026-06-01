@@ -1946,33 +1946,44 @@ class IndustrialERPApp {
           cursor: pointer;
         }
         
-        .text-muted {
-          color: var(--text-secondary);
-        }
+        /* ── Global utility classes ─────────────────────────────── */
+        .text-muted    { color: var(--text-muted); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-danger   { color: var(--danger); }
+        .text-success  { color: var(--success); }
+        .text-warning  { color: var(--warning); }
+        .text-center   { text-align: center; }
+        .text-right    { text-align: right; }
+        .font-bold     { font-weight: 700; }
+        .font-medium   { font-weight: 500; }
 
-        /* Global Button Styles */
-        .btn {
-          padding: 0.75rem 1.5rem;
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .w-100 { width: 100%; }
+        .col-span-full { grid-column: 1 / -1; }
+
+        /* Text button (looks like a link) */
+        .btn-text {
+          background: none;
           border: none;
-          border-radius: 6px;
-          font-size: 1rem;
-          font-weight: 500;
           cursor: pointer;
-          transition: all 0.2s;
+          font-size: inherit;
+          font-family: inherit;
+          padding: 0;
+          color: var(--text-secondary);
+          transition: color 0.15s;
         }
-        
-        .btn-primary {
-          background: #2563eb;
-          color: white;
-        }
-        
-        .btn-primary:hover {
-          background: #1e40af;
-        }
-        
-        .btn-block {
-          width: 100%;
-        }
+        .btn-text:hover { color: var(--text-primary); }
+        .btn-text.text-danger { color: var(--danger); }
+        .btn-text.text-danger:hover { opacity: 0.8; }
+
+        .btn-block { width: 100%; }
 
         @media (max-width: 768px) {
           .sidebar {
