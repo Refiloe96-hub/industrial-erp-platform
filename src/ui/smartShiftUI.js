@@ -278,34 +278,42 @@ class SmartShiftUI {
 
     container.innerHTML = `
       <div class="dashboard-grid">
-        <div class="card" data-card="running" style="cursor:pointer" title="Click for details">
-          <h3>Running Orders</h3>
-          <div class="big-number">${metrics.orders.inProgress}</div>
+        <div class="card stat-card" data-card="running" style="cursor:pointer" title="Click for details">
+          <div class="stat-content">
+            <p class="stat-label">Running Orders</p>
+            <div class="stat-value">${metrics.orders.inProgress}</div>
+          </div>
         </div>
-        <div class="card" data-card="pending" style="cursor:pointer" title="Click for details">
-          <h3>Pending Orders</h3>
-          <div class="big-number">${metrics.orders.pending}</div>
+        <div class="card stat-card" data-card="pending" style="cursor:pointer" title="Click for details">
+          <div class="stat-content">
+            <p class="stat-label">Pending Orders</p>
+            <div class="stat-value">${metrics.orders.pending}</div>
+          </div>
         </div>
-        <div class="card" data-card="utilization" style="cursor:pointer" title="Click for machine breakdown">
-          <h3>Machine Utilization</h3>
-          <div class="big-number">${metrics.machineUtilization}%</div>
+        <div class="card stat-card" data-card="utilization" style="cursor:pointer" title="Click for machine breakdown">
+          <div class="stat-content">
+            <p class="stat-label">Machine Utilization</p>
+            <div class="stat-value">${metrics.machineUtilization}%</div>
+          </div>
         </div>
-        <div class="card" data-card="delivery" style="cursor:pointer" title="Click for details">
-          <h3>On-Time Delivery</h3>
-          <div class="big-number">${metrics.onTimeDeliveryRate}%</div>
+        <div class="card stat-card" data-card="delivery" style="cursor:pointer" title="Click for details">
+          <div class="stat-content">
+            <p class="stat-label">On-Time Delivery</p>
+            <div class="stat-value">${metrics.onTimeDeliveryRate}%</div>
+          </div>
         </div>
       </div>
 
-          <div class="card mt-4">
-            <h3>Recent Insights</h3>
-            <ul class="insight-list">
+          <div class="card" style="margin-top:1rem;">
+            <div class="card-header"><h3>Insights</h3></div>
+            <div class="card-body"><ul class="insight-list">
               ${metrics.insights.map(i => `
             <li class="insight-item ${i.type}">
               <strong>${i.message}</strong>
               ${i.action ? `<p>${i.action}</p>` : ''}
             </li>
           `).join('')}
-            </ul>
+            </ul></div>
           </div>
     `;
 

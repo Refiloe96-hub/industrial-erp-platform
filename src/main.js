@@ -1308,7 +1308,7 @@ class IndustrialERPApp {
 
         <!-- Business Insights — below charts, not the first thing you see -->
         <div class="card full-width" id="ai-advisor-card" style="margin-top:0.25rem;">
-          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <h3 style="margin:0;font-size:0.875rem;font-weight:600;">Business Insights</h3>
               <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-muted);">Across all modules</p>
@@ -1865,8 +1865,10 @@ class IndustrialERPApp {
         .card {
           background: var(--bg-primary);
           border-radius: 8px;
-          padding: 1.5rem;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          padding: 0;
+          box-shadow: var(--card-shadow);
+          border: 1px solid var(--border);
+          overflow: hidden;
         }
         
         .card.full-width {
@@ -2240,20 +2242,14 @@ class IndustrialERPApp {
         }
 
         /* ========== COMPONENTS (continued) ========== */
-        .card {
-            background: var(--bg-primary);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            color: var(--text-primary);
-        }
+        /* .card already defined above — no duplicate needed */
 
         .card-header {
-            padding: 1rem 1.25rem;
+            padding: 0.875rem 1.25rem;
             border-bottom: 1px solid var(--border);
             font-weight: 600;
             font-size: 0.875rem;
+            color: var(--text-primary);
         }
 
         .card-body { padding: 1.25rem; }
@@ -2447,31 +2443,24 @@ class IndustrialERPApp {
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
-            font-size: 0.65rem;
+            font-size: 0.625rem;
+            font-weight: 500;
             cursor: pointer;
-            padding: 0.5rem 0.25rem;
+            padding: 0.375rem 0.25rem;
             flex: 1;
             text-align: center;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-        
-        .bottom-nav-item:hover {
-            color: var(--text-primary);
-        }
-        
-        .bottom-nav-item.active {
-            color: var(--accent-primary);
-        }
+            border-radius: 6px;
+            transition: color 0.15s;
+            letter-spacing: 0.01em;
         }
 
-        .bottom-nav-item.active {
-            color: var(--accent-primary);
-        }
+        .bottom-nav-item:hover { color: var(--text-primary); }
+
+        .bottom-nav-item.active { color: var(--accent); }
 
         .bottom-nav-item .nav-icon {
-            font-size: 1.25rem;
-            margin-bottom: 0.15rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.125rem;
         }
 
         /* Sidebar overlay for mobile */
@@ -2522,8 +2511,8 @@ class IndustrialERPApp {
 
             .sidebar .sidebar-footer {
                 flex-shrink: 0 !important;
-                padding: 1rem !important;
-                border-top: 1px solid rgba(255,255,255,0.1) !important;
+                padding: 0.5rem !important;
+                border-top: 1px solid var(--border) !important;
             }
 
             .sidebar.open {
@@ -2533,8 +2522,8 @@ class IndustrialERPApp {
             /* Main content: full width since sidebar is out of flow */
             .main-content {
                 margin-left: 0 !important;
-                padding-top: 56px !important;
-                padding-bottom: 80px !important;
+                padding-top: 52px !important;
+                padding-bottom: 72px !important;
                 width: 100% !important;
                 max-width: 100vw !important;
                 overflow-x: hidden !important;
@@ -2550,13 +2539,9 @@ class IndustrialERPApp {
                 gap: 0.75rem !important;
             }
 
-            /* Stat cards: 2-per-row within the single column flow */
+            /* Stat cards stay as block on mobile — the stats-row handles the 2-col grid */
             .dashboard-grid .stat-card {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-                gap: 0.75rem !important;
-                padding: 0.875rem !important;
+                padding: 0.875rem 1rem !important;
             }
 
             /* Chart cards and AI alert: full width */
