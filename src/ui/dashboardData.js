@@ -3,7 +3,7 @@ import db from '../db/index.js';
 import ChartUtils from '../utils/charts.js';
 import { esc, sym } from '../utils/safeJson.js';
 
-export function (app) {
+export async function updateDashboardStats(app) {
     console.log('🔄 updateDashboardStats: Starting...');
 
     try {
@@ -237,6 +237,9 @@ export function (app) {
       // 5. Load AI Advisor card
       app.loadAIAdvisor();
 
+      // 6. First-time empty state — guide new users who have no data
+      await checkFirstRunState();
+
     } catch (error) {
       console.error('🔥 CRITICAL FAIL in updateDashboardStats:', error);
       const chartCashflow = document.getElementById('chart-cashflow');
@@ -249,7 +252,57 @@ export function (app) {
     }
   }
 
-export function (app) {
+async function checkFirstRunState() {
+  // Only show if all four stat values are still "—" (no data yet)
+  const allEmpty = ['stat-cash-flow','stat-inventory','stat-machine-util','stat-syndicates']
+    .every(id => document.getElementById(id)?.textContent?.trim() === '—');
+  if (!allEmpty) return;
+
+  const banner = document.getElementById('first-run-banner');
+  if (banner) return; // already showing
+
+  const aiCard = document.getElementById('ai-advisor-card');
+  if (!aiCard) return;
+
+  const el = document.createElement('div');
+  el.id = 'first-run-banner';
+  el.style.cssText = 'grid-column:1/-1;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.18);border-radius:10px;padding:1.5rem;margin-bottom:0.5rem;';
+  el.innerHTML = `
+    <p style="margin:0 0 0.25rem;font-size:0.875rem;font-weight:700;color:#93c5fd;">Welcome to Industrial ERP</p>
+    <p style="margin:0 0 1rem;font-size:0.8125rem;color:var(--text-secondary);">Your workspace is ready. Here's how to get started:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;">
+      ${[
+        { icon:'ph-duotone ph-package', step:'1', label:'Add inventory', hint:'Go to PoolStock → Add Item', module:'poolstock' },
+        { icon:'ph-duotone ph-shopping-cart', step:'2', label:'Make a sale', hint:'Open Sales (POS) and checkout', module:'sales' },
+        { icon:'ph-duotone ph-wallet', step:'3', label:'Track finances', hint:'Record income & expenses in PocketBooks', module:'pocketbooks' },
+      ].map(s => `
+        <button class="first-run-step" data-module="${s.module}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;cursor:pointer;text-align:left;transition:border-color 0.15s;font-family:inherit;">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(37,99,235,0.1);color:#60a5fa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="${s.icon}"></i>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.8125rem;font-weight:600;color:var(--text-primary);">${s.step}. ${s.label}</p>
+            <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">${s.hint}</p>
+          </div>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  // Insert before the AI advisor card
+  aiCard.parentNode.insertBefore(el, aiCard);
+
+  // Wire navigation
+  el.querySelectorAll('.first-run-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('navigate-to', { detail: btn.dataset.module }));
+    });
+    btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--border-strong)');
+    btn.addEventListener('mouseleave', () => btn.style.borderColor = 'var(--border)');
+  });
+}
+
+export async function loadAIAdvisor(app) {
     const scoresEl = document.getElementById('ai-module-scores');
     const insightsEl = document.getElementById('ai-insights-list');
     const noteEl = document.getElementById('ai-source-note');

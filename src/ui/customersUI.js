@@ -14,7 +14,12 @@ class CustomersUI {
       <div class="customers-container">
         <div class="page-header">
           <h2 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Customers</h2>
-          <button class="btn btn-primary" id="btn-add-customer"><i class="ph ph-plus"></i> New Customer</button>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-secondary" id="btn-debtors-view" title="Show customers who owe money">
+              <i class="ph ph-clock"></i> Debtors
+            </button>
+            <button class="btn btn-primary" id="btn-add-customer"><i class="ph ph-plus"></i> New Customer</button>
+          </div>
         </div>
 
         <div class="search-bar" style="margin-bottom:1rem;">
@@ -116,6 +121,11 @@ class CustomersUI {
       );
       list.innerHTML = this.renderCustomerParams(filtered);
       this.attachEditHandlers(list); // Re-attach for new elements
+    });
+
+    // Debtors view
+    container.querySelector('#btn-debtors-view')?.addEventListener('click', () => {
+      this.showDebtorsReport(container);
     });
 
     // Add Button
@@ -423,6 +433,111 @@ class CustomersUI {
     `;
   }
 }
+
+  showDebtorsReport(container) {
+    const debtors = this.customers
+      .filter(c => (c.creditBalance || 0) > 0)
+      .sort((a, b) => (b.creditBalance || 0) - (a.creditBalance || 0));
+
+    const now = Date.now();
+    const ageDays = (c) => c.creditIssuedAt ? Math.floor((now - c.creditIssuedAt) / 864e5) : null;
+    const totalOwed = debtors.reduce((s, c) => s + (c.creditBalance || 0), 0);
+    const overdue = debtors.filter(c => (ageDays(c) || 0) > 30);
+
+    const list = container.querySelector('#customers-list');
+    if (!list) return;
+
+    if (debtors.length === 0) {
+      list.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+          <i class="ph-duotone ph-check-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:#34d399;opacity:0.7;"></i>
+          <p style="font-size:0.9375rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.375rem;">No outstanding balances</p>
+          <p style="font-size:0.8125rem;margin:0;">All customers are paid up.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = `
+      <div style="grid-column:1/-1;">
+        <!-- Summary strip -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.25rem;">
+          <div class="card stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Total Owed</p>
+              <h3 class="stat-value" style="color:#f87171;">${sym()}${totalOwed.toFixed(2)}</h3>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Debtors</p>
+              <h3 class="stat-value">${debtors.length}</h3>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-content">
+              <p class="stat-label">Overdue (&gt;30d)</p>
+              <h3 class="stat-value" style="color:${overdue.length > 0 ? '#f87171' : '#34d399'};">${overdue.length}</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debtors table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th style="text-align:right;">Balance</th>
+                <th style="text-align:center;">Age</th>
+                <th style="text-align:center;">Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${debtors.map(c => {
+                const days = ageDays(c);
+                const status = days === null ? 'Unknown'
+                             : days > 60   ? 'Critical'
+                             : days > 30   ? 'Overdue'
+                             : days > 7    ? 'Pending'
+                             : 'Recent';
+                const statusColor = { Critical:'#f87171', Overdue:'#f87171', Pending:'#fbbf24', Recent:'#34d399', Unknown:'#a1a1aa' }[status];
+                return `
+                  <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td style="color:var(--text-secondary);">${c.phone || '—'}</td>
+                    <td style="text-align:right;font-weight:700;color:#f87171;">${sym()}${(c.creditBalance||0).toFixed(2)}</td>
+                    <td style="text-align:center;color:var(--text-muted);font-size:0.8125rem;">${days !== null ? days + 'd' : '—'}</td>
+                    <td style="text-align:center;">
+                      <span style="font-size:0.75rem;font-weight:600;color:${statusColor};">${status}</span>
+                    </td>
+                    <td style="text-align:right;">
+                      <button class="btn-record-payment btn btn-secondary"
+                        data-id="${c.id}" data-balance="${c.creditBalance||0}" data-name="${c.name}"
+                        style="font-size:0.75rem;padding:0.25rem 0.625rem;color:#34d399;border-color:rgba(16,185,129,0.3);">
+                        Pay
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <button class="btn btn-secondary" id="back-to-all" style="margin-top:1rem;">← All Customers</button>
+      </div>
+    `;
+
+    list.querySelector('#back-to-all')?.addEventListener('click', () => {
+      list.innerHTML = this.renderCustomerParams(this.customers);
+      this.attachEditHandlers(list);
+    });
+
+    // Re-attach payment handlers for the inline Pay buttons
+    this.attachEditHandlers(list);
+  }
 
   async showCustomerHistory(customerId, customerName) {
     // Pull all sales transactions for this customer

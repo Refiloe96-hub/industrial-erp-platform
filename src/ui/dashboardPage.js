@@ -1,7 +1,7 @@
 // Dashboard page rendering — extracted from main.js
 import { esc } from '../utils/safeJson.js';
 
-export function (app) {
+export function renderDashboard(app) {
     const userModules = app.getModulesForUser();
     const businessLabel = BUSINESS_LABELS[app.currentUser.businessType] || 'Dashboard';
 

@@ -2,7 +2,7 @@
 import db from '../db/index.js';
 import { esc } from '../utils/safeJson.js';
 
-export function (app) {
+export function initGlobalSearch(app) {
     // Inject overlay into DOM once
     if (!document.getElementById('global-search-overlay')) {
       const el = document.createElement('div');

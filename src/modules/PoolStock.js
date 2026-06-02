@@ -120,6 +120,18 @@ class PoolStock {
     return item;
   }
 
+  // Stock take adjustment — called by the Stock Take UI
+  async adjustStock(data) {
+    const type = data.type === 'adjustment_in' ? 'in' : 'out';
+    return this.recordMovement({
+      sku: data.sku,
+      type,
+      quantity: Math.abs(data.quantity),
+      reference: 'STOCK-TAKE',
+      notes: data.reason || 'Manual stock adjustment',
+    });
+  }
+
   // Alias for Sales module integration
   async updateStockLevel(sku, quantityChange) {
     // quantityChange is negative for sales
