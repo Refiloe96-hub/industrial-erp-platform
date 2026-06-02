@@ -59,8 +59,9 @@ export function (app) {
     // Click outside to close
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 
-    // Header search button
+    // Header search buttons (desktop + mobile)
     document.getElementById('search-toggle-btn')?.addEventListener('click', open);
+    document.getElementById('mobile-search-btn')?.addEventListener('click', open);
 
     // Typing handler
     input?.addEventListener('input', (e) => {

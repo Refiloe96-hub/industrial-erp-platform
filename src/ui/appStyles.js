@@ -190,6 +190,21 @@ export function renderAppStyles() {
           padding-top: 10vh;
           animation: gsFadeIn 0.12s ease;
         }
+
+        @media (max-width: 768px) {
+          .gs-overlay { padding-top: 0; align-items: flex-end; }
+          .gs-modal {
+            border-radius: 16px 16px 0 0;
+            width: 100%;
+            max-height: 85vh;
+            animation: gsSlideUp 0.2s ease;
+          }
+          @keyframes gsSlideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+          }
+          .gs-results { max-height: 55vh; }
+        }
         @keyframes gsFadeIn {
           from { opacity:0; }
           to   { opacity:1; }

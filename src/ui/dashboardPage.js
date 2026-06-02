@@ -33,7 +33,8 @@ export function (app) {
       <header class="mobile-header">
         <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu"><i class="ph ph-list"></i></button>
         <h1>${esc(app.currentUser.businessName)}</h1>
-        <div style="display: flex; gap: 0.5rem;">
+        <div style="display:flex;gap:0.375rem;align-items:center;">
+          <button class="btn-icon" id="mobile-search-btn" aria-label="Search" style="font-size:1rem;"><i class="ph ph-magnifying-glass"></i></button>
           <button class="btn-icon notification-btn" id="mobile-notification-btn" aria-label="Notifications"><i class="ph-duotone ph-bell"></i></button>
         </div>
       </header>
