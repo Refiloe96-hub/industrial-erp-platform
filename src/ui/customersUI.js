@@ -432,7 +432,6 @@ class CustomersUI {
       </style>
     `;
   }
-}
 
   showDebtorsReport(container) {
     const debtors = this.customers
