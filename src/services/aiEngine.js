@@ -458,47 +458,47 @@ class AIEngine {
         // Finance
         const f = snapshot.finance;
         if (f.netCashFlow < 0) {
-            insights.push({ text: `🔴 Cash flow is negative (R${Math.abs(Math.round(f.netCashFlow))} deficit) — review your ${f.topExpenseCategory} spending urgently.`, severity: 'critical', source: 'rule' });
+            insights.push({ text: `Cash flow is negative (${Math.abs(Math.round(f.netCashFlow))} deficit) — review your ${f.topExpenseCategory} spending urgently.`, severity: 'critical', source: 'rule' });
         } else if (f.savingsRate < 10) {
-            insights.push({ text: `🟡 Your savings rate is only ${f.savingsRate}% — aim for at least 20% to build a buffer.`, severity: 'warning', source: 'rule' });
+            insights.push({ text: `Savings rate is only ${f.savingsRate}% — aim for at least 20% to build a buffer.`, severity: 'warning', source: 'rule' });
         } else {
-            insights.push({ text: `🟢 Cash flow is healthy with a ${f.savingsRate}% savings rate — keep it up.`, severity: 'good', source: 'rule' });
+            insights.push({ text: `Cash flow is healthy with a ${f.savingsRate}% savings rate.`, severity: 'good', source: 'rule' });
         }
 
         // Inventory
         const inv = snapshot.inventory;
         if (inv.criticalCount > 0) {
             const first = inv.urgencyList?.[0];
-            insights.push({ text: `🔴 ${inv.criticalCount} item(s) are out of stock${first ? ` — order ${first.name} from ${first.preferredSupplier} immediately` : ''}.`, severity: 'critical', source: 'rule' });
+            insights.push({ text: `${inv.criticalCount} item${inv.criticalCount !== 1 ? 's' : ''} out of stock${first ? ` — order ${first.name} from ${first.preferredSupplier} immediately` : ''}.`, severity: 'critical', source: 'rule' });
         } else if (inv.highCount > 0) {
-            insights.push({ text: `🟡 ${inv.highCount} item(s) will run out within 3 days — check PoolStock for reorder recommendations.`, severity: 'warning', source: 'rule' });
+            insights.push({ text: `${inv.highCount} item${inv.highCount !== 1 ? 's' : ''} will run out within 3 days — check PoolStock for reorder recommendations.`, severity: 'warning', source: 'rule' });
         } else {
-            insights.push({ text: `🟢 All stock levels are healthy — no urgent reorders needed.`, severity: 'good', source: 'rule' });
+            insights.push({ text: `All stock levels are healthy — no urgent reorders needed.`, severity: 'good', source: 'rule' });
         }
 
         // Production
         const p = snapshot.production;
         if (p.atRiskMachines?.length) {
-            insights.push({ text: `🔴 ${p.atRiskMachines.map(m => m.name).join(', ')} ${p.atRiskMachines.length === 1 ? 'has' : 'have'} a low health score — schedule maintenance soon.`, severity: 'critical', source: 'rule' });
+            insights.push({ text: `${p.atRiskMachines.map(m => m.name).join(', ')} ${p.atRiskMachines.length === 1 ? 'has' : 'have'} a low health score — schedule maintenance soon.`, severity: 'critical', source: 'rule' });
         } else if ((p.overdueOrders?.length || 0) > 0) {
-            insights.push({ text: `🟡 ${p.overdueOrders.length} production order(s) are overdue — review SmartShift to unblock the bottleneck.`, severity: 'warning', source: 'rule' });
+            insights.push({ text: `${p.overdueOrders.length} production order${p.overdueOrders.length !== 1 ? 's' : ''} overdue — review SmartShift to unblock the bottleneck.`, severity: 'warning', source: 'rule' });
         } else if (p.status !== 'no_data') {
-            insights.push({ text: `🟢 Production is running at ${p.avgUtilization}% utilization with no overdue orders.`, severity: 'good', source: 'rule' });
+            insights.push({ text: `Production running at ${p.avgUtilization}% utilization with no overdue orders.`, severity: 'good', source: 'rule' });
         }
 
         // Syndicate
         const sy = snapshot.syndicate;
         if (sy.highRiskCount > 0) {
-            insights.push({ text: `🟡 ${sy.highRiskCount} syndicate member(s) are high-risk — consider sending a payment reminder via TrustCircle.`, severity: 'warning', source: 'rule' });
+            insights.push({ text: `${sy.highRiskCount} syndicate member${sy.highRiskCount !== 1 ? 's' : ''} at high risk — consider sending a payment reminder via TrustCircle.`, severity: 'warning', source: 'rule' });
         } else if (sy.status !== 'no_data') {
-            insights.push({ text: `🟢 TrustCircle syndicates are healthy — all members are contributing on time.`, severity: 'good', source: 'rule' });
+            insights.push({ text: `TrustCircle syndicates are healthy — all members contributing on time.`, severity: 'good', source: 'rule' });
         }
 
         // Sales
         const s = snapshot.sales;
         if (s.status !== 'no_data') {
             const trendAmt = s.revTrendPct !== null ? ` (${s.revenueTrend})` : '';
-            insights.push({ text: `📊 Revenue this week${trendAmt}. ${s.peakDay !== 'Unknown' ? `Your busiest day is ${s.peakDay}.` : ''} ${s.topItems?.[0] ? `Top seller: ${s.topItems[0].name}.` : ''}`, severity: parseFloat(s.revTrendPct) < -10 ? 'warning' : 'good', source: 'rule' });
+            insights.push({ text: `Revenue this week${trendAmt}. ${s.peakDay !== 'Unknown' ? `Busiest day: ${s.peakDay}.` : ''} ${s.topItems?.[0] ? `Top seller: ${s.topItems[0].name}.` : ''}`.trim(), severity: parseFloat(s.revTrendPct) < -10 ? 'warning' : 'good', source: 'rule' });
         }
 
         return insights.slice(0, 5);

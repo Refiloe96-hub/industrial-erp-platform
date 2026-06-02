@@ -866,7 +866,15 @@ class PocketBooksUI {
 
                 modal.close();
                 modal.remove();
-                this.loadDashboard(); // Refresh
+
+                // Brief toast confirmation
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg-elevated,#232326);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:0.5rem 1rem;border-radius:8px;font-size:0.8125rem;font-weight:600;z-index:9999;animation:none;';
+                toast.textContent = 'Transaction saved';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+
+                this.loadDashboard();
             } catch (err) {
                 alert('Failed to save transaction: ' + err.message);
             }

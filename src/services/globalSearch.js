@@ -1,6 +1,6 @@
 // Global search — extracted from main.js
 import db from '../db/index.js';
-import { esc } from '../utils/safeJson.js';
+import { esc, sym } from '../utils/safeJson.js';
 
 export function initGlobalSearch(app) {
     // Inject overlay into DOM once
@@ -130,7 +130,7 @@ export async function runSearch(app, query) {
     try {
       const txs = await db.getAll('transactions');
       const matched = txs.filter(t => (t.description || t.category || '').toLowerCase().includes(q)).slice(0, 4);
-      if (matched.length) results.push({ group: 'Transactions', items: matched.map(t => ({ id: t.id, label: t.description || t.category, icon: 'ph-duotone ph-receipt', sub: `R ${(t.amount || 0).toFixed(2)}`, action: () => { document.getElementById('global-search-overlay').style.display = 'none'; app.navigateTo('pocketbooks'); } })) });
+      if (matched.length) results.push({ group: 'Transactions', items: matched.map(t => ({ id: t.id, label: t.description || t.category, icon: 'ph-duotone ph-receipt', sub: `${sym()}${(t.amount || 0).toFixed(2)}`, action: () => { document.getElementById('global-search-overlay').style.display = 'none'; app.navigateTo('pocketbooks'); } })) });
     } catch {}
 
     app._renderSearchResults(results, query);

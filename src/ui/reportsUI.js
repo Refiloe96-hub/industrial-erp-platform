@@ -401,14 +401,16 @@ class ReportsUI {
   }
 
   async getFinancialReport(startDate, endDate, inventoryMap) {
-    const transactions = await db.getAll('transactions');
     const startTime = new Date(startDate).getTime();
     const endTime = new Date(endDate).getTime() + 24 * 60 * 60 * 1000;
-
-    const filtered = transactions.filter(t => {
-      const txTime = t.date || t.timestamp;
-      return txTime >= startTime && txTime <= endTime;
+    // Only load transactions within date range — avoids full table scan
+    const allTxs = await db.getAll('transactions');
+    // Filter by date range up front — avoids processing thousands of records
+    const transactions = allTxs.filter(t => {
+      const d = t.date || t.timestamp || t.createdAt || 0;
+      return d >= startTime && d <= endTime;
     });
+    const filtered = transactions; // already date-filtered above
 
     const incomeByCategory = {};
     const expensesByCategory = {};
@@ -675,10 +677,14 @@ class ReportsUI {
   }
 
   async getABCAnalysis(startDate, endDate) {
+    const startMs = new Date(startDate).getTime();
+    const endMs   = new Date(endDate).getTime() + 86400000;
     const transactions = await db.getAll('transactions');
-    const filtered = transactions.filter(t =>
-      t.type === 'sale' && t.date >= startDate && t.date <= endDate
-    );
+    const filtered = transactions.filter(t => {
+      const d = t.date || t.timestamp || t.createdAt || 0;
+      const ds = typeof d === 'string' ? new Date(d).getTime() : d;
+      return t.type === 'sale' && ds >= startMs && ds <= endMs;
+    });
 
     const skuRevenue = {};
     filtered.forEach(t => {

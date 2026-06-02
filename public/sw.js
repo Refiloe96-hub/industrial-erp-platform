@@ -1,8 +1,10 @@
 // Service Worker - Offline-First Strategy
-const CACHE_NAME = 'industrial-erp-v16';
-const RUNTIME_CACHE = 'runtime-cache-v1';
+// NOTE: VitePWA (Workbox) handles JS/CSS asset caching via globPatterns.
+// This SW handles runtime API caching and offline fallback only.
+const CACHE_NAME = 'industrial-erp-v17';
+const RUNTIME_CACHE = 'runtime-cache-v2';
 
-// Assets to cache immediately
+// Core shell assets to precache (JS modules are handled by Workbox)
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

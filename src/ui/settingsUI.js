@@ -503,8 +503,9 @@ class SettingsUI {
           localStorage.setItem('erp_session', JSON.stringify(currentUser));
         }
 
-        setTimeout(() => btn.innerHTML = 'Saved!', 500);
-        setTimeout(() => btn.innerHTML = originalText, 2000);
+        btn.innerHTML = '<i class="ph ph-check"></i> Saved';
+        btn.style.background = '#10b981';
+        setTimeout(() => { btn.innerHTML = originalText; btn.style.background = ''; }, 2000);
       } catch (err) {
         console.error(err);
         alert('Failed to save settings');
