@@ -2,6 +2,7 @@
 import { getSession } from '../utils/safeJson.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
+import { downloadCSV, fmtDate } from '../utils/csvExport.js';
 
 class PocketBooksUI {
     constructor(container) {
@@ -30,9 +31,8 @@ class PocketBooksUI {
                             <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Financial ledger & cash flow</p>
                         </div>
                         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-                            <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
-                                Insights
-                            </button>
+                            <button id="pb-export-btn" class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export CSV</button>
+                            <button id="pb-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">Insights</button>
                             <button id="add-transaction-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Transaction</button>
                         </div>
                     </header>
@@ -466,6 +466,31 @@ class PocketBooksUI {
     }
 
     attachEventListeners() {
+        // Export CSV
+        this.container.querySelector('#pb-export-btn')?.addEventListener('click', async () => {
+            const btn = this.container.querySelector('#pb-export-btn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Exporting...';
+            btn.disabled = true;
+            try {
+                const txs = await this.module.getTransactions();
+                const session = getSession() ?? {};
+                const biz = session.businessName || 'Business';
+                const headers = ['Date','Type','Category','Description','Amount (R)','Payment Method','VAT (R)'];
+                const rows = txs.map(t => [
+                    fmtDate(t.date || t.createdAt),
+                    t.type || '',
+                    t.category || '',
+                    t.description || '',
+                    Number(t.amount || 0).toFixed(2),
+                    t.paymentMethod || '',
+                    Number(t.vatAmount || 0).toFixed(2),
+                ]);
+                downloadCSV(headers, rows, `${biz}_transactions`);
+            } catch (err) { alert('Export failed: ' + err.message); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        });
+
         // Add Transaction Button
         this.container.querySelector('#add-transaction-btn').addEventListener('click', () => {
             this.showAddTransactionModal();

@@ -3,6 +3,7 @@ import { getSession } from '../utils/safeJson.js';
 import PoolStock from '../modules/PoolStock.js';
 import db, { STORES } from '../db/index.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
+import { downloadCSV, fmtDate } from '../utils/csvExport.js';
 
 class PoolStockUI {
     constructor(container) {
@@ -35,7 +36,10 @@ class PoolStockUI {
                             <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PoolStock</h1>
                             <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Inventory & procurement</p>
                         </div>
-                        <button id="add-item-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Item</button>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button id="export-inventory-btn" class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export CSV</button>
+                            <button id="add-item-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Add Item</button>
+                        </div>
                     </header>
 
                     <!-- Tab Navigation -->
@@ -181,6 +185,9 @@ class PoolStockUI {
                     <td class="actions" onclick="event.stopPropagation()">
                         <button class="btn-icon" onclick="window.poolStockUI.editItem('${item.sku}')" title="Edit"><i class="ph-duotone ph-pencil-simple"></i></button>
                         <button class="btn-icon" onclick="window.poolStockUI.adjustStock('${item.sku}')" title="Adjust Stock"><i class="ph-duotone ph-archive-box"></i></button>
+                        ${(item.quantity || 0) <= (item.reorderLevel || 10)
+                          ? `<button class="btn-icon" onclick="window.poolStockUI.quickReorder('${item.sku}')" title="Create Purchase Order" style="color:#fbbf24;"><i class="ph-duotone ph-shopping-cart-simple"></i></button>`
+                          : ''}
                     </td>
                 </tr>
             `;
@@ -519,6 +526,28 @@ class PoolStockUI {
             }
         };
         document.addEventListener('keydown', window._poolStockBarcodeListener);
+
+        // Export Inventory CSV
+        this.container.querySelector('#export-inventory-btn')?.addEventListener('click', async () => {
+            const btn = this.container.querySelector('#export-inventory-btn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+            btn.disabled = true;
+            try {
+                const items = await this.module.getInventory();
+                const headers = ['SKU','Name','Category','Quantity','Unit','Unit Cost (R)','Unit Price (R)','Reorder Level','Preferred Supplier','Last Updated'];
+                const rows = items.map(i => [
+                    i.sku || '', i.name || '', i.category || '',
+                    i.quantity ?? 0, i.unit || '',
+                    Number(i.unitCost || 0).toFixed(2),
+                    Number(i.unitPrice || 0).toFixed(2),
+                    i.reorderLevel ?? '', i.supplier || i.preferredSupplier || '',
+                    fmtDate(i.lastUpdated),
+                ]);
+                downloadCSV(headers, rows, 'inventory');
+            } catch (err) { alert('Export failed: ' + err.message); }
+            finally { btn.innerHTML = orig; btn.disabled = false; }
+        });
 
         // Add Item Button
         this.container.querySelector('#add-item-btn').addEventListener('click', () => {
@@ -1124,6 +1153,93 @@ class PoolStockUI {
             } catch (err) {
                 alert('Failed to save item: ' + err.message);
             }
+        });
+    }
+
+    async quickReorder(sku) {
+        const inventory = await this.module.getInventory();
+        const item = inventory.find(i => i.sku === sku);
+        if (!item) return;
+
+        const suppliers = await this.module.getSuppliers().catch(() => []);
+        // Try to match preferred supplier by name
+        const preferred = suppliers.find(s => s.name === (item.supplier || item.preferredSupplier));
+
+        // Pre-fill a PO creation modal with item and supplier
+        const qty = Math.max((item.reorderQuantity || 0), (item.reorderLevel || 10) * 2);
+        const unitCost = item.unitCost || 0;
+
+        const modal = document.createElement('dialog');
+        modal.style.cssText = 'border:none;padding:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:10px;box-shadow:var(--modal-shadow,0 24px 48px rgba(0,0,0,0.5));width:min(480px,96vw);color:var(--text-primary);';
+        modal.innerHTML = `
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <h2 style="margin:0;font-size:1rem;font-weight:700;">Reorder — ${item.name}</h2>
+              <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-muted);">Current stock: ${item.quantity} · Reorder level: ${item.reorderLevel || 10}</p>
+            </div>
+            <button id="close-reorder" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.25rem;padding:0.25rem;"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="quick-po-form" style="padding:1.25rem;display:flex;flex-direction:column;gap:0.875rem;">
+            <div>
+              <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Supplier</label>
+              ${suppliers.length > 0
+                ? `<select name="supplierId" style="width:100%;">
+                    <option value="">— Select supplier —</option>
+                    ${suppliers.map(s => `<option value="${s.id}" ${preferred?.id===s.id?'selected':''}>${s.name}${s.paymentTerms?' ('+s.paymentTerms+')':''}</option>`).join('')}
+                   </select>`
+                : `<input type="text" name="supplierName" value="${item.supplier||item.preferredSupplier||''}" placeholder="Supplier name" style="width:100%;box-sizing:border-box;">`
+              }
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Quantity to Order</label>
+                <input type="number" name="quantity" value="${qty}" min="1" required style="width:100%;box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Unit Cost (R)</label>
+                <input type="number" name="unitCost" value="${unitCost}" min="0" step="0.01" style="width:100%;box-sizing:border-box;">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Notes</label>
+              <input type="text" name="notes" placeholder="Optional note for supplier" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:0.625rem;padding-top:0.25rem;border-top:1px solid var(--border);">
+              <button type="button" id="cancel-reorder" class="btn btn-secondary">Cancel</button>
+              <button type="submit" class="btn btn-primary"><i class="ph ph-paper-plane-right"></i> Create PO</button>
+            </div>
+          </form>
+        `;
+        document.body.appendChild(modal);
+        modal.showModal();
+
+        const close = () => { modal.close(); modal.remove(); };
+        modal.querySelector('#close-reorder').addEventListener('click', close);
+        modal.querySelector('#cancel-reorder').addEventListener('click', close);
+
+        modal.querySelector('#quick-po-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          try {
+            const supplierId = fd.get('supplierId') ? parseInt(fd.get('supplierId')) : null;
+            const supplierName = supplierId
+              ? (suppliers.find(s => s.id === supplierId)?.name || '')
+              : (fd.get('supplierName') || '');
+            const ordQty = parseInt(fd.get('quantity')) || 1;
+            const cost   = parseFloat(fd.get('unitCost')) || 0;
+
+            await this.module.createPurchaseOrder({
+              supplierId,
+              supplierName,
+              items: [{ sku: item.sku, name: item.name, quantity: ordQty, unitCost: cost }],
+              totalCost: ordQty * cost,
+              status: 'pending',
+              notes: fd.get('notes') || '',
+              expectedDate: null,
+            });
+            close();
+            this.loadPurchaseOrders();
+          } catch (err) { alert('Failed to create PO: ' + err.message); }
         });
     }
 

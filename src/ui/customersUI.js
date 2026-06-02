@@ -83,6 +83,11 @@ class CustomersUI {
         <div class="card-body">
           <p><i class="ph-duotone ph-phone"></i> ${c.phone || 'No phone'}</p>
           <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: R ${(c.totalSpent || 0).toLocaleString()}</p>
+          ${(c.creditBalance || 0) > 0 ? `
+          <div style="margin-top:0.5rem;padding:0.5rem 0.625rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:0.8125rem;color:#f87171;font-weight:600;">Owes R ${(c.creditBalance||0).toFixed(2)}</span>
+            <button class="btn-record-payment btn btn-secondary" data-id="${c.id}" data-balance="${c.creditBalance||0}" data-name="${c.name}" style="font-size:0.7rem;padding:0.2rem 0.5rem;color:#34d399;border-color:rgba(16,185,129,0.3);">Record Payment</button>
+          </div>` : ''}
           <p style="font-size:0.75rem;color:var(--text-muted);margin:0.375rem 0 0;">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
           <button class="btn btn-secondary btn-edit" data-id="${c.id}" style="font-size:0.75rem;padding:0.3rem 0.75rem;margin-top:0.5rem;">Edit</button>
         </div>
@@ -160,6 +165,40 @@ class CustomersUI {
   }
 
   attachEditHandlers(container) {
+    // Record partial or full payment against a customer's credit balance
+    container.querySelectorAll('.btn-record-payment').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id);
+        const balance = parseFloat(btn.dataset.balance);
+        const name = btn.dataset.name;
+        const amount = parseFloat(prompt(`Record payment from ${name}\nOutstanding: R ${balance.toFixed(2)}\n\nEnter amount received:`));
+        if (!amount || amount <= 0) return;
+        try {
+          const customer = await Customers.getCustomer(id);
+          if (!customer) return;
+          const newBalance = Math.max(0, (customer.creditBalance || 0) - amount);
+          await Customers.updateCustomer(id, { creditBalance: newBalance });
+          // Also record it as income in PocketBooks if available
+          try {
+            const db = (await import('../db/index.js')).default;
+            await db.add('transactions', {
+              id: `pay_${Date.now()}`,
+              type: 'income',
+              amount,
+              description: `Credit payment — ${name}`,
+              category: 'Credit Recovery',
+              date: Date.now(),
+              paymentMethod: 'cash',
+            });
+          } catch {}
+          // Refresh
+          this.customers = await Customers.getAllCustomers();
+          container.innerHTML = this.renderCustomerParams(this.customers);
+          this.attachEditHandlers(container);
+        } catch (err) { alert('Failed to record payment: ' + err.message); }
+      });
+    });
+
     container.querySelectorAll('.btn-edit').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const id = parseInt(e.target.dataset.id);

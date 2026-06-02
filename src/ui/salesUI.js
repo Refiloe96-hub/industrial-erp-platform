@@ -164,6 +164,11 @@ class SalesUI {
                     <i class="ph-duotone ph-qr-code"></i>
                     <span class="pay-label">QR</span>
                   </label>
+                  <label class="payment-option" id="credit-payment-option" style="display:none;">
+                    <input type="radio" name="payment" value="credit">
+                    <i class="ph-duotone ph-hand-coins"></i>
+                    <span class="pay-label">Credit</span>
+                  </label>
                 </div>
 
                 <div id="mpesa-qr-container" style="display: none; text-align: center; margin-bottom: 1rem; border: 1px dashed var(--border-strong); padding: 1rem; border-radius: 8px;">
@@ -305,7 +310,13 @@ class SalesUI {
       const opt = customerSelect.options[customerSelect.selectedIndex];
       const pts = parseInt(opt?.dataset?.points || '0');
       const section = container.querySelector('#loyalty-section');
-      if (customerSelect.value && pts > 0) {
+      const creditOpt = container.querySelector('#credit-payment-option');
+      const hasCustomer = !!customerSelect.value;
+
+      // Show credit option only when a named customer is selected
+      if (creditOpt) creditOpt.style.display = hasCustomer ? 'flex' : 'none';
+
+      if (hasCustomer && pts > 0) {
         section.style.display = 'block';
         container.querySelector('#loyalty-pts-bal').textContent = pts;
         selectedCustomerData = this.customers.find(c => c.id == customerSelect.value) || null;
@@ -315,7 +326,13 @@ class SalesUI {
         selectedCustomerData = null;
         updateCart();
       }
-      // Reset any applied discount on customer change
+      // If credit was selected but customer cleared, switch to cash
+      const checkedMethod = container.querySelector('input[name="payment"]:checked');
+      if (checkedMethod?.value === 'credit' && !hasCustomer) {
+        const cash = container.querySelector('input[name="payment"][value="cash"]');
+        if (cash) cash.checked = true;
+      }
+      // Reset loyalty discount on customer change
       loyaltyDiscount = 0; loyaltyPointsToDeduct = 0;
       container.querySelector('#loyalty-discount-row').style.display = 'none';
       container.querySelector('#redeem-applied-msg').style.display = 'none';
@@ -722,20 +739,26 @@ class SalesUI {
           cashierName
         });
 
-        // Loyalty: deduct redeemed points then award new points for this purchase
+        // Post-sale: update loyalty points and credit balance
         if (customerId) {
           try {
-            if (loyaltyPointsToDeduct > 0) {
-              const cust = await this.customers.find ? this.customers.find(c => c.id == customerId) : null;
-              const custFresh = await Customers.getCustomer(customerId);
-              if (custFresh) {
-                await Customers.updateCustomer(customerId, {
-                  loyaltyPoints: Math.max(0, (custFresh.loyaltyPoints || 0) - loyaltyPointsToDeduct)
-                });
+            const custFresh = await Customers.getCustomer(customerId);
+            if (custFresh) {
+              const updates = {};
+              // Deduct redeemed loyalty points
+              if (loyaltyPointsToDeduct > 0) {
+                updates.loyaltyPoints = Math.max(0, (custFresh.loyaltyPoints || 0) - loyaltyPointsToDeduct);
+              }
+              // Record credit sale — add to customer's outstanding balance
+              if (paymentMethod === 'credit') {
+                updates.creditBalance = (custFresh.creditBalance || 0) + grandTotal;
+              }
+              if (Object.keys(updates).length) {
+                await Customers.updateCustomer(customerId, updates);
               }
             }
             await Customers.recordVisit(customerId, grossTotal); // awards 1pt per R10
-          } catch (e) { console.warn('Loyalty update failed:', e.message); }
+          } catch (e) { console.warn('Post-sale customer update failed:', e.message); }
         }
 
         // Reset loyalty state
