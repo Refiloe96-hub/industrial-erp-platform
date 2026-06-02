@@ -1,5 +1,6 @@
 import { getSession } from '../utils/safeJson.js';
 import sales from '../modules/Sales.js';
+import Customers from '../modules/Customers.js';
 import PoolStock from '../modules/PoolStock.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import Customers from '../modules/Customers.js';
@@ -92,10 +93,31 @@ class SalesUI {
               <div class="card-body">
                 <!-- Customer Selector -->
                 <div class="customer-selector mb-3">
-                    <select id="sale-customer" class="form-select">
-                        <option value=""><i class="ph ph-user"></i> Guest (Walk-in)</option>
-                        ${this.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                    </select>
+                  <select id="sale-customer">
+                    <option value="">Walk-in customer</option>
+                    ${this.customers.map(c => `<option value="${c.id}" data-points="${c.loyaltyPoints||0}">${c.name}${c.loyaltyPoints ? ` · ${c.loyaltyPoints}pts` : ''}</option>`).join('')}
+                  </select>
+                </div>
+
+                <!-- Loyalty Points Redemption -->
+                <div id="loyalty-section" style="display:none;margin-bottom:0.75rem;padding:0.625rem 0.75rem;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                    <div style="font-size:0.8125rem;">
+                      <span style="color:var(--text-muted);">Points balance:</span>
+                      <strong id="loyalty-pts-bal" style="color:#34d399;margin-left:0.25rem;">0</strong>
+                      <span style="color:var(--text-muted);font-size:0.75rem;"> (10pts = R1)</span>
+                    </div>
+                    <button id="toggle-redeem-btn" class="btn-text" style="font-size:0.75rem;color:#2563eb;">Redeem</button>
+                  </div>
+                  <div id="redeem-row" style="display:none;margin-top:0.5rem;display:flex;gap:0.5rem;align-items:center;">
+                    <input type="number" id="redeem-pts-input" min="0" step="10" placeholder="Points to redeem"
+                      style="flex:1;font-size:0.8125rem;padding:0.3rem 0.5rem;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-primary);">
+                    <button id="apply-redeem-btn" class="btn btn-secondary" style="font-size:0.75rem;padding:0.3rem 0.75rem;white-space:nowrap;">Apply</button>
+                    <button id="clear-redeem-btn" class="btn-text text-danger" style="font-size:0.75rem;">✕</button>
+                  </div>
+                  <p id="redeem-applied-msg" style="display:none;font-size:0.75rem;color:#34d399;margin:0.375rem 0 0;">
+                    <i class="ph ph-check"></i> <span id="redeem-applied-text"></span>
+                  </p>
                 </div>
 
                 <div class="cart-items" id="cart-items">
@@ -110,6 +132,10 @@ class SalesUI {
                   <div class="summary-row vat-row">
                     <span>Includes VAT (${config.taxRate || 15}%):</span>
                     <span id="cart-vat">${sym}0.00</span>
+                  </div>
+                  <div class="summary-row" id="loyalty-discount-row" style="display:none;color:#34d399;">
+                    <span>Loyalty discount:</span>
+                    <span id="cart-loyalty">-${sym}0.00</span>
                   </div>
                   <div class="summary-row total-row">
                     <span>Total:</span>
@@ -268,6 +294,63 @@ class SalesUI {
       });
     });
 
+    // Loyalty state
+    let loyaltyDiscount = 0;   // in Rand
+    let loyaltyPointsToDeduct = 0;
+    let selectedCustomerData = null;
+
+    // Loyalty: show/hide section when customer changes
+    const customerSelect = container.querySelector('#sale-customer');
+    customerSelect?.addEventListener('change', () => {
+      const opt = customerSelect.options[customerSelect.selectedIndex];
+      const pts = parseInt(opt?.dataset?.points || '0');
+      const section = container.querySelector('#loyalty-section');
+      if (customerSelect.value && pts > 0) {
+        section.style.display = 'block';
+        container.querySelector('#loyalty-pts-bal').textContent = pts;
+        selectedCustomerData = this.customers.find(c => c.id == customerSelect.value) || null;
+      } else {
+        section.style.display = 'none';
+        loyaltyDiscount = 0; loyaltyPointsToDeduct = 0;
+        selectedCustomerData = null;
+        updateCart();
+      }
+      // Reset any applied discount on customer change
+      loyaltyDiscount = 0; loyaltyPointsToDeduct = 0;
+      container.querySelector('#loyalty-discount-row').style.display = 'none';
+      container.querySelector('#redeem-applied-msg').style.display = 'none';
+    });
+
+    container.querySelector('#toggle-redeem-btn')?.addEventListener('click', () => {
+      const row = container.querySelector('#redeem-row');
+      row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    container.querySelector('#apply-redeem-btn')?.addEventListener('click', () => {
+      const input = container.querySelector('#redeem-pts-input');
+      const pts = parseInt(input?.value || '0');
+      if (!pts || pts <= 0) return;
+      const maxPts = parseInt(container.querySelector('#loyalty-pts-bal')?.textContent || '0');
+      const clamped = Math.min(pts, maxPts);
+      const discount = clamped / 10; // 10 pts = R1
+      loyaltyDiscount = discount;
+      loyaltyPointsToDeduct = clamped;
+      container.querySelector('#redeem-row').style.display = 'none';
+      const msg = container.querySelector('#redeem-applied-msg');
+      container.querySelector('#redeem-applied-text').textContent = `${clamped} points → R${discount.toFixed(2)} off`;
+      msg.style.display = 'block';
+      updateCart();
+    });
+
+    container.querySelector('#clear-redeem-btn')?.addEventListener('click', () => {
+      loyaltyDiscount = 0; loyaltyPointsToDeduct = 0;
+      container.querySelector('#redeem-row').style.display = 'none';
+      container.querySelector('#redeem-applied-msg').style.display = 'none';
+      container.querySelector('#loyalty-discount-row').style.display = 'none';
+      container.querySelector('#redeem-pts-input').value = '';
+      updateCart();
+    });
+
     // Helper: Update Cart UI
     const updateCart = () => {
       cartItemsContainer.innerHTML = '';
@@ -279,6 +362,7 @@ class SalesUI {
         container.querySelector('#cart-subtotal').textContent = `${this.currencySym}0.00`;
         container.querySelector('#cart-vat').textContent = `${this.currencySym}0.00`;
         container.querySelector('#cart-total').textContent = `${this.currencySym}0.00`;
+        container.querySelector('#loyalty-discount-row').style.display = 'none';
         return;
       }
 
@@ -301,15 +385,24 @@ class SalesUI {
         cartItemsContainer.appendChild(row);
       });
 
-      const grandTotal = subtotal; // Prices are already VAT inclusive
-      const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT from the inclusive total
-      const exVatSubtotal = grandTotal - vatAmount; // The true subtotal before VAT
+      const grossTotal = subtotal; // VAT inclusive
+      const effectiveTotal = Math.max(0, grossTotal - loyaltyDiscount);
+      const vatAmount = effectiveTotal - (effectiveTotal / 1.15);
+      const exVatSubtotal = effectiveTotal - vatAmount;
 
       container.querySelector('#cart-subtotal').textContent = `${this.currencySym}${exVatSubtotal.toFixed(2)}`;
       container.querySelector('#cart-vat').textContent = `${this.currencySym}${vatAmount.toFixed(2)}`;
-      container.querySelector('#cart-total').textContent = `${this.currencySym}${grandTotal.toFixed(2)}`;
-      checkoutBtn.textContent = `Charge ${this.currencySym}${grandTotal.toFixed(2)}`;
+      container.querySelector('#cart-total').textContent = `${this.currencySym}${effectiveTotal.toFixed(2)}`;
+      checkoutBtn.textContent = `Charge ${this.currencySym}${effectiveTotal.toFixed(2)}`;
       checkoutBtn.disabled = false;
+
+      const discRow = container.querySelector('#loyalty-discount-row');
+      if (loyaltyDiscount > 0) {
+        discRow.style.display = 'flex';
+        container.querySelector('#cart-loyalty').textContent = `-${this.currencySym}${loyaltyDiscount.toFixed(2)}`;
+      } else {
+        discRow.style.display = 'none';
+      }
 
       container.querySelectorAll('.btn-remove-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -586,9 +679,10 @@ class SalesUI {
 
         try {
         const paymentMethod = container.querySelector('input[name="payment"]:checked').value;
-        const grandTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0); // Inclusive of VAT
-        const vatAmount = grandTotal - (grandTotal / 1.15); // Extract 15% VAT
-        const subtotal = grandTotal - vatAmount; // True subtotal before VAT
+        const grossTotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        const grandTotal = Math.max(0, grossTotal - loyaltyDiscount); // Apply loyalty discount
+        const vatAmount = grandTotal - (grandTotal / 1.15);
+        const subtotal = grandTotal - vatAmount;
 
         const session = getSession() ?? {};
         const cashierName = session.name || session.username || 'Admin User';
@@ -618,7 +712,7 @@ class SalesUI {
         const sale = await this.salesModule.recordSale({
           items: saleItems,
           subtotal,
-          discount: 0,
+          discount: loyaltyDiscount,
           vatAmount,
           vat: 0.15,
           total: grandTotal,
@@ -628,6 +722,24 @@ class SalesUI {
           cashierName
         });
 
+        // Loyalty: deduct redeemed points then award new points for this purchase
+        if (customerId) {
+          try {
+            if (loyaltyPointsToDeduct > 0) {
+              const cust = await this.customers.find ? this.customers.find(c => c.id == customerId) : null;
+              const custFresh = await Customers.getCustomer(customerId);
+              if (custFresh) {
+                await Customers.updateCustomer(customerId, {
+                  loyaltyPoints: Math.max(0, (custFresh.loyaltyPoints || 0) - loyaltyPointsToDeduct)
+                });
+              }
+            }
+            await Customers.recordVisit(customerId, grossTotal); // awards 1pt per R10
+          } catch (e) { console.warn('Loyalty update failed:', e.message); }
+        }
+
+        // Reset loyalty state
+        loyaltyDiscount = 0; loyaltyPointsToDeduct = 0;
         cart = [];
         updateCart();
         modal.close();

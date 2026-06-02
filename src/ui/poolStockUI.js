@@ -42,6 +42,7 @@ class PoolStockUI {
                     <div class="ps-tab-bar">
                         <button class="ps-tab active" data-tab="inventory"><i class="ph ph-package"></i> Inventory</button>
                         <button class="ps-tab" data-tab="purchase-orders"><i class="ph ph-clipboard-text"></i> Purchase Orders</button>
+                        <button class="ps-tab" data-tab="suppliers"><i class="ph ph-truck"></i> Suppliers</button>
                         <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast</button>
                     </div>
 
@@ -544,6 +545,8 @@ class PoolStockUI {
             btn.addEventListener('click', () => {
                 if (btn.dataset.tab === 'purchase-orders') {
                     this.loadPurchaseOrders();
+                } else if (btn.dataset.tab === 'suppliers') {
+                    this.loadSuppliers();
                 } else if (btn.dataset.tab === 'forecast') {
                     this.loadForecastView();
                 } else {
@@ -704,6 +707,167 @@ class PoolStockUI {
         }
     }
 
+    // ── Supplier Management ─────────────────────────────────────────────
+    async loadSuppliers() {
+        const suppliers = await this.module.getSuppliers();
+
+        this.container.innerHTML = `
+            <div class="poolstock-ui">
+                <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                    <div>
+                        <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Suppliers</h1>
+                        <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">${suppliers.length} supplier${suppliers.length !== 1 ? 's' : ''} on record</p>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button class="btn btn-secondary" id="back-to-inventory-btn"><i class="ph ph-arrow-left"></i> Back</button>
+                        <button class="btn btn-primary" id="add-supplier-btn"><i class="ph ph-plus"></i> Add Supplier</button>
+                    </div>
+                </header>
+
+                <div style="padding:1.25rem;">
+                    ${suppliers.length === 0
+                        ? `<div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+                            <i class="ph-duotone ph-truck" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.4;"></i>
+                            <p style="font-size:0.9375rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.375rem;">No suppliers yet</p>
+                            <p style="font-size:0.8125rem;margin:0;">Add your first supplier to link them to purchase orders.</p>
+                          </div>`
+                        : `<div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                        <th>Phone</th>
+                                        <th>Payment Terms</th>
+                                        <th>Min Order</th>
+                                        <th style="width:80px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${suppliers.map(s => `
+                                        <tr>
+                                            <td><strong>${s.name}</strong>${s.email ? `<br><small style="color:var(--text-muted)">${s.email}</small>` : ''}</td>
+                                            <td>${s.contact || '—'}</td>
+                                            <td>${s.phone || '—'}</td>
+                                            <td>${s.paymentTerms || '—'}</td>
+                                            <td>${s.minOrderValue ? `R ${parseFloat(s.minOrderValue).toLocaleString()}` : '—'}</td>
+                                            <td style="text-align:right;">
+                                                <button class="btn btn-secondary btn-edit-supplier" data-id="${s.id}" style="font-size:0.75rem;padding:0.25rem 0.625rem;">Edit</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                           </div>`
+                    }
+                </div>
+            </div>
+        `;
+
+        this.container.querySelector('#back-to-inventory-btn')?.addEventListener('click', () => this.loadDashboard());
+
+        this.container.querySelector('#add-supplier-btn')?.addEventListener('click', () => {
+            this.showSupplierModal(null);
+        });
+
+        this.container.querySelectorAll('.btn-edit-supplier').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const supplier = suppliers.find(s => s.id == btn.dataset.id);
+                if (supplier) this.showSupplierModal(supplier);
+            });
+        });
+    }
+
+    showSupplierModal(existing = null) {
+        const isEdit = !!existing;
+        const modal = document.createElement('dialog');
+        modal.style.cssText = 'border:none;padding:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:10px;box-shadow:var(--modal-shadow,0 24px 48px rgba(0,0,0,0.5));width:min(520px,96vw);color:var(--text-primary);';
+        modal.innerHTML = `
+            <div style="padding:1.125rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                <h2 style="margin:0;font-size:1rem;font-weight:700;">${isEdit ? 'Edit Supplier' : 'Add Supplier'}</h2>
+                <button id="close-supplier-modal" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.25rem;padding:0.25rem;"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="supplier-form" style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Business Name *</label>
+                    <input type="text" name="name" required value="${existing?.name || ''}" placeholder="e.g. Metro Wholesale" style="width:100%;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Contact Person</label>
+                    <input type="text" name="contact" value="${existing?.contact || ''}" placeholder="Name">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Phone</label>
+                    <input type="tel" name="phone" value="${existing?.phone || ''}" placeholder="072 000 0000">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Email</label>
+                    <input type="email" name="email" value="${existing?.email || ''}" placeholder="orders@supplier.co.za">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Payment Terms</label>
+                    <select name="paymentTerms" style="width:100%;">
+                        <option value="COD" ${existing?.paymentTerms==='COD'?'selected':''}>Cash on Delivery</option>
+                        <option value="7 days" ${existing?.paymentTerms==='7 days'?'selected':''}>7 Days</option>
+                        <option value="30 days" ${existing?.paymentTerms==='30 days'?'selected':''}>30 Days</option>
+                        <option value="60 days" ${existing?.paymentTerms==='60 days'?'selected':''}>60 Days</option>
+                        <option value="Prepaid" ${existing?.paymentTerms==='Prepaid'?'selected':''}>Prepaid</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Minimum Order (R)</label>
+                    <input type="number" name="minOrderValue" value="${existing?.minOrderValue || ''}" placeholder="0" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Lead Time (days)</label>
+                    <input type="number" name="leadTime" value="${existing?.leadTime || ''}" placeholder="e.g. 3" min="0">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Address</label>
+                    <input type="text" name="address" value="${existing?.address || ''}" placeholder="Physical address">
+                </div>
+                <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:0.625rem;padding-top:0.5rem;border-top:1px solid var(--border);margin-top:0.25rem;">
+                    <button type="button" id="cancel-supplier-btn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Add Supplier'}</button>
+                </div>
+            </form>
+        `;
+        document.body.appendChild(modal);
+        modal.showModal();
+
+        const close = () => { modal.close(); modal.remove(); };
+        modal.querySelector('#close-supplier-modal').addEventListener('click', close);
+        modal.querySelector('#cancel-supplier-btn').addEventListener('click', close);
+
+        modal.querySelector('#supplier-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const data = {
+                name: fd.get('name'),
+                contact: fd.get('contact'),
+                phone: fd.get('phone'),
+                email: fd.get('email'),
+                address: fd.get('address'),
+                paymentTerms: fd.get('paymentTerms'),
+                minOrderValue: parseFloat(fd.get('minOrderValue')) || 0,
+                leadTime: parseInt(fd.get('leadTime')) || 0,
+            };
+            try {
+                if (isEdit) {
+                    const { default: db } = await import('../db/index.js');
+                    await db.update('suppliers', { ...existing, ...data });
+                } else {
+                    await this.module.addSupplier(data);
+                }
+                close();
+                this.loadSuppliers();
+            } catch (err) {
+                alert('Failed to save supplier: ' + err.message);
+            }
+        });
+    }
+    // ── End Supplier Management ─────────────────────────────────────────
+
     async loadForecastView() {
         this.container.innerHTML = '<div class="loading">Generating forecast...</div>';
         try {
@@ -837,8 +1001,9 @@ class PoolStockUI {
         tbody.innerHTML = this.renderInventoryRows(inventory);
     }
 
-    showAddItemModal(existingItem = null) {
+    async showAddItemModal(existingItem = null) {
         const isEdit = !!existingItem;
+        const suppliers = await this.module.getSuppliers().catch(() => []);
         const modal = document.createElement('dialog');
         modal.className = 'item-modal';
         modal.innerHTML = `
@@ -884,8 +1049,14 @@ class PoolStockUI {
                         <input type="number" name="unitPrice" value="${existingItem?.unitPrice || 0}" min="0" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Supplier</label>
-                        <input type="text" name="supplier" value="${existingItem?.supplier || ''}" placeholder="Supplier name">
+                        <label>Preferred Supplier</label>
+                        ${suppliers.length > 0
+                          ? `<select name="supplier" style="width:100%;">
+                              <option value="">— None —</option>
+                              ${suppliers.map(s => `<option value="${s.name}" ${existingItem?.supplier===s.name?'selected':''}>${s.name}</option>`).join('')}
+                             </select>`
+                          : `<input type="text" name="supplier" value="${existingItem?.supplier || ''}" placeholder="Add suppliers in the Suppliers tab">`
+                        }
                     </div>
                 </div>
 
