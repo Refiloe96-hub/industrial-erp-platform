@@ -863,14 +863,15 @@ class LandingUI {
 
           <!-- Hero Video / App Screenshot -->
           <div class="lp-hero-media lp-animate" style="background: #000;">
-            <video 
-              src="/demo.mp4" 
-              width="100%" 
-              height="100%" 
-              autoplay 
-              loop 
-              muted 
-              playsinline 
+            <video
+              src="/demo.mp4"
+              width="100%"
+              height="100%"
+              autoplay
+              loop
+              muted
+              playsinline
+              poster="/icons/icon.svg"
               style="object-fit: cover; width: 100%; height: 100%;">
             </video>
           </div>
@@ -882,20 +883,20 @@ class LandingUI {
         <div class="lp-stats lp-animate">
           <div class="lp-stats-inner">
             <div>
-              <span class="lp-stat-num">2,400+</span>
-              <span class="lp-stat-label">Businesses active</span>
+              <span class="lp-stat-num">100%</span>
+              <span class="lp-stat-label">Offline-capable</span>
             </div>
             <div>
-              <span class="lp-stat-num">14</span>
-              <span class="lp-stat-label">Countries</span>
+              <span class="lp-stat-num">0</span>
+              <span class="lp-stat-label">Setup fees</span>
             </div>
             <div>
-              <span class="lp-stat-num">99.8%</span>
-              <span class="lp-stat-label">Uptime SLA</span>
+              <span class="lp-stat-num">ZAR</span>
+              <span class="lp-stat-label">Local pricing</span>
             </div>
             <div>
-              <span class="lp-stat-num">&lt; 400ms</span>
-              <span class="lp-stat-label">Avg. response time</span>
+              <span class="lp-stat-num">5 min</span>
+              <span class="lp-stat-label">To first sale</span>
             </div>
           </div>
         </div>
@@ -904,28 +905,28 @@ class LandingUI {
 
         <!-- Social proof marquee -->
         <div class="lp-proof">
-          <p class="lp-proof-label">Trusted by businesses across the region</p>
+          <p class="lp-proof-label">Built for businesses like these</p>
           <div class="lp-marquee-outer">
             <!-- The track is duplicated so the loop is seamless -->
             <div class="lp-marquee-track">
-              <!-- Set 1 -->
-              <div class="lp-marquee-item"><span>SHOPRITE SPAZA</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>DURBAN WAREHOUSE CO.</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>METRO TRADERS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>EASTGATE MILLS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>KASI FRESH</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>SOWETO BULK DEPOT</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>CAPE GRAIN TRADERS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>TEMBISA TOOLS</span><span class="lp-marquee-dot"></span></div>
+              <!-- Set 1 — generic business type descriptors, not brand names -->
+              <div class="lp-marquee-item"><span>SPAZA SHOPS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>HARDWARE STORES</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>WHOLESALE TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>GRAIN MILLS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>FRESH PRODUCE</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>BULK DEPOTS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>SMALL FACTORIES</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>TUCK SHOPS</span><span class="lp-marquee-dot"></span></div>
               <!-- Set 2 — exact duplicate for seamless loop -->
-              <div class="lp-marquee-item"><span>SHOPRITE SPAZA</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>DURBAN WAREHOUSE CO.</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>METRO TRADERS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>EASTGATE MILLS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>KASI FRESH</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>SOWETO BULK DEPOT</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>CAPE GRAIN TRADERS</span><span class="lp-marquee-dot"></span></div>
-              <div class="lp-marquee-item"><span>TEMBISA TOOLS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>SPAZA SHOPS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>HARDWARE STORES</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>WHOLESALE TRADERS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>GRAIN MILLS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>FRESH PRODUCE</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>BULK DEPOTS</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>SMALL FACTORIES</span><span class="lp-marquee-dot"></span></div>
+              <div class="lp-marquee-item"><span>TUCK SHOPS</span><span class="lp-marquee-dot"></span></div>
             </div>
           </div>
         </div>
@@ -1176,7 +1177,7 @@ class LandingUI {
                 <li><i class="ph-bold ph-check"></i> Dedicated account manager</li>
                 <li><i class="ph-bold ph-check"></i> SLA guarantee</li>
               </ul>
-              <button class="lp-plan-btn outline" onclick="window.location.href='mailto:sales@industrial-erp.test'">Contact sales</button>
+              <button class="lp-plan-btn outline" onclick="window.location.href='mailto:motsoenengrdm@gmail.com?subject=Industrial ERP Enterprise Inquiry'">Contact sales</button>
             </div>
           </div>
         </section>
