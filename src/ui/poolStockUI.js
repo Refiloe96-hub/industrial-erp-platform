@@ -46,6 +46,7 @@ class PoolStockUI {
                     <div class="ps-tab-bar">
                         <button class="ps-tab active" data-tab="inventory"><i class="ph ph-package"></i> Inventory</button>
                         <button class="ps-tab" data-tab="purchase-orders"><i class="ph ph-clipboard-text"></i> Purchase Orders</button>
+                        <button class="ps-tab" data-tab="stock-take"><i class="ph ph-clipboard-text"></i> Stock Take</button>
                         <button class="ps-tab" data-tab="suppliers"><i class="ph ph-truck"></i> Suppliers</button>
                         <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast</button>
                     </div>
@@ -574,6 +575,8 @@ class PoolStockUI {
             btn.addEventListener('click', () => {
                 if (btn.dataset.tab === 'purchase-orders') {
                     this.loadPurchaseOrders();
+                } else if (btn.dataset.tab === 'stock-take') {
+                    this.loadStockTake();
                 } else if (btn.dataset.tab === 'suppliers') {
                     this.loadSuppliers();
                 } else if (btn.dataset.tab === 'forecast') {
@@ -735,6 +738,131 @@ class PoolStockUI {
             chartContainer.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--danger);"><i class="ph ph-warning-circle"></i> Error loading chart data</div>`;
         }
     }
+
+    // ── Stock Take ──────────────────────────────────────────────────────
+    async loadStockTake() {
+        const inventory = await this.module.getInventory();
+
+        this.container.innerHTML = `
+            <div class="poolstock-ui">
+                <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                    <div>
+                        <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Stock Take</h1>
+                        <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Count physical stock and record adjustments</p>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button class="btn btn-secondary" id="st-back-btn"><i class="ph ph-arrow-left"></i> Back</button>
+                        <button class="btn btn-primary" id="st-submit-btn"><i class="ph ph-check"></i> Submit Count</button>
+                    </div>
+                </header>
+
+                <div style="padding:1.25rem;">
+                    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.8125rem;color:#fbbf24;">
+                        Enter actual physical counts. Leave blank to keep system quantity unchanged.
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th style="text-align:right;">System Qty</th>
+                                    <th style="text-align:center;width:120px;">Physical Count</th>
+                                    <th style="text-align:right;">Variance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="st-body">
+                                ${inventory.map(item => `
+                                    <tr data-sku="${item.sku}" data-sys="${item.quantity || 0}">
+                                        <td><strong>${item.name}</strong><br><small style="color:var(--text-muted);">${item.sku}</small></td>
+                                        <td>${item.category || '—'}</td>
+                                        <td style="text-align:right;font-weight:600;">${item.quantity || 0} ${item.unit || ''}</td>
+                                        <td style="text-align:center;">
+                                            <input type="number" class="st-count-input" data-sku="${item.sku}" data-sys="${item.quantity || 0}"
+                                                min="0" placeholder="—"
+                                                style="width:90px;text-align:center;padding:0.3rem 0.5rem;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-primary);font-size:0.875rem;">
+                                        </td>
+                                        <td class="st-variance" data-sku="${item.sku}" style="text-align:right;color:var(--text-muted);font-weight:600;">—</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.container.querySelector('#st-back-btn')?.addEventListener('click', () => this.loadDashboard());
+
+        // Live variance calculation as counts are entered
+        this.container.querySelectorAll('.st-count-input').forEach(input => {
+            input.addEventListener('input', () => {
+                const sys = parseInt(input.dataset.sys) || 0;
+                const val = input.value.trim();
+                const varCell = this.container.querySelector(`.st-variance[data-sku="${input.dataset.sku}"]`);
+                if (val === '' || val === null) {
+                    varCell.textContent = '—';
+                    varCell.style.color = 'var(--text-muted)';
+                    return;
+                }
+                const counted = parseInt(val) || 0;
+                const diff = counted - sys;
+                varCell.textContent = (diff >= 0 ? '+' : '') + diff;
+                varCell.style.color = diff === 0 ? '#34d399' : diff > 0 ? '#fbbf24' : '#f87171';
+            });
+        });
+
+        // Submit: apply all entered counts as adjustments
+        this.container.querySelector('#st-submit-btn')?.addEventListener('click', async () => {
+            const inputs = [...this.container.querySelectorAll('.st-count-input')].filter(i => i.value.trim() !== '');
+            if (inputs.length === 0) {
+                alert('No counts entered. Enter at least one physical count to submit.');
+                return;
+            }
+
+            const confirmed = confirm(
+                `Submit stock take?\n${inputs.length} item${inputs.length !== 1 ? 's' : ''} will be adjusted.`
+            );
+            if (!confirmed) return;
+
+            const btn = this.container.querySelector('#st-submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+
+            let adjusted = 0;
+            const errors = [];
+
+            for (const input of inputs) {
+                const sku = input.dataset.sku;
+                const counted = parseInt(input.value) || 0;
+                const sys = parseInt(input.dataset.sys) || 0;
+                const diff = counted - sys;
+                if (diff === 0) continue;
+
+                try {
+                    await this.module.adjustStock({
+                        sku,
+                        type: diff > 0 ? 'adjustment_in' : 'adjustment_out',
+                        quantity: Math.abs(diff),
+                        reason: `Stock take — counted ${counted}, system had ${sys}`,
+                        date: Date.now(),
+                    });
+                    adjusted++;
+                } catch (err) {
+                    errors.push(`${sku}: ${err.message}`);
+                }
+            }
+
+            if (errors.length > 0) {
+                alert(`${adjusted} items adjusted.\n\nErrors:\n${errors.join('\n')}`);
+            } else {
+                alert(`Stock take complete. ${adjusted} item${adjusted !== 1 ? 's' : ''} adjusted.`);
+            }
+
+            this.loadDashboard();
+        });
+    }
+    // ── End Stock Take ──────────────────────────────────────────────────
 
     // ── Supplier Management ─────────────────────────────────────────────
     async loadSuppliers() {

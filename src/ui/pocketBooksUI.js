@@ -1,5 +1,5 @@
 
-import { getSession } from '../utils/safeJson.js';
+import { getSession, sym } from '../utils/safeJson.js';
 import PocketBooks from '../modules/PocketBooks.js';
 import { showDetailPanel, dpBar, dpKV } from './panelHelper.js';
 import { downloadCSV, fmtDate } from '../utils/csvExport.js';
@@ -43,21 +43,21 @@ class PocketBooksUI {
                             <div class="stat-icon"><i class="ph-duotone ph-trend-up"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Total Income</span>
-                                <span class="stat-value">R ${cashFlow.income.toLocaleString()}</span>
+                                <span class="stat-value">${sym()}${cashFlow.income.toLocaleString()}</span>
                             </div>
                         </div>
                         <div class="stat-card expense" data-card="expenses" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-trend-down"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Total Expenses</span>
-                                <span class="stat-value">R ${cashFlow.expenses.toLocaleString()}</span>
+                                <span class="stat-value">${sym()}${cashFlow.expenses.toLocaleString()}</span>
                             </div>
                         </div>
                         <div class="stat-card ${cashFlow.netCashFlow >= 0 ? 'positive' : 'negative'}" data-card="net" style="cursor:pointer" title="Click for breakdown">
                             <div class="stat-icon"><i class="ph-duotone ph-money"></i></div>
                             <div class="stat-content">
                                 <span class="stat-label">Net Cash Flow</span>
-                                <span class="stat-value">${cashFlow.netCashFlow >= 0 ? '+' : ''}R ${cashFlow.netCashFlow.toLocaleString()}</span>
+                                <span class="stat-value">${cashFlow.netCashFlow >= 0 ? '+' : ''}${sym()}${cashFlow.netCashFlow.toLocaleString()}</span>
                             </div>
                         </div>
                         <div class="stat-card neutral" data-card="count" style="cursor:pointer" title="Click for breakdown">
@@ -236,10 +236,10 @@ class PocketBooksUI {
                     </div>
 
                     <div class="totals-box">
-                        <div class="tot-row"><span>Total Gross Income:</span> <span>R ${totalIncome.toFixed(2)}</span></div>
-                        <div class="tot-row"><span>Total Expenses:</span> <span>R ${totalExpenses.toFixed(2)}</span></div>
-                        <div class="tot-row"><span>Taxable Sales:</span> <span>R ${totalVatableIncome.toFixed(2)}</span></div>
-                        <div class="tot-row grand"><span>Estimated VAT Collected (15%):</span> <span>R ${vatCollected.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Total Gross Income:</span> <span>${sym()}${totalIncome.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Total Expenses:</span> <span>${sym()}${totalExpenses.toFixed(2)}</span></div>
+                        <div class="tot-row"><span>Taxable Sales:</span> <span>${sym()}${totalVatableIncome.toFixed(2)}</span></div>
+                        <div class="tot-row grand"><span>Estimated VAT Collected (15%):</span> <span>${sym()}${vatCollected.toFixed(2)}</span></div>
                     </div>
 
                     <h2>Transaction Log</h2>
@@ -332,19 +332,19 @@ class PocketBooksUI {
                     <table>
                         <tr><th colspan="2">${pl.labels.revenue}</th></tr>
                         ${Object.entries(pl.revenueBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
-                        <tr class="subtotal"><td>Total ${pl.labels.revenue}</td><td class="right">R ${pl.revenue.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total ${pl.labels.revenue}</td><td class="right">${sym()}${pl.revenue.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">${pl.labels.cogs}</th></tr>
                         ${Object.entries(pl.cogsBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
-                        <tr class="subtotal"><td>Total ${pl.labels.cogs.split(' (')[0]}</td><td class="right">R ${pl.costOfGoodsSold.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total ${pl.labels.cogs.split(' (')[0]}</td><td class="right">${sym()}${pl.costOfGoodsSold.toFixed(2)}</td></tr>
                         
-                        <tr class="grand-total"><td>Gross Profit</td><td class="right">R ${pl.grossProfit.toFixed(2)}</td></tr>
+                        <tr class="grand-total"><td>Gross Profit</td><td class="right">${sym()}${pl.grossProfit.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">Operating Expenses</th></tr>
                         ${Object.entries(pl.opexBreakdown).map(([k, v]) => `<tr><td class="indent">${k}</td><td class="right">${v.toFixed(2)}</td></tr>`).join('')}
-                        <tr class="subtotal"><td>Total Operating Expenses</td><td class="right">R ${pl.operatingExpenses.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Operating Expenses</td><td class="right">${sym()}${pl.operatingExpenses.toFixed(2)}</td></tr>
                         
-                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Income</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${pl.netIncome.toFixed(2)}</td></tr>
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Income</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">${sym()}${pl.netIncome.toFixed(2)}</td></tr>
                     </table>
                     
                     <div style="margin-top: 3rem; text-align: center;">
@@ -378,19 +378,19 @@ class PocketBooksUI {
                         <tr><th colspan="2">Cash Flows from Operating Activities</th></tr>
                         <tr><td class="indent">Cash Inflows from Customers</td><td class="right">${cf.operatingActivities.inflow.toFixed(2)}</td></tr>
                         <tr><td class="indent">Cash Outflows to Suppliers/Expenses</td><td class="right">(${cf.operatingActivities.outflow.toFixed(2)})</td></tr>
-                        <tr class="subtotal"><td>Net Cash from Operating Activities</td><td class="right">R ${cf.operatingActivities.net.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Operating Activities</td><td class="right">${sym()}${cf.operatingActivities.net.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">Cash Flows from Investing Activities</th></tr>
                         <tr><td class="indent">Cash Inflows from Asset Sales</td><td class="right">${cf.investingActivities.inflow.toFixed(2)}</td></tr>
                         <tr><td class="indent">Cash Outflows for Asset Purchases</td><td class="right">(${cf.investingActivities.outflow.toFixed(2)})</td></tr>
-                        <tr class="subtotal"><td>Net Cash from Investing Activities</td><td class="right">R ${cf.investingActivities.net.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Investing Activities</td><td class="right">${sym()}${cf.investingActivities.net.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">Cash Flows from Financing Activities</th></tr>
                         <tr><td class="indent">Cash Inflows from Loans/Capital</td><td class="right">${cf.financingActivities.inflow.toFixed(2)}</td></tr>
                         <tr><td class="indent">Cash Outflows for Repayments</td><td class="right">(${cf.financingActivities.outflow.toFixed(2)})</td></tr>
-                        <tr class="subtotal"><td>Net Cash from Financing Activities</td><td class="right">R ${cf.financingActivities.net.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Net Cash from Financing Activities</td><td class="right">${sym()}${cf.financingActivities.net.toFixed(2)}</td></tr>
                         
-                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Increase (Decrease) in Cash</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${cf.netIncreaseInCash.toFixed(2)}</td></tr>
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Net Increase (Decrease) in Cash</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">${sym()}${cf.netIncreaseInCash.toFixed(2)}</td></tr>
                     </table>
                     
                     <div style="margin-top: 3rem; text-align: center;">
@@ -424,17 +424,17 @@ class PocketBooksUI {
                         <tr><th colspan="2">ASSETS</th></tr>
                         <tr><td class="indent">Cash and Cash Equivalents</td><td class="right">${bs.assets.cashAndEquivalents.toFixed(2)}</td></tr>
                         <tr><td class="indent">${bs.labels.inventory}</td><td class="right">${bs.assets.inventory.toFixed(2)}</td></tr>
-                        <tr class="subtotal"><td>Total Assets</td><td class="right">R ${bs.assets.total.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Assets</td><td class="right">${sym()}${bs.assets.total.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">LIABILITIES</th></tr>
                         <tr><td class="indent">Loans / Notes Payable</td><td class="right">${bs.liabilities.loansPayable.toFixed(2)}</td></tr>
-                        <tr class="subtotal"><td>Total Liabilities</td><td class="right">R ${bs.liabilities.total.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Liabilities</td><td class="right">${sym()}${bs.liabilities.total.toFixed(2)}</td></tr>
                         
                         <tr><th colspan="2">EQUITY</th></tr>
                         <tr><td class="indent">Retained Earnings / Capital</td><td class="right">${bs.equity.retainedEarnings.toFixed(2)}</td></tr>
-                        <tr class="subtotal"><td>Total Equity</td><td class="right">R ${bs.equity.total.toFixed(2)}</td></tr>
+                        <tr class="subtotal"><td>Total Equity</td><td class="right">${sym()}${bs.equity.total.toFixed(2)}</td></tr>
                         
-                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Total Liabilities and Equity</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">R ${(bs.liabilities.total + bs.equity.total).toFixed(2)}</td></tr>
+                        <tr class="grand-total"><td style="padding-top:1rem;padding-bottom:1rem;">Total Liabilities and Equity</td><td class="right" style="padding-top:1rem;padding-bottom:1rem;">${sym()}${(bs.liabilities.total + bs.equity.total).toFixed(2)}</td></tr>
                     </table>
                     
                     <div style="margin-top: 3rem; text-align: center;">
@@ -459,7 +459,7 @@ class PocketBooksUI {
                 <td><span class="badge ${t.category?.toLowerCase()}">${t.category}</span></td>
                 <td class="reference">${t.reference || '-'}</td>
                 <td class="amount ${t.type}">
-                    ${t.type === 'income' ? '+' : '-'} R ${(t.amount || 0).toLocaleString()}
+                    ${t.type === 'income' ? '+' : '-'} ${sym()}${(t.amount || 0).toLocaleString()}
                 </td>
             </tr>
                 `).join('');
@@ -545,9 +545,9 @@ class PocketBooksUI {
                     <div class="dp-section">
                         <div class="dp-section-title">Financial Health</div>
                         <div class="dp-kv-grid">
-                            ${dpKV('Net Cash Flow', (result.netCashFlow >= 0 ? '+' : '') + 'R ' + Math.round(result.netCashFlow).toLocaleString(), result.netCashFlow >= 0)}
+                            ${dpKV('Net Cash Flow', (result.netCashFlow >= 0 ? '+' : '') + sym() + Math.round(result.netCashFlow).toLocaleString(), result.netCashFlow >= 0)}
                             ${dpKV('Savings Rate', result.savingsRate + '%')}
-                            ${dpKV('Daily Burn Rate', 'R ' + result.burnRate)}
+                            ${dpKV('Daily Burn Rate', sym() + result.burnRate)}
                             ${dpKV('Anomalies Detected', result.anomalyCount)}
                             ${dpKV('Top Expense Category', result.topExpenseCategory)}
                         </div>
@@ -619,22 +619,22 @@ class PocketBooksUI {
         const panels = {
             income: {
                 title: 'Total Income Breakdown',
-                subtitle: `R ${cashFlow.income.toLocaleString()} across ${incomeCount} income entries`,
+                subtitle: `${sym()}${cashFlow.income.toLocaleString()} across ${incomeCount} income entries`,
                 bodyHTML: Object.keys(incomeByCategory).length ? `
                     <div class="dp-section">
                         <div class="dp-section-title">Income by Category</div>
                         ${Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
-                    dpBar(cat, amt, maxIncome, '#16a34a', v => `R ${v.toLocaleString()}`)).join('')}
+                    dpBar(cat, amt, maxIncome, '#16a34a', v => `${sym()}${v.toLocaleString()}`)).join('')}
                     </div>` : '<div class="dp-empty">No income recorded yet.</div>'
             },
             expenses: {
                 title: 'Total Expenses Breakdown',
-                subtitle: `R ${cashFlow.expenses.toLocaleString()} across ${expenseCount} expense entries`,
+                subtitle: `${sym()}${cashFlow.expenses.toLocaleString()} across ${expenseCount} expense entries`,
                 bodyHTML: Object.keys(expenseByCategory).length ? `
                     <div class="dp-section">
                         <div class="dp-section-title">Expenses by Category</div>
                         ${Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
-                    dpBar(cat, amt, maxExpense, '#dc2626', v => `R ${v.toLocaleString()}`)).join('')}
+                    dpBar(cat, amt, maxExpense, '#dc2626', v => `${sym()}${v.toLocaleString()}`)).join('')}
                     </div>` : '<div class="dp-empty">No expenses recorded yet.</div>'
             },
             net: {
@@ -644,15 +644,15 @@ class PocketBooksUI {
                     <div class="dp-section">
                         <div class="dp-section-title">Overview</div>
                         <div class="dp-kv-grid">
-                            ${dpKV('Total Income', 'R ' + cashFlow.income.toLocaleString())}
-                            ${dpKV('Total Expenses', 'R ' + cashFlow.expenses.toLocaleString())}
-                            ${dpKV('Net Cash Flow', (cashFlow.netCashFlow >= 0 ? '+' : '') + 'R ' + cashFlow.netCashFlow.toLocaleString(), true)}
+                            ${dpKV('Total Income', sym() + cashFlow.income.toLocaleString())}
+                            ${dpKV('Total Expenses', sym() + cashFlow.expenses.toLocaleString())}
+                            ${dpKV('Net Cash Flow', (cashFlow.netCashFlow >= 0 ? '+' : '') + sym() + cashFlow.netCashFlow.toLocaleString(), true)}
                         </div>
                     </div>
                     <div class="dp-section">
                         <div class="dp-section-title">Comparison</div>
-                        ${dpBar('Income', cashFlow.income, Math.max(cashFlow.income, cashFlow.expenses, 1), '#16a34a', v => 'R ' + v.toLocaleString())}
-                        ${dpBar('Expenses', cashFlow.expenses, Math.max(cashFlow.income, cashFlow.expenses, 1), '#dc2626', v => 'R ' + v.toLocaleString())}
+                        ${dpBar('Income', cashFlow.income, Math.max(cashFlow.income, cashFlow.expenses, 1), '#16a34a', v => sym() + v.toLocaleString())}
+                        ${dpBar('Expenses', cashFlow.expenses, Math.max(cashFlow.income, cashFlow.expenses, 1), '#dc2626', v => sym() + v.toLocaleString())}
                     </div>`
             },
             count: {
@@ -669,7 +669,7 @@ class PocketBooksUI {
                         <ul class="dp-list">
                             ${transactions.slice(0, 5).map(t => `<li>
                                 <span>${t.description || t.category}</span>
-                                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}R ${(t.amount || 0).toLocaleString()}</span>
+                                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}${sym()}${(t.amount || 0).toLocaleString()}</span>
                             </li>`).join('') || '<li>No transactions yet.</li>'}
                         </ul>
                     </div>`
@@ -719,7 +719,7 @@ class PocketBooksUI {
             </div>
             <div class="tx-detail-body">
                 <div class="tx-amount-hero">
-                    <div class="amount">${isIncome ? '+' : '-'} R ${(t.amount || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</div>
+                    <div class="amount">${isIncome ? '+' : '-'} ${sym()}${(t.amount || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</div>
                     <div class="type-badge">${t.type}</div>
                 </div>
                 <div class="tx-field-grid">

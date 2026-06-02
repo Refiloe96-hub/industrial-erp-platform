@@ -1,4 +1,6 @@
 import Customers from '../modules/Customers.js';
+import db from '../db/index.js';
+import { sym } from '../utils/safeJson.js';
 
 class CustomersUI {
   constructor() {
@@ -82,14 +84,19 @@ class CustomersUI {
         </div>
         <div class="card-body">
           <p><i class="ph-duotone ph-phone"></i> ${c.phone || 'No phone'}</p>
-          <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: R ${(c.totalSpent || 0).toLocaleString()}</p>
+          <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: ${sym()}${(c.totalSpent || 0).toLocaleString()}</p>
           ${(c.creditBalance || 0) > 0 ? `
           <div style="margin-top:0.5rem;padding:0.5rem 0.625rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.8125rem;color:#f87171;font-weight:600;">Owes R ${(c.creditBalance||0).toFixed(2)}</span>
+            <span style="font-size:0.8125rem;color:#f87171;font-weight:600;">Owes ${sym()}${(c.creditBalance||0).toFixed(2)}</span>
             <button class="btn-record-payment btn btn-secondary" data-id="${c.id}" data-balance="${c.creditBalance||0}" data-name="${c.name}" style="font-size:0.7rem;padding:0.2rem 0.5rem;color:#34d399;border-color:rgba(16,185,129,0.3);">Record Payment</button>
           </div>` : ''}
           <p style="font-size:0.75rem;color:var(--text-muted);margin:0.375rem 0 0;">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
-          <button class="btn btn-secondary btn-edit" data-id="${c.id}" style="font-size:0.75rem;padding:0.3rem 0.75rem;margin-top:0.5rem;">Edit</button>
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+            <button class="btn btn-secondary btn-history" data-id="${c.id}" data-name="${c.name}" style="font-size:0.75rem;padding:0.3rem 0.75rem;flex:1;">
+              <i class="ph ph-clock-clockwise"></i> History
+            </button>
+            <button class="btn btn-secondary btn-edit" data-id="${c.id}" style="font-size:0.75rem;padding:0.3rem 0.75rem;">Edit</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -165,13 +172,22 @@ class CustomersUI {
   }
 
   attachEditHandlers(container) {
+    // Customer purchase history
+    container.querySelectorAll('.btn-history').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const customerId = parseInt(btn.dataset.id);
+        const customerName = btn.dataset.name;
+        this.showCustomerHistory(customerId, customerName);
+      });
+    });
+
     // Record partial or full payment against a customer's credit balance
     container.querySelectorAll('.btn-record-payment').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.dataset.id);
         const balance = parseFloat(btn.dataset.balance);
         const name = btn.dataset.name;
-        const amount = parseFloat(prompt(`Record payment from ${name}\nOutstanding: R ${balance.toFixed(2)}\n\nEnter amount received:`));
+        const amount = parseFloat(prompt(`Record payment from ${name}\nOutstanding: ${sym()}${balance.toFixed(2)}\n\nEnter amount received:`));
         if (!amount || amount <= 0) return;
         try {
           const customer = await Customers.getCustomer(id);
@@ -370,6 +386,63 @@ class CustomersUI {
         #customer-modal { backdrop-filter: none !important; }
       </style>
     `;
+  }
+}
+
+  async showCustomerHistory(customerId, customerName) {
+    // Pull all sales transactions for this customer
+    let txs = [];
+    try {
+      const all = await db.getAll('transactions');
+      txs = all
+        .filter(t => t.customerId == customerId && t.type === 'income')
+        .sort((a, b) => (b.date || b.createdAt || 0) - (a.date || a.createdAt || 0));
+    } catch {}
+
+    const { showDetailPanel, dpKV } = await import('./panelHelper.js');
+
+    const totalSpent = txs.reduce((s, t) => s + (t.amount || 0), 0);
+    const visitCount = txs.length;
+
+    const txRows = txs.length === 0
+      ? `<p style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:1rem 0;">No purchase history yet.</p>`
+      : txs.slice(0, 50).map(t => {
+          const date = new Date(t.date || t.createdAt || 0).toLocaleDateString('en-ZA');
+          const items = (t.items || []).map(i => `${i.name || i.sku} ×${i.quantity}`).join(', ');
+          const badge = { cash:'#10b981', card:'#2563eb', mobile:'#f59e0b', credit:'#f87171' }[t.paymentMethod] || '#6b7280';
+          return `
+            <div style="padding:0.75rem 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;margin-bottom:0.25rem;">
+                <span style="font-size:0.875rem;font-weight:600;color:var(--text-primary);">${sym()}${(t.amount||0).toFixed(2)}</span>
+                <div style="display:flex;gap:0.375rem;align-items:center;">
+                  <span style="font-size:0.6875rem;padding:0.1rem 0.4rem;border-radius:4px;background:${badge}22;color:${badge};font-weight:600;text-transform:capitalize;">${t.paymentMethod||'cash'}</span>
+                  <span style="font-size:0.75rem;color:var(--text-muted);">${date}</span>
+                </div>
+              </div>
+              ${items ? `<p style="margin:0;font-size:0.75rem;color:var(--text-secondary);">${items}</p>` : ''}
+              ${t.cashierName ? `<p style="margin:0.125rem 0 0;font-size:0.6875rem;color:var(--text-muted);">Cashier: ${t.cashierName}</p>` : ''}
+            </div>
+          `;
+        }).join('');
+
+    const summaryHTML = `
+      <div class="dp-section">
+        <div class="dp-kv-grid" style="margin-bottom:1.25rem;">
+          ${dpKV('Total Spent', `${sym()}${totalSpent.toFixed(2)}`)}
+          ${dpKV('Visits', visitCount)}
+          ${dpKV('Avg per Visit', visitCount > 0 ? `${sym()}${(totalSpent / visitCount).toFixed(2)}` : '—')}
+          ${dpKV('Last Visit', txs[0] ? new Date(txs[0].date || txs[0].createdAt).toLocaleDateString('en-ZA') : '—')}
+        </div>
+        <div class="dp-section-title">Purchase History${txs.length > 50 ? ' (last 50)' : ''}</div>
+        ${txRows}
+      </div>
+    `;
+
+    showDetailPanel({
+      title: customerName,
+      subtitle: `${visitCount} visit${visitCount !== 1 ? 's' : ''} · ${sym()}${totalSpent.toLocaleString()} spent`,
+      bodyHTML: summaryHTML,
+    });
   }
 }
 

@@ -306,6 +306,7 @@ class IndustrialERPApp {
 
       // Load User Configuration/Settings
       this.config = (await db.get('settings', 'config')) || {};
+      if (this.config.currency) localStorage.setItem('erp_currency', this.config.currency);
 
       // Initialize Router
       initRouter();

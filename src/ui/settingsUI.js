@@ -467,7 +467,7 @@ class SettingsUI {
         businessAddress:  container.querySelector('#set-address')?.value  || '',
         businessPhone:    container.querySelector('#set-biz-phone')?.value || '',
         businessEmail:    container.querySelector('#set-biz-email')?.value || '',
-        currency:         container.querySelector('#set-currency')?.value  || this.settings.currency,
+        currency:         container.querySelector('#set-currency')?.value  || this.settings.currency || 'ZAR',
         businessLogo:     currentLogoBase64,
         taxRate:          parseFloat(container.querySelector('#set-tax')?.value) || 0,
         printerIp:        container.querySelector('#set-printer')?.value   || ''
@@ -476,6 +476,8 @@ class SettingsUI {
       try {
         await db.update('settings', { key: 'config', ...newSettings });
         this.settings = newSettings;
+        // Cache currency symbol for synchronous access in other modules
+        if (newSettings.currency) localStorage.setItem('erp_currency', newSettings.currency);
         
         // Update sidebar dynamically
         const brandLogo = document.querySelector('.brand .logo');

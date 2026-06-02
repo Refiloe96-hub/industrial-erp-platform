@@ -1,7 +1,7 @@
 // Dashboard data fetching — extracted from main.js
 import db from '../db/index.js';
 import ChartUtils from '../utils/charts.js';
-import { esc } from '../utils/safeJson.js';
+import { esc, sym } from '../utils/safeJson.js';
 
 export function (app) {
     console.log('🔄 updateDashboardStats: Starting...');
@@ -26,7 +26,7 @@ export function (app) {
           console.log(`✅ Got ${txs.length} transactions`);
           const balance = txs.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
           const el = document.getElementById('stat-cash-flow');
-          if (el) el.textContent = `R ${balance.toLocaleString()}`;
+          if (el) el.textContent = `${sym()}${balance.toLocaleString()}`;
 
           // Chart
           const chartCashflow = document.getElementById('chart-cashflow');
@@ -172,15 +172,15 @@ export function (app) {
         const dashPanels = {
           cashflow: {
             title: 'Cash Flow Summary',
-            subtitle: `Net balance: R ${balance.toLocaleString()}`,
+            subtitle: `Net balance: ${sym()}${balance.toLocaleString()}`,
             bodyHTML: `<div class="dp-section"><div class="dp-section-title">Overview</div><div class="dp-kv-grid">
-              ${dpKV('Total Income', 'R ' + txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0).toLocaleString())}
-              ${dpKV('Total Expenses', 'R ' + txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0).toLocaleString())}
-              ${dpKV('Net Balance', (balance >= 0 ? '+' : '') + 'R ' + balance.toLocaleString(), true)}
+              ${dpKV('Total Income', sym() + txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0).toLocaleString())}
+              ${dpKV('Total Expenses', sym() + txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0).toLocaleString())}
+              ${dpKV('Net Balance', (balance >= 0 ? '+' : '') + sym() + balance.toLocaleString(), true)}
             </div></div>
             <div class="dp-section"><div class="dp-section-title">Recent Transactions</div>
               <ul class="dp-list">${txs.slice(0, 6).map(t => `<li><span>${t.description || t.category}</span>
-                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}R ${(t.amount || 0).toLocaleString()}</span>
+                <span style="color:${t.type === 'income' ? '#16a34a' : '#dc2626'};font-weight:600">${t.type === 'income' ? '+' : '-'}${sym()}${(t.amount || 0).toLocaleString()}</span>
               </li>`).join('') || '<li>No transactions yet</li>'}</ul>
             </div>`
           },
@@ -191,7 +191,7 @@ export function (app) {
               ${dpKV('Total SKUs', items.length)}
               ${dpKV('Low Stock', lowStock + ' items')}
               ${dpKV('Out of Stock', items.filter(i => i.quantity === 0).length + ' items')}
-              ${dpKV('Total Value', 'R ' + items.reduce((s, i) => s + (i.quantity * (i.unitPrice || 0)), 0).toLocaleString())}
+              ${dpKV('Total Value', sym() + items.reduce((s, i) => s + (i.quantity * (i.unitPrice || 0)), 0).toLocaleString())}
             </div></div>
             <div class="dp-section"><div class="dp-section-title">By Category</div>
               ${Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([cat, n]) => dpBar(cat, n, maxCat, '#2563eb')).join('')}
@@ -211,13 +211,13 @@ export function (app) {
           },
           syndicates: {
             title: 'Syndicate Status',
-            subtitle: `${syndicates.length} active syndicates, R ${totalPool.toLocaleString()} in capital pools`,
+            subtitle: `${syndicates.length} active syndicates, ${sym()}${totalPool.toLocaleString()} in capital pools`,
             bodyHTML: `<div class="dp-section"><div class="dp-section-title">Summary</div><div class="dp-kv-grid">
               ${dpKV('Active Syndicates', syndicates.length)}
-              ${dpKV('Total Capital', 'R ' + totalPool.toLocaleString())}
+              ${dpKV('Total Capital', sym() + totalPool.toLocaleString())}
             </div></div>
             ${syndicates.length ? `<div class="dp-section"><div class="dp-section-title">Capital by Syndicate</div>
-              ${syndicates.sort((a, b) => (b.totalPool || 0) - (a.totalPool || 0)).map(s => dpBar(s.name, s.totalPool || 0, Math.max(...syndicates.map(x => x.totalPool || 0), 1), '#f97316', v => 'R ' + v.toLocaleString())).join('')}
+              ${syndicates.sort((a, b) => (b.totalPool || 0) - (a.totalPool || 0)).map(s => dpBar(s.name, s.totalPool || 0, Math.max(...syndicates.map(x => x.totalPool || 0), 1), '#f97316', v => sym() + v.toLocaleString())).join('')}
             </div>` : '<div class="dp-empty">No syndicates yet. Create one in TrustCircle.</div>'}`
           }
         };
