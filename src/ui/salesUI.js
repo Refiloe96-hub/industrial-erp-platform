@@ -37,6 +37,9 @@ class SalesUI {
             <p style="margin:0.125rem 0 0; color:var(--text-muted); font-size:0.8125rem;">Sales, checkout, and receipts</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+            <button id="till-reconcile-btn" class="btn btn-secondary">
+              <i class="ph ph-calculator"></i> Till Count
+            </button>
             <button id="sales-ai-btn" class="btn btn-secondary" style="border:1px solid #2563eb;color:#2563eb">
               Insights
             </button>
@@ -204,6 +207,11 @@ class SalesUI {
     const categoryFilters = container.querySelector('#category-filters');
 
     let cart = [];
+
+    // Till Reconciliation
+    container.querySelector('#till-reconcile-btn')?.addEventListener('click', async () => {
+      await this.showTillReconciliation();
+    });
 
     // AI Insights Button
     container.querySelector('#sales-ai-btn')?.addEventListener('click', async () => {
@@ -787,6 +795,145 @@ class SalesUI {
 
     modal.querySelector('#close-sales-scanner').addEventListener('click', cleanup);
     modal.addEventListener('click', (e) => { if (e.target === modal) cleanup(); });
+  }
+
+  async showTillReconciliation() {
+    // Get today's POS totals
+    const now = Date.now();
+    const dayStart = new Date().setHours(0,0,0,0);
+    let txs = [];
+    try { txs = await db.getAll(STORES.transactions); } catch {}
+
+    const todaySales = txs.filter(t => t.date >= dayStart && t.date <= now && t.type === 'income');
+    const expectedCash = todaySales.filter(t => t.paymentMethod === 'cash').reduce((s, t) => s + (t.amount || 0), 0);
+    const expectedCard = todaySales.filter(t => t.paymentMethod === 'card').reduce((s, t) => s + (t.amount || 0), 0);
+    const expectedMobile = todaySales.filter(t => ['mobile','mpesa'].includes(t.paymentMethod)).reduce((s, t) => s + (t.amount || 0), 0);
+    const totalExpected = todaySales.reduce((s, t) => s + (t.amount || 0), 0);
+
+    const DENOMINATIONS = [
+      { label: 'R 200', value: 200 },
+      { label: 'R 100', value: 100 },
+      { label: 'R 50',  value: 50  },
+      { label: 'R 20',  value: 20  },
+      { label: 'R 10',  value: 10  },
+      { label: 'R 5',   value: 5   },
+      { label: 'R 2',   value: 2   },
+      { label: 'R 1',   value: 1   },
+      { label: '50c',   value: 0.5 },
+    ];
+
+    const modal = document.createElement('dialog');
+    modal.style.cssText = 'border:none;padding:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:12px;box-shadow:0 24px 48px rgba(0,0,0,0.5);width:min(520px,96vw);max-height:90vh;overflow-y:auto;color:var(--text-primary);';
+    modal.innerHTML = `
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h2 style="margin:0;font-size:1rem;font-weight:700;">End-of-Day Till Count</h2>
+          <p style="margin:0.125rem 0 0;font-size:0.75rem;color:var(--text-muted);">${new Date().toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long' })}</p>
+        </div>
+        <button id="close-till-btn" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.25rem;padding:0.25rem;"><i class="ph ph-x"></i></button>
+      </div>
+
+      <div style="padding:1.25rem 1.5rem;">
+        <!-- System totals -->
+        <div style="background:var(--bg-elevated,#232326);border-radius:8px;padding:1rem;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;text-align:center;">
+          <div>
+            <p style="margin:0;font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Cash (POS)</p>
+            <p style="margin:0.25rem 0 0;font-size:1.125rem;font-weight:700;color:var(--text-primary);">R ${expectedCash.toFixed(2)}</p>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Card / Mobile</p>
+            <p style="margin:0.25rem 0 0;font-size:1.125rem;font-weight:700;color:var(--text-primary);">R ${(expectedCard + expectedMobile).toFixed(2)}</p>
+          </div>
+          <div>
+            <p style="margin:0;font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Total Revenue</p>
+            <p style="margin:0.25rem 0 0;font-size:1.125rem;font-weight:700;color:#34d399;">R ${totalExpected.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <!-- Denomination count -->
+        <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin:0 0 0.625rem;">Count physical cash in drawer</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1.25rem;" id="denom-grid">
+          ${DENOMINATIONS.map(d => `
+            <div style="display:flex;align-items:center;gap:0.625rem;background:var(--bg-elevated,#232326);border-radius:6px;padding:0.5rem 0.75rem;">
+              <span style="font-size:0.875rem;font-weight:600;color:var(--text-secondary);min-width:44px;">${d.label}</span>
+              <span style="color:var(--text-muted);font-size:0.75rem;">×</span>
+              <input type="number" class="denom-input" data-value="${d.value}" min="0" value="0"
+                style="width:64px;text-align:center;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.375rem;color:var(--text-primary);font-size:0.875rem;font-weight:600;">
+              <span class="denom-sub" data-value="${d.value}" style="margin-left:auto;font-size:0.8125rem;color:var(--text-muted);min-width:64px;text-align:right;">R 0.00</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Totals comparison -->
+        <div style="border-top:1px solid var(--border);padding-top:1rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;font-size:0.875rem;">
+            <span style="color:var(--text-secondary);">Physical cash counted</span>
+            <span id="till-counted" style="font-weight:700;color:var(--text-primary);">R 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;font-size:0.875rem;">
+            <span style="color:var(--text-secondary);">Cash expected (POS)</span>
+            <span style="font-weight:600;color:var(--text-secondary);">R ${expectedCash.toFixed(2)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding-top:0.625rem;border-top:1px solid var(--border);">
+            <span style="font-size:1rem;font-weight:700;color:var(--text-primary);">Variance</span>
+            <span id="till-variance" style="font-size:1.125rem;font-weight:700;color:var(--text-muted);">R 0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button id="cancel-till-btn" class="btn btn-secondary">Cancel</button>
+        <button id="save-till-btn" class="btn btn-primary"><i class="ph ph-check"></i> Save Reconciliation</button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.showModal();
+
+    const updateTotals = () => {
+      let counted = 0;
+      modal.querySelectorAll('.denom-input').forEach(input => {
+        const qty = parseFloat(input.value) || 0;
+        const val = parseFloat(input.dataset.value);
+        const sub = modal.querySelector(`.denom-sub[data-value="${val}"]`);
+        const lineTotal = qty * val;
+        counted += lineTotal;
+        if (sub) sub.textContent = `R ${lineTotal.toFixed(2)}`;
+      });
+      const variance = counted - expectedCash;
+      const varEl = modal.querySelector('#till-variance');
+      const countEl = modal.querySelector('#till-counted');
+      if (countEl) countEl.textContent = `R ${counted.toFixed(2)}`;
+      if (varEl) {
+        varEl.textContent = `${variance >= 0 ? '+' : ''}R ${variance.toFixed(2)}`;
+        varEl.style.color = Math.abs(variance) < 0.01 ? '#34d399' : variance > 0 ? '#fbbf24' : '#f87171';
+      }
+      return { counted, variance };
+    };
+
+    modal.querySelectorAll('.denom-input').forEach(input => input.addEventListener('input', updateTotals));
+
+    const close = () => { modal.close(); modal.remove(); };
+    modal.querySelector('#close-till-btn').addEventListener('click', close);
+    modal.querySelector('#cancel-till-btn').addEventListener('click', close);
+
+    modal.querySelector('#save-till-btn').addEventListener('click', async () => {
+      const { counted, variance } = updateTotals();
+      try {
+        await db.add(STORES.transactions, {
+          id: `till_${Date.now()}`,
+          type: 'internal',
+          description: `Till reconciliation — counted R ${counted.toFixed(2)}, variance ${variance >= 0 ? '+' : ''}R ${variance.toFixed(2)}`,
+          amount: 0,
+          date: Date.now(),
+          category: 'Till Count',
+          paymentMethod: 'internal',
+          cashierName: getSession()?.username || 'Admin'
+        });
+      } catch {}
+      close();
+      alert(`Till count saved.\nCash counted: R ${counted.toFixed(2)}\nExpected: R ${expectedCash.toFixed(2)}\nVariance: ${variance >= 0 ? '+' : ''}R ${variance.toFixed(2)}`);
+    });
   }
 
   renderStyles() {

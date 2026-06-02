@@ -498,6 +498,8 @@ class IndustrialERPApp {
       }
       app.innerHTML = this.renderDashboard();
       this.attachDashboardHandlers();
+      this.initGlobalSearch();
+      this.applyTheme();
       if (!this.currentUser.onboardingComplete) {
         this.showOnboardingWizard();
       }
@@ -1208,6 +1210,12 @@ class IndustrialERPApp {
           <header class="content-header">
             <h1 id="module-title">${businessLabel}</h1>
             <div class="header-actions">
+              <button class="btn-icon" id="search-toggle-btn" title="Search (Ctrl+K)" aria-label="Search" style="font-size:1rem;">
+                <i class="ph ph-magnifying-glass"></i>
+              </button>
+              <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
+                <i class="ph ph-sun" id="theme-icon"></i>
+              </button>
               <button class="btn-icon notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">
                 <i class="ph-duotone ph-bell"></i>
                 <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
@@ -1506,6 +1514,202 @@ class IndustrialERPApp {
           padding: 0.5rem;
           border-top: 1px solid var(--border);
           z-index: 2;
+        }
+
+        /* ── Global search ── */
+        .gs-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 9000;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          padding-top: 10vh;
+          animation: gsFadeIn 0.12s ease;
+        }
+        @keyframes gsFadeIn {
+          from { opacity:0; }
+          to   { opacity:1; }
+        }
+        .gs-modal {
+          background: var(--bg-elevated, #232326);
+          border: 1px solid var(--border-strong);
+          border-radius: 12px;
+          width: min(600px, 94vw);
+          box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+          overflow: hidden;
+          animation: gsSlideDown 0.14s ease;
+        }
+        @keyframes gsSlideDown {
+          from { transform: translateY(-12px); opacity:0; }
+          to   { transform: translateY(0); opacity:1; }
+        }
+        .gs-input-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.875rem 1rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .gs-input-row i { color: var(--text-muted); font-size: 1.1rem; flex-shrink: 0; }
+        .gs-input-row input {
+          flex: 1;
+          background: none;
+          border: none;
+          outline: none;
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-family: inherit;
+        }
+        .gs-input-row input::placeholder { color: var(--text-muted); }
+        .gs-esc {
+          font-size: 0.6875rem;
+          background: var(--bg-hover);
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          padding: 0.125rem 0.375rem;
+          color: var(--text-muted);
+          flex-shrink: 0;
+          font-family: inherit;
+        }
+        .gs-results {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+        .gs-group-label {
+          font-size: 0.6875rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: var(--text-muted);
+          padding: 0.625rem 1rem 0.25rem;
+        }
+        .gs-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.625rem 1rem;
+          cursor: pointer;
+          transition: background 0.1s;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+          font-family: inherit;
+          color: var(--text-primary);
+        }
+        .gs-item:hover, .gs-item.gs-selected {
+          background: var(--bg-hover);
+        }
+        .gs-item-icon {
+          width: 28px; height: 28px;
+          border-radius: 6px;
+          background: rgba(37,99,235,0.1);
+          color: #60a5fa;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.875rem;
+          flex-shrink: 0;
+        }
+        .gs-item-title {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex: 1;
+        }
+        .gs-item-sub {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          white-space: nowrap;
+        }
+        .gs-empty {
+          padding: 2.5rem 1rem;
+          text-align: center;
+          color: var(--text-muted);
+          font-size: 0.875rem;
+        }
+        .gs-hint {
+          padding: 0.625rem 1rem;
+          border-top: 1px solid var(--border);
+          display: flex;
+          gap: 1rem;
+          font-size: 0.6875rem;
+          color: var(--text-muted);
+        }
+        .gs-hint kbd {
+          background: var(--bg-hover);
+          border: 1px solid var(--border);
+          border-radius: 3px;
+          padding: 0 0.3rem;
+          font-family: inherit;
+        }
+
+        /* ── Theme toggle ── */
+        .theme-toggle {
+          width: 32px; height: 32px;
+          border-radius: 6px;
+          border: none;
+          background: transparent;
+          color: var(--text-muted);
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 1rem;
+          transition: background 0.15s, color 0.15s;
+        }
+        .theme-toggle:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        /* ── Light mode overrides ── */
+        [data-theme="light"] {
+          --bg-base:        #f8f9fb;
+          --bg-sidebar:     #f1f3f7;
+          --bg-secondary:   #f1f3f7;
+          --bg-primary:     #ffffff;
+          --bg-elevated:    #eef0f4;
+          --bg-hover:       rgba(0,0,0,0.04);
+
+          --text-primary:   #111118;
+          --text-secondary: #4b5563;
+          --text-muted:     #9ca3af;
+
+          --border:         rgba(0,0,0,0.09);
+          --border-color:   rgba(0,0,0,0.09);
+          --border-strong:  rgba(0,0,0,0.16);
+
+          --accent:         #2563eb;
+          --accent-hover:   #1d4ed8;
+          --primary:        #2563eb;
+          --primary-color:  #2563eb;
+          --accent-primary: #2563eb;
+
+          --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] body,
+        [data-theme="light"] #app {
+          background: var(--bg-base);
+          color: var(--text-primary);
+        }
+
+        [data-theme="light"] .sidebar { box-shadow: 1px 0 0 var(--border); }
+
+        [data-theme="light"] .nav-item.active {
+          background: rgba(37,99,235,0.08);
+          color: #1d4ed8;
+        }
+
+        [data-theme="light"] .content-header {
+          background: var(--bg-primary);
+        }
+
+        [data-theme="light"] .user-dropdown {
+          background: #ffffff;
+        }
+
+        [data-theme="light"] .bottom-nav {
+          background: var(--bg-primary);
         }
 
         /* ── User profile trigger ── */
@@ -3394,6 +3598,192 @@ class IndustrialERPApp {
     document.getElementById('ai-refresh-btn')?.addEventListener('click', () => {
       if (insightsEl) insightsEl.innerHTML = '<p style="font-size:0.8125rem;color:var(--text-muted);">Refreshing...</p>';
       this.loadAIAdvisor();
+    });
+  }
+
+  // ========== THEME ==========
+
+  applyTheme() {
+    const saved = localStorage.getItem('erp_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    this._updateThemeIcon(saved);
+
+    document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('erp_theme', next);
+      this._updateThemeIcon(next);
+    });
+  }
+
+  _updateThemeIcon(theme) {
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.className = theme === 'dark' ? 'ph ph-sun' : 'ph ph-moon';
+  }
+
+  // ========== GLOBAL SEARCH ==========
+
+  initGlobalSearch() {
+    // Inject overlay into DOM once
+    if (!document.getElementById('global-search-overlay')) {
+      const el = document.createElement('div');
+      el.id = 'global-search-overlay';
+      el.className = 'gs-overlay';
+      el.style.display = 'none';
+      el.setAttribute('aria-modal', 'true');
+      el.setAttribute('role', 'dialog');
+      el.innerHTML = `
+        <div class="gs-modal" id="gs-modal">
+          <div class="gs-input-row">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="gs-input" placeholder="Search products, customers, modules…" autocomplete="off" spellcheck="false">
+            <kbd class="gs-esc">ESC</kbd>
+          </div>
+          <div id="gs-results" class="gs-results"></div>
+          <div class="gs-hint">
+            <span><kbd>↑↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> open</span>
+            <span><kbd>ESC</kbd> close</span>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(el);
+    }
+
+    const overlay = document.getElementById('global-search-overlay');
+    const input = document.getElementById('gs-input');
+    let debounceTimer = null;
+    let selectedIndex = -1;
+
+    const open = () => {
+      overlay.style.display = 'flex';
+      input.value = '';
+      selectedIndex = -1;
+      this._renderSearchResults([]);
+      setTimeout(() => input.focus(), 50);
+    };
+
+    const close = () => {
+      overlay.style.display = 'none';
+      input.value = '';
+    };
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        overlay.style.display === 'none' ? open() : close();
+      }
+      if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+    });
+
+    // Click outside to close
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    // Header search button
+    document.getElementById('search-toggle-btn')?.addEventListener('click', open);
+
+    // Typing handler
+    input?.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      const q = e.target.value.trim();
+      if (!q) { this._renderSearchResults([]); selectedIndex = -1; return; }
+      debounceTimer = setTimeout(() => this._runSearch(q), 220);
+    });
+
+    // Keyboard navigation within results
+    input?.addEventListener('keydown', (e) => {
+      const items = document.querySelectorAll('.gs-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        items.forEach((item, i) => item.classList.toggle('gs-selected', i === selectedIndex));
+        items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        items.forEach((item, i) => item.classList.toggle('gs-selected', i === selectedIndex));
+        items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const selected = items[selectedIndex] ?? items[0];
+        selected?.click();
+      }
+    });
+  }
+
+  async _runSearch(query) {
+    const q = query.toLowerCase();
+    const results = [];
+
+    // Modules (instant, no DB)
+    const moduleList = [
+      { id: 'dashboard',    label: 'Dashboard',    icon: 'ph-duotone ph-chart-bar' },
+      { id: 'sales',        label: 'Sales (POS)',  icon: 'ph-duotone ph-shopping-cart' },
+      { id: 'pocketbooks',  label: 'PocketBooks',  icon: 'ph-duotone ph-wallet' },
+      { id: 'poolstock',    label: 'PoolStock',    icon: 'ph-duotone ph-package' },
+      { id: 'smartshift',   label: 'SmartShift',   icon: 'ph-duotone ph-gear' },
+      { id: 'trustcircle',  label: 'TrustCircle',  icon: 'ph-duotone ph-users-three' },
+      { id: 'pocketwallet', label: 'PocketWallet', icon: 'ph-duotone ph-credit-card' },
+      { id: 'reports',      label: 'Reports',      icon: 'ph-duotone ph-trend-up' },
+      { id: 'customers',    label: 'Customers',    icon: 'ph-duotone ph-user-list' },
+      { id: 'settings',     label: 'Settings',     icon: 'ph-duotone ph-gear-six' },
+    ].filter(m => m.label.toLowerCase().includes(q) || m.id.includes(q));
+
+    if (moduleList.length) results.push({ group: 'Modules', items: moduleList.map(m => ({ ...m, action: () => { document.getElementById('global-search-overlay').style.display = 'none'; this.navigateTo(m.id); }, sub: 'Navigate' })) });
+
+    // Products
+    try {
+      const items = await db.getAll('inventory');
+      const matched = items.filter(i => (i.name || '').toLowerCase().includes(q) || (i.sku || '').toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q)).slice(0, 6);
+      if (matched.length) results.push({ group: 'Products', items: matched.map(i => ({ id: i.sku, label: i.name, icon: 'ph-duotone ph-package', sub: `${i.category || '—'}  ·  ${i.quantity ?? '?'} in stock`, action: () => { document.getElementById('global-search-overlay').style.display = 'none'; this.navigateTo('poolstock'); } })) });
+    } catch {}
+
+    // Customers
+    try {
+      const customers = await db.getAll('customers');
+      const matched = customers.filter(c => (c.name || '').toLowerCase().includes(q) || (c.phone || '').includes(q)).slice(0, 4);
+      if (matched.length) results.push({ group: 'Customers', items: matched.map(c => ({ id: c.id, label: c.name, icon: 'ph-duotone ph-user', sub: c.phone || 'No phone', action: () => { document.getElementById('global-search-overlay').style.display = 'none'; this.navigateTo('customers'); } })) });
+    } catch {}
+
+    // Transactions
+    try {
+      const txs = await db.getAll('transactions');
+      const matched = txs.filter(t => (t.description || t.category || '').toLowerCase().includes(q)).slice(0, 4);
+      if (matched.length) results.push({ group: 'Transactions', items: matched.map(t => ({ id: t.id, label: t.description || t.category, icon: 'ph-duotone ph-receipt', sub: `R ${(t.amount || 0).toFixed(2)}`, action: () => { document.getElementById('global-search-overlay').style.display = 'none'; this.navigateTo('pocketbooks'); } })) });
+    } catch {}
+
+    this._renderSearchResults(results, query);
+  }
+
+  _renderSearchResults(results, query = '') {
+    const container = document.getElementById('gs-results');
+    if (!container) return;
+
+    if (!query || results.length === 0) {
+      container.innerHTML = query
+        ? `<div class="gs-empty">No results for "<strong>${esc(query)}</strong>"</div>`
+        : `<div class="gs-empty" style="padding:1.5rem 1rem;">Type to search across products, customers, modules…</div>`;
+      return;
+    }
+
+    container.innerHTML = results.map(group => `
+      <div class="gs-group-label">${esc(group.group)}</div>
+      ${group.items.map(item => `
+        <button class="gs-item" data-action-id="${esc(item.id)}">
+          <span class="gs-item-icon"><i class="${esc(item.icon)}"></i></span>
+          <span class="gs-item-title">${esc(item.label)}</span>
+          ${item.sub ? `<span class="gs-item-sub">${esc(item.sub)}</span>` : ''}
+        </button>
+      `).join('')}
+    `).join('');
+
+    // Wire click handlers (using stored actions map to avoid XSS via data attrs)
+    const actionMap = {};
+    results.forEach(group => group.items.forEach(item => { actionMap[item.id] = item.action; }));
+    container.querySelectorAll('.gs-item').forEach(btn => {
+      btn.addEventListener('click', () => { actionMap[btn.dataset.actionId]?.(); });
     });
   }
 
