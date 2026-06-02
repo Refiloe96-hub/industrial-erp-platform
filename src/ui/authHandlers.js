@@ -91,6 +91,7 @@ export function attachLoginHandlers(app) {
       step1Div.style.display = 'block';
       passwordInput.value = '';
       passwordInput.required = false;
+      document.getElementById('auth-not-found-notice')?.remove();
       document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = false);
     });
 
@@ -155,18 +156,29 @@ export function attachLoginHandlers(app) {
         passwordInput.required = true;
 
         if (localUser) {
-          // Returning User (Local) -> Login Flow
+          // Returning user — show password field only
           currentAction = 'login';
           regFieldsDiv.style.display = 'none';
+          // Remove any leftover 'not found' notice
+          document.getElementById('auth-not-found-notice')?.remove();
           document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = false);
           setTimeout(() => passwordInput.focus(), 100);
         } else {
-          // New User -> Registration Flow
+          // Email not found locally or in cloud — show registration form
+          // but also explain why so returning users aren't confused
           currentAction = 'register';
           regFieldsDiv.style.display = 'block';
           document.querySelectorAll('#register-only-fields input, #register-only-fields select').forEach(el => el.required = true);
-          // Phone is optional
           document.getElementById('reg-phone').required = false;
+
+          // Insert a notice above the password field if it isn't already there
+          if (!document.getElementById('auth-not-found-notice')) {
+            const notice = document.createElement('p');
+            notice.id = 'auth-not-found-notice';
+            notice.style.cssText = 'font-size:0.8rem;color:#fbbf24;margin:0 0 1rem;padding:0.5rem 0.75rem;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;line-height:1.5;';
+            notice.innerHTML = 'No account found for this email on this device. If you registered on another browser or device, your data is stored there. Create a new account below or use Google sign-in.';
+            passwordInput.parentElement?.insertAdjacentElement('beforebegin', notice);
+          }
           setTimeout(() => passwordInput.focus(), 100);
         }
 
