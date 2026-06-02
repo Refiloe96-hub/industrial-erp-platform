@@ -271,6 +271,35 @@ class SettingsUI {
                   <option value="30" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '30' ? 'selected' : ''}>30 Days</option>
                 </select>
               </div>
+              <div class="settings-section-divider"></div>
+
+              <div class="form-group">
+                <label>Daily Summary Notification</label>
+                <p class="text-xs text-muted mb-2">
+                  Get a browser notification at end of day with today's revenue, sales count, and low-stock alerts.
+                </p>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                  <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;">
+                    <input type="checkbox" id="set-daily-summary"
+                      ${localStorage.getItem('erp_daily_summary_enabled') === 'true' ? 'checked' : ''}
+                      style="width:auto;accent-color:var(--accent);">
+                    Enable daily summary
+                  </label>
+                  <div style="display:flex;align-items:center;gap:0.375rem;">
+                    <span style="font-size:0.8125rem;color:var(--text-secondary);">at</span>
+                    <select id="set-summary-hour" style="width:auto;padding:0.25rem 0.5rem;font-size:0.8125rem;">
+                      ${[15,16,17,18,19,20].map(h => `<option value="${h}" ${parseInt(localStorage.getItem('erp_daily_summary_hour')||'17')===h?'selected':''}>${h}:00</option>`).join('')}
+                    </select>
+                  </div>
+                  <button class="btn btn-secondary" id="test-notification-btn" style="font-size:0.75rem;padding:0.3rem 0.75rem;">
+                    Test now
+                  </button>
+                </div>
+                <p id="notif-permission-note" class="text-xs" style="margin-top:0.5rem;color:var(--text-muted);display:none;">
+                  Browser notifications are blocked. Enable them in your browser settings.
+                </p>
+              </div>
+
               <div class="pane-actions">
                 <button class="btn btn-primary" id="save-ai-settings">Save AI Settings</button>
               </div>
@@ -444,12 +473,49 @@ class SettingsUI {
     container.querySelector('#save-settings-finance')?.addEventListener('click', handleSave);
 
     // AI Settings Save
-    container.querySelector('#save-ai-settings')?.addEventListener('click', () => {
+    container.querySelector('#save-ai-settings')?.addEventListener('click', async () => {
       const key = (container.querySelector('#set-groq-key')?.value || '').trim();
       const horizon = container.querySelector('#set-forecast-horizon')?.value || '14';
       localStorage.setItem('erp_groq_api_key', key);
       localStorage.setItem('erp_forecast_horizon', horizon);
-      alert(key ? 'API key saved. AI insights enabled.' : 'Settings saved (rule-based analysis mode).');
+
+      // Daily summary settings
+      const summaryEnabled = container.querySelector('#set-daily-summary')?.checked || false;
+      const summaryHour = container.querySelector('#set-summary-hour')?.value || '17';
+
+      if (summaryEnabled) {
+        // Request permission if not already granted
+        const granted = await Notification.requestPermission?.().catch(() => 'denied');
+        if (granted !== 'granted') {
+          const note = container.querySelector('#notif-permission-note');
+          if (note) note.style.display = 'block';
+          container.querySelector('#set-daily-summary').checked = false;
+          alert('Notifications are blocked in your browser. Please allow notifications for this site in browser settings.');
+          return;
+        }
+      }
+
+      localStorage.setItem('erp_daily_summary_enabled', summaryEnabled ? 'true' : 'false');
+      localStorage.setItem('erp_daily_summary_hour', summaryHour);
+
+      alert(key ? 'Settings saved. AI insights enabled.' : 'Settings saved.');
+    });
+
+    // Test notification button
+    container.querySelector('#test-notification-btn')?.addEventListener('click', async () => {
+      if (!('Notification' in window)) { alert('Browser notifications not supported.'); return; }
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        const note = container.querySelector('#notif-permission-note');
+        if (note) note.style.display = 'block';
+        return;
+      }
+      const session = getSession();
+      const businessName = session?.businessName || 'My Business';
+      // Dynamically import to avoid loading on settings open
+      const { DailySummary } = await import('../services/dailySummary.js');
+      const { title, body } = await DailySummary.buildSummary(businessName);
+      new Notification(title, { body, icon: '/icons/icon.svg', tag: 'erp-test' });
     });
 
     // P2P Offline Sync (WebRTC)
