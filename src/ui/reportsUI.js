@@ -1,6 +1,7 @@
 // Reports UI - Analytics and reporting for all business types
 import db from '../db/index.js';
 import PocketBooks from '../modules/PocketBooks.js';
+import { sym } from '../utils/safeJson.js';
 import PoolStock from '../modules/PoolStock.js';
 
 class ReportsUI {
@@ -722,15 +723,23 @@ class ReportsUI {
             <div class="card-body">
                 <div class="table-container">
                     <table class="data-table">
-                        <thead><tr><th>Product</th><th>Revenue</th><th>Wait</th></tr></thead>
+                        <thead><tr><th>Product</th><th>Revenue</th><th>Share</th></tr></thead>
                         <tbody>
-                            ${classified.a.slice(0, 5).map(i => `
+                            ${(() => {
+                              const totalRev = classified.a.reduce((s,i)=>s+i.rev,0) || 1;
+                              return classified.a.slice(0, 5).map(i => `
                                 <tr>
                                     <td>${getProductName(i.sku)}</td>
-                                    <td>R ${i.rev.toLocaleString()}</td>
-                                    <td><div class="progress-bar-bg" style="width: 50px; height: 4px;"><div class="progress-bar-fill" style="width: 100%; background: var(--success)"></div></div></td>
+                                    <td>${sym()}${i.rev.toLocaleString()}</td>
+                                    <td style="width:80px;">
+                                      <div style="background:var(--border);border-radius:999px;height:6px;overflow:hidden;">
+                                        <div style="height:100%;background:var(--success);border-radius:999px;width:${Math.round(i.rev/totalRev*100)}%;"></div>
+                                      </div>
+                                      <span style="font-size:0.7rem;color:var(--text-muted);">${Math.round(i.rev/totalRev*100)}%</span>
+                                    </td>
                                 </tr>
-                            `).join('')}
+                              `).join('');
+                            })()}
                             ${classified.a.length === 0 ? '<tr><td colspan="3" class="text-muted">No Class A items yet</td></tr>' : ''}
                         </tbody>
                     </table>
@@ -751,8 +760,8 @@ class ReportsUI {
                             ${classified.c.slice(0, 5).map(i => `
                                 <tr>
                                     <td>${getProductName(i.sku)}</td>
-                                    <td>R ${i.rev.toLocaleString()}</td>
-                                    <td><span class="text-xs text-danger">Review</span></td>
+                                    <td>${sym()}${i.rev.toLocaleString()}</td>
+                                    <td><span style="font-size:0.75rem;color:var(--danger);font-weight:600;">Consider clearance</span></td>
                                 </tr>
                             `).join('')}
                              ${classified.c.length === 0 ? '<tr><td colspan="3" class="text-muted">No Class C items yet</td></tr>' : ''}

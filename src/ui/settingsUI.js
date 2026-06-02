@@ -144,6 +144,11 @@ class SettingsUI {
                 <input type="number" id="set-tax" value="${this.settings.taxRate}" min="0" max="100">
                 <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Applied automatically at the Point of Sale to calculate VAT.</small>
               </div>
+              <div class="form-group">
+                <label>Mobile Money / QR Merchant ID</label>
+                <input type="text" id="set-mpesa-id" value="${this.settings.mpesaMerchantId || ''}" placeholder="e.g. 0821234567 or your M-Pesa Till number">
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown as a QR code at the POS for mobile payments (M-Pesa, Capitec Pay, SnapScan etc.).</small>
+              </div>
               <div class="pane-actions">
                 <button class="btn btn-primary" id="save-settings-finance">Save Changes</button>
               </div>
@@ -470,6 +475,7 @@ class SettingsUI {
         currency:         container.querySelector('#set-currency')?.value  || this.settings.currency || 'ZAR',
         businessLogo:     currentLogoBase64,
         taxRate:          parseFloat(container.querySelector('#set-tax')?.value) || 0,
+        mpesaMerchantId:  container.querySelector('#set-mpesa-id')?.value?.trim() || '',
         printerIp:        container.querySelector('#set-printer')?.value   || ''
       };
 

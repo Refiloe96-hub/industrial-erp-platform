@@ -70,15 +70,17 @@ class SalesUI {
           <!-- Left: Product Grid -->
           <div class="product-section">
             <div class="product-toolbar">
-              <div class="category-filters" id="category-filters">
-                <button class="cat-btn active" data-cat="all">All</button>
-                ${[...new Set(inventory.map(i => i.category))].map(cat => `
-                  <button class="cat-btn" data-cat="${cat}">${cat}</button>
-                `).join('')}
-              </div>
+              <input type="text" id="product-search" placeholder="Search products…"
+                style="flex:1;min-width:0;padding:0.375rem 0.75rem;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-primary);font-size:0.875rem;font-family:inherit;">
               <button id="sales-scan-btn" class="btn-icon scan-btn" title="Scan Barcode to find product">
                 <i class="ph ph-barcode"></i>
               </button>
+            </div>
+            <div class="category-filters" id="category-filters" style="margin-bottom:0.75rem;">
+              <button class="cat-btn active" data-cat="all">All</button>
+              ${[...new Set(inventory.map(i => i.category).filter(Boolean))].map(cat => `
+                <button class="cat-btn" data-cat="${cat}">${cat}</button>
+              `).join('')}
             </div>
 
             <div class="product-grid" id="product-grid">
@@ -175,9 +177,12 @@ class SalesUI {
                 </div>
 
                 <div id="mpesa-qr-container" style="display: none; text-align: center; margin-bottom: 1rem; border: 1px dashed var(--border-strong); padding: 1rem; border-radius: 8px;">
-                  <p style="margin-bottom: 0.5rem; font-weight: 600;">Scan to Pay with M-Pesa</p>
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=M-PESA-MERCHANT-123456" alt="M-Pesa QR Code" style="width: 150px; height: 150px;">
-                  <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.5rem;">Merchant ID: 123456</p>
+                  ${config.mpesaMerchantId
+                    ? `<p style="margin-bottom:0.5rem;font-weight:600;">Scan to Pay</p>
+                       <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(config.mpesaMerchantId)}" alt="QR Code" style="width:150px;height:150px;border-radius:6px;">
+                       <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">Merchant: ${config.mpesaMerchantId}</p>`
+                    : `<p style="font-size:0.875rem;color:var(--text-muted);">Set your Merchant ID in <strong>Settings → Financials</strong> to enable QR payments.</p>`
+                  }
                 </div>
 
                 <button id="checkout-btn" class="btn btn-primary btn-lg btn-block" disabled>
@@ -450,15 +455,44 @@ class SalesUI {
     paymentRadios.forEach(radio => radio.addEventListener('change', toggleQR));
     toggleQR();
 
-    // Filter Items
+    // Product search + category filter (shared state)
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    const applyFilters = () => {
+      let filtered = inventory;
+      if (activeCategory !== 'all') filtered = filtered.filter(i => i.category === activeCategory);
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(i =>
+          (i.name || '').toLowerCase().includes(q) ||
+          (i.sku || '').toLowerCase().includes(q)
+        );
+      }
+      grid.innerHTML = this.renderProductGrid(filtered);
+    };
+
+    // Category filter
     categoryFilters.addEventListener('click', (e) => {
       if (e.target.classList.contains('cat-btn')) {
         container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-        const cat = e.target.dataset.cat;
-        const filtered = cat === 'all' ? inventory : inventory.filter(i => i.category === cat);
-        grid.innerHTML = this.renderProductGrid(filtered);
+        activeCategory = e.target.dataset.cat;
+        applyFilters();
       }
+    });
+
+    // Product name search
+    const productSearch = container.querySelector('#product-search');
+    productSearch?.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      // Reset category filter when searching
+      if (searchQuery) {
+        container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        container.querySelector('.cat-btn[data-cat="all"]')?.classList.add('active');
+        activeCategory = 'all';
+      }
+      applyFilters();
     });
 
     // Add to Cart (Delegation)
@@ -757,9 +791,11 @@ class SalesUI {
               if (loyaltyPointsToDeduct > 0) {
                 updates.loyaltyPoints = Math.max(0, (custFresh.loyaltyPoints || 0) - loyaltyPointsToDeduct);
               }
-              // Record credit sale — add to customer's outstanding balance
+              // Record credit sale — add to customer's outstanding balance with timestamp
               if (paymentMethod === 'credit') {
                 updates.creditBalance = (custFresh.creditBalance || 0) + grandTotal;
+                // Track oldest unpaid credit date for aging reports
+                if (!custFresh.creditIssuedAt) updates.creditIssuedAt = Date.now();
               }
               if (Object.keys(updates).length) {
                 await Customers.updateCustomer(customerId, updates);

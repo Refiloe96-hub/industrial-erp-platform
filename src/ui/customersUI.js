@@ -87,7 +87,7 @@ class CustomersUI {
           <p><i class="ph-duotone ph-currency-dollar"></i> Total Spent: ${sym()}${(c.totalSpent || 0).toLocaleString()}</p>
           ${(c.creditBalance || 0) > 0 ? `
           <div style="margin-top:0.5rem;padding:0.5rem 0.625rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.8125rem;color:#f87171;font-weight:600;">Owes ${sym()}${(c.creditBalance||0).toFixed(2)}</span>
+            <span style="font-size:0.8125rem;color:#f87171;font-weight:600;">Owes ${sym()}${(c.creditBalance||0).toFixed(2)}${c.creditIssuedAt ? ` · ${Math.floor((Date.now()-c.creditIssuedAt)/(864e5))}d old` : ''}</span>
             <button class="btn-record-payment btn btn-secondary" data-id="${c.id}" data-balance="${c.creditBalance||0}" data-name="${c.name}" style="font-size:0.7rem;padding:0.2rem 0.5rem;color:#34d399;border-color:rgba(16,185,129,0.3);">Record Payment</button>
           </div>` : ''}
           <p style="font-size:0.75rem;color:var(--text-muted);margin:0.375rem 0 0;">Last visited: ${new Date(c.lastVisit).toLocaleDateString()}</p>
@@ -187,13 +187,48 @@ class CustomersUI {
         const id = parseInt(btn.dataset.id);
         const balance = parseFloat(btn.dataset.balance);
         const name = btn.dataset.name;
-        const amount = parseFloat(prompt(`Record payment from ${name}\nOutstanding: ${sym()}${balance.toFixed(2)}\n\nEnter amount received:`));
+
+        // Proper modal instead of prompt()
+        const amount = await new Promise((resolve) => {
+          const dlg = document.createElement('dialog');
+          dlg.style.cssText = 'border:none;padding:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:10px;box-shadow:0 24px 48px rgba(0,0,0,0.5);width:min(340px,96vw);color:var(--text-primary);';
+          dlg.innerHTML = `
+            <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);">
+              <h3 style="margin:0;font-size:1rem;font-weight:700;">Record Payment</h3>
+              <p style="margin:0.25rem 0 0;font-size:0.8125rem;color:var(--text-muted);">${name} owes <strong style="color:#f87171;">${sym()}${balance.toFixed(2)}</strong></p>
+            </div>
+            <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.75rem;">
+              <div>
+                <label style="font-size:0.75rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Amount Received (${sym()})</label>
+                <input id="pay-amount-input" type="number" min="0.01" max="${balance}" step="0.01" value="${balance.toFixed(2)}"
+                  style="width:100%;box-sizing:border-box;font-size:1.25rem;font-weight:700;text-align:center;padding:0.5rem;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.04);color:var(--text-primary);">
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button id="pay-cancel" class="btn btn-secondary" style="flex:1;">Cancel</button>
+                <button id="pay-confirm" class="btn btn-primary" style="flex:1;">Confirm Payment</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(dlg);
+          dlg.showModal();
+          dlg.querySelector('#pay-cancel').onclick = () => { dlg.close(); dlg.remove(); resolve(null); };
+          dlg.querySelector('#pay-confirm').onclick = () => {
+            const v = parseFloat(dlg.querySelector('#pay-amount-input').value);
+            dlg.close(); dlg.remove();
+            resolve(v > 0 ? v : null);
+          };
+          // Pre-select input value for quick editing
+          setTimeout(() => dlg.querySelector('#pay-amount-input')?.select(), 50);
+        });
         if (!amount || amount <= 0) return;
         try {
           const customer = await Customers.getCustomer(id);
           if (!customer) return;
           const newBalance = Math.max(0, (customer.creditBalance || 0) - amount);
-          await Customers.updateCustomer(id, { creditBalance: newBalance });
+          await Customers.updateCustomer(id, {
+            creditBalance: newBalance,
+            creditIssuedAt: newBalance === 0 ? null : customer.creditIssuedAt,
+          });
           // Also record it as income in PocketBooks if available
           try {
             const db = (await import('../db/index.js')).default;
