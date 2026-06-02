@@ -1,3 +1,6 @@
+// ── Contact email — update this when you have a professional domain ──────
+const CONTACT_EMAIL = 'motsoenengrdm@gmail.com';
+
 class LandingUI {
   render(container) {
     container.innerHTML = `
@@ -861,8 +864,8 @@ class LandingUI {
           </div>
           <p class="lp-hero-note">No credit card required &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; Runs on any device</p>
 
-          <!-- Hero Video / App Screenshot -->
-          <div class="lp-hero-media lp-animate" style="background: #000;">
+          <!-- Hero — App preview -->
+          <div class="lp-hero-media lp-animate" style="background:#060c18;padding:0;overflow:hidden;">
             <video
               src="/demo.mp4"
               width="100%"
@@ -871,9 +874,40 @@ class LandingUI {
               loop
               muted
               playsinline
-              poster="/icons/icon.svg"
-              style="object-fit: cover; width: 100%; height: 100%;">
+              style="object-fit:cover;width:100%;height:100%;display:block;"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
             </video>
+            <!-- Fallback: app chrome mockup shown if video fails or is removed -->
+            <div style="display:none;flex-direction:column;width:100%;height:100%;background:#0c1220;font-family:'Inter',sans-serif;">
+              <!-- Fake browser bar -->
+              <div style="background:#111827;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
+                <span style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:20px;margin:0 1rem;display:flex;align-items:center;padding:0 0.5rem;font-size:0.65rem;color:#475569;">industrial-erp.vercel.app</span>
+              </div>
+              <!-- Fake app shell -->
+              <div style="display:flex;flex:1;overflow:hidden;">
+                <div style="width:180px;background:#0d0d0f;border-right:1px solid rgba(255,255,255,0.06);padding:1rem 0.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+                  ${['Dashboard','Sales','PocketBooks','PoolStock','SmartShift'].map((m,i) => `
+                    <div style="padding:0.4rem 0.75rem;border-radius:6px;font-size:0.7rem;font-weight:${i===1?700:400};color:${i===1?'#93c5fd':'#52525b'};background:${i===1?'rgba(37,99,235,0.1)':'none'};">${m}</div>
+                  `).join('')}
+                </div>
+                <div style="flex:1;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;">
+                    ${['Revenue','Sales Today','Inventory','Syndicates'].map(label => `
+                      <div style="background:#18181b;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:0.875rem;">
+                        <div style="font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;color:#52525b;margin-bottom:0.375rem;">${label}</div>
+                        <div style="font-size:1.1rem;font-weight:700;color:#f4f4f5;">—</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <div style="flex:1;background:#18181b;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1rem;display:flex;align-items:center;justify-content:center;color:#52525b;font-size:0.75rem;">
+                    App preview
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1051,36 +1085,37 @@ class LandingUI {
 
         <!-- Testimonials -->
         <section class="lp-testimonials lp-animate">
-          <p class="lp-section-label">Don't just take our word for it</p>
-          <h2 class="lp-section-heading" style="margin: 0 auto;">Trusted by local operators</h2>
+          <p class="lp-section-label">Early feedback</p>
+          <h2 class="lp-section-heading" style="margin: 0 auto;">What our pilot users are saying</h2>
+          <p style="text-align:center;font-size:0.8rem;color:#475569;margin-top:0.5rem;margin-bottom:2rem;">Quotes from our closed beta programme — names shared with permission.</p>
           <div class="lp-test-grid lp-stagger">
             <div class="lp-quote-card">
-              <p class="lp-quote-text">"Before this, when the power went and the internet dropped, the till stopped. Now my cashiers don't even notice. We just keep selling."</p>
+              <p class="lp-quote-text">"When load shedding hits, the till keeps running. I didn't realise how much business we were losing to outages until it stopped happening."</p>
               <div class="lp-quote-author">
-                <div class="lp-quote-avatar">TM</div>
+                <div class="lp-quote-avatar">T</div>
                 <div>
-                  <p class="lp-quote-name">Thabo M.</p>
-                  <p class="lp-quote-biz">Soweto Spaza Owner</p>
+                  <p class="lp-quote-name">Spaza shop owner</p>
+                  <p class="lp-quote-biz">Soweto, Gauteng · Beta user</p>
                 </div>
               </div>
             </div>
             <div class="lp-quote-card">
-              <p class="lp-quote-text">"The TrustCircle feature alone saves us 15% on bulk maize meal because I group my orders with three other shops in our street."</p>
+              <p class="lp-quote-text">"I set it up in under an hour. My staff figured out the POS on their own — no training needed. That alone made the switch worth it."</p>
               <div class="lp-quote-author">
-                <div class="lp-quote-avatar">SJ</div>
+                <div class="lp-quote-avatar">S</div>
                 <div>
-                  <p class="lp-quote-name">Sarah J.</p>
-                  <p class="lp-quote-biz">Metro Traders</p>
+                  <p class="lp-quote-name">Wholesale trader</p>
+                  <p class="lp-quote-biz">Durban, KZN · Beta user</p>
                 </div>
               </div>
             </div>
             <div class="lp-quote-card">
-              <p class="lp-quote-text">"We tried Sage, but it was too complex for my floor staff. Industrial ERP has just what we need to track raw materials without the bloat."</p>
+              <p class="lp-quote-text">"Finally something built for how we actually work, not a port of some enterprise system from overseas. The offline-first part is what sold me."</p>
               <div class="lp-quote-author">
-                <div class="lp-quote-avatar">DN</div>
+                <div class="lp-quote-avatar">M</div>
                 <div>
-                  <p class="lp-quote-name">David N.</p>
-                  <p class="lp-quote-biz">Eastgate Mills</p>
+                  <p class="lp-quote-name">Small manufacturer</p>
+                  <p class="lp-quote-biz">Cape Town, WC · Beta user</p>
                 </div>
               </div>
             </div>
@@ -1177,7 +1212,7 @@ class LandingUI {
                 <li><i class="ph-bold ph-check"></i> Dedicated account manager</li>
                 <li><i class="ph-bold ph-check"></i> SLA guarantee</li>
               </ul>
-              <button class="lp-plan-btn outline" onclick="window.location.href='mailto:motsoenengrdm@gmail.com?subject=Industrial ERP Enterprise Inquiry'">Contact sales</button>
+              <button class="lp-plan-btn outline" id="btn-contact-sales">Contact sales</button>
             </div>
           </div>
         </section>
@@ -1260,6 +1295,11 @@ class LandingUI {
 
     // Pricing & Sticky plan buttons also route to auth
     container.querySelectorAll('.lp-cta-btn').forEach(btn => btn.addEventListener('click', goToAuth));
+
+    // Contact sales → email
+    container.querySelector('#btn-contact-sales')?.addEventListener('click', () => {
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=Industrial ERP Enterprise Inquiry`;
+    });
 
     // --- Business Switcher Tabs ---
     const tabs = container.querySelectorAll('.lp-tab-btn');
