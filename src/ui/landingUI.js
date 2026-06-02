@@ -1,5 +1,5 @@
 // ── Contact email — update this when you have a professional domain ──────
-const CONTACT_EMAIL = 'motsoenengrdm@gmail.com';
+const CONTACT_EMAIL = 'jujutsutech832@gmail.com';
 
 class LandingUI {
   render(container) {
@@ -856,13 +856,13 @@ class LandingUI {
           <div class="lp-eyebrow">
             <i class="ph-bold ph-sparkle"></i> Built for resilient operations
           </div>
-          <h1>The business platform for <em>emerging markets</em></h1>
-          <p>An offline-first ERP that connects your sales, inventory, finances, and supply chain — without the enterprise complexity or price tag.</p>
+          <h1>Run your business like a <em>big operation</em></h1>
+          <p>The offline-first platform built for spaza shops, traders, and growing SMEs across Southern Africa — works through load shedding, slow data, and tight budgets.</p>
           <div class="lp-hero-actions">
             <button class="lp-btn-hero" id="btnHeroSignup">Start for free <i class="ph-bold ph-arrow-right"></i></button>
             <button class="lp-btn-outline" id="btnHeroLogin">Sign in to your account</button>
           </div>
-          <p class="lp-hero-note">No credit card required &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; Runs on any device</p>
+          <p class="lp-hero-note">Free to start &nbsp;·&nbsp; Works through load shedding &nbsp;·&nbsp; Any phone or tablet</p>
 
           <!-- Hero — App preview -->
           <div class="lp-hero-media lp-animate" style="background:#060c18;padding:0;overflow:hidden;">
@@ -1179,40 +1179,41 @@ class LandingUI {
               <button class="lp-plan-btn outline lp-cta-btn">Get started free</button>
             </div>
 
-            <!-- Pro (featured) -->
+            <!-- Growth (featured) -->
             <div class="lp-plan lp-plan--featured">
               <div class="lp-plan-badge">Most popular</div>
-              <p class="lp-plan-name featured-name">Pro</p>
-              <div class="lp-plan-price"><sup>R</sup>399<sub>/mo</sub></div>
-              <p class="lp-plan-desc">For growing businesses that need cloud sync and advanced modules.</p>
+              <p class="lp-plan-name featured-name">Growth</p>
+              <div class="lp-plan-price"><sup>R</sup>149<sub>/mo</sub></div>
+              <p class="lp-plan-desc">For small businesses ready to sync to the cloud and track everything in one place.</p>
               <hr class="lp-plan-divider">
               <ul class="lp-plan-features">
                 <li><i class="ph-bold ph-check"></i> Everything in Starter</li>
-                <li><i class="ph-bold ph-check"></i> Cloud sync &amp; backup</li>
+                <li><i class="ph-bold ph-check"></i> Cloud sync &amp; daily backup</li>
                 <li><i class="ph-bold ph-check"></i> Unlimited products</li>
-                <li><i class="ph-bold ph-check"></i> SmartShift manufacturing</li>
-                <li><i class="ph-bold ph-check"></i> TrustCircle syndicates</li>
-                <li><i class="ph-bold ph-check"></i> Up to 5 team members</li>
-                <li><i class="ph-bold ph-check"></i> Priority support</li>
+                <li><i class="ph-bold ph-check"></i> Full financial reports</li>
+                <li><i class="ph-bold ph-check"></i> Up to 3 team members</li>
+                <li><i class="ph-bold ph-check"></i> Customer loyalty &amp; credit tracking</li>
+                <li><i class="ph-bold ph-check"></i> Email support</li>
               </ul>
               <button class="lp-plan-btn primary lp-cta-btn">Start free 14-day trial</button>
             </div>
 
-            <!-- Enterprise -->
+            <!-- Business -->
             <div class="lp-plan">
-              <p class="lp-plan-name">Enterprise</p>
-              <div class="lp-plan-price" style="font-size:1.75rem;padding-top:0.5rem">Custom</div>
-              <p class="lp-plan-desc">Multi-location deployments, dedicated support, and custom integrations.</p>
+              <p class="lp-plan-name">Business</p>
+              <div class="lp-plan-price"><sup>R</sup>349<sub>/mo</sub></div>
+              <p class="lp-plan-desc">For medium SMEs with staff, suppliers, and syndicate buying groups.</p>
               <hr class="lp-plan-divider">
               <ul class="lp-plan-features">
-                <li><i class="ph-bold ph-check"></i> Everything in Pro</li>
-                <li><i class="ph-bold ph-check"></i> Unlimited locations &amp; team members</li>
-                <li><i class="ph-bold ph-check"></i> Custom API integrations</li>
-                <li><i class="ph-bold ph-check"></i> SSO &amp; full audit logs</li>
-                <li><i class="ph-bold ph-check"></i> Dedicated account manager</li>
-                <li><i class="ph-bold ph-check"></i> SLA guarantee</li>
+                <li><i class="ph-bold ph-check"></i> Everything in Growth</li>
+                <li><i class="ph-bold ph-check"></i> SmartShift manufacturing</li>
+                <li><i class="ph-bold ph-check"></i> TrustCircle syndicates</li>
+                <li><i class="ph-bold ph-check"></i> Supplier management</li>
+                <li><i class="ph-bold ph-check"></i> Unlimited team members</li>
+                <li><i class="ph-bold ph-check"></i> Staff PIN login</li>
+                <li><i class="ph-bold ph-check"></i> Priority support</li>
               </ul>
-              <button class="lp-plan-btn outline" id="btn-contact-sales">Contact sales</button>
+              <button class="lp-plan-btn outline lp-cta-btn" id="btn-contact-sales">Get started</button>
             </div>
           </div>
         </section>
