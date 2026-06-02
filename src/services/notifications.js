@@ -195,7 +195,7 @@ class NotificationService {
                 this.addNotification({
                     type: 'critical',
                     category: 'production',
-                    title: '🚨 Machines Offline',
+                    title: 'Machines Offline',
                     message: `${offline.length} machine(s) are offline`,
                     details: offline.map(m => m.name),
                     action: { label: 'Check Status', module: 'smartshift' },
@@ -237,7 +237,7 @@ class NotificationService {
                     this.addNotification({
                         type: 'info',
                         category: 'syndicate',
-                        title: '🎉 Payout Ready',
+                        title: 'Payout Ready',
                         message: `Syndicate "${syndicate.name}" has collected all contributions`,
                         action: { label: 'Process Payout', module: 'trustcircle' },
                         id: `syndicate-payout-${syndicate.id}`

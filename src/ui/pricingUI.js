@@ -491,7 +491,7 @@ export default class PricingUI {
       e.preventDefault();
       const msg = container.querySelector('#pricing-support-msg').value;
       const targetType = container.querySelector('#pricing-target-type').value;
-      alert(`📧 Support request sent for migration to ${targetType}! We'll be in touch.`);
+      alert(`Support request sent. We'll be in touch about your migration to ${targetType}.`);
       supportModal.style.display = 'none';
     });
 

@@ -1531,7 +1531,7 @@ class PoolStockUI {
                         <label>Supplier *</label>
                         <select name="supplierId" required>
                             <option value="">Select supplier...</option>
-                            <optgroup label="🌐 TrustCircle B2B Network">
+                            <optgroup label="TrustCircle B2B Network">
                                 ${networkSuppliers.map(s => `<option value="${s.id}">🔵 ${s.name} (${s.type})</option>`).join('')}
                             </optgroup>
                             <optgroup label="📋 My Local Suppliers">
@@ -1678,7 +1678,7 @@ class PoolStockUI {
                         items,
                         fd.get('notes')
                     );
-                    alert('🌐 Order successfully routed through the B2B Network!');
+                    alert('Order routed through the TrustCircle B2B Network.');
                 } else {
                     await this.module.createPurchaseOrder({
                         supplierId: parseInt(supplierVal) || 0,
@@ -1751,7 +1751,7 @@ class PoolStockUI {
                 await this.module.receivePurchaseOrder(orderId, receivedItems);
                 modal.close();
                 modal.remove();
-                alert(`✅ PO-${orderId} received. Inventory updated.`);
+                alert(`PO-${orderId} received. Inventory updated.`);
                 this.loadPurchaseOrders();
             } catch (err) {
                 alert('Failed to receive order: ' + err.message);

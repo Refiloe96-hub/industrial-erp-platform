@@ -69,7 +69,7 @@ export function attachDashboardHandlers(app) {
         }
 
         // 3. Notify and Reload
-        alert(`🎉 Success! You are now on the ${newType.toUpperCase()} plan.\n\nNew features have been unlocked.`);
+        alert(`Plan updated. You are now on the ${newType.charAt(0).toUpperCase()+newType.slice(1)} plan. Reload to see your new features.`);
         location.reload(); // Reload to refresh sidebar and modules
 
       } catch (err) {
