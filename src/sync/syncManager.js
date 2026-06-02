@@ -149,6 +149,13 @@ class SyncManager {
 
       console.log(`📦 ${pendingItems.length} items to sync`);
 
+      // Notify UI of pending count
+      if (pendingItems.length > 0) {
+        window.dispatchEvent(new CustomEvent('sync-status', {
+          detail: { status: 'syncing', queuedCount: pendingItems.length }
+        }));
+      }
+
       if (pendingItems.length === 0) {
         console.log('✅ Nothing to sync');
         this.isSyncing = false;
@@ -191,6 +198,11 @@ class SyncManager {
       }
 
       console.log(`✅ Sync complete: ${syncedCount} synced, ${failedCount} failed`);
+
+      // Notify UI of sync completion
+      window.dispatchEvent(new CustomEvent('sync-status', {
+        detail: { status: failedCount > 0 ? 'partial' : 'synced', syncedCount, failedCount, queuedCount: 0 }
+      }));
 
       // Clean up synced items
       await db.clearSyncedItems();

@@ -64,6 +64,12 @@ export function (app) {
             ${navItems}
           </ul>
           
+          <!-- Sync status indicator -->
+          <div id="sync-indicator" class="sync-indicator" title="Cloud sync status">
+            <span class="sync-dot"></span>
+            <span class="sync-label">Offline</span>
+          </div>
+
           <div class="sidebar-footer" style="position:relative;">
             <!-- User dropdown (opens upward) -->
             <div id="user-dropdown" class="user-dropdown" aria-hidden="true">

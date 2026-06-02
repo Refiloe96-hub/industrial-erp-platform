@@ -38,6 +38,9 @@ class SalesUI {
             <p style="margin:0.125rem 0 0; color:var(--text-muted); font-size:0.8125rem;">Sales, checkout, and receipts</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+            <button id="switch-user-btn" class="btn btn-secondary" title="Switch cashier with PIN">
+              <i class="ph ph-user-switch"></i> Switch User
+            </button>
             <button id="till-reconcile-btn" class="btn btn-secondary">
               <i class="ph ph-calculator"></i> Till Count
             </button>
@@ -238,6 +241,11 @@ class SalesUI {
     const categoryFilters = container.querySelector('#category-filters');
 
     let cart = [];
+
+    // Switch User via PIN
+    container.querySelector('#switch-user-btn')?.addEventListener('click', async () => {
+      await this.showPINSwitcher();
+    });
 
     // Till Reconciliation
     container.querySelector('#till-reconcile-btn')?.addEventListener('click', async () => {
@@ -801,11 +809,21 @@ class SalesUI {
     }
   }
 
-  showInvoiceModal(sale, customerName, paymentMethod) {
+  async showInvoiceModal(sale, customerName, paymentMethod) {
     const session = getSession() ?? {};
     const businessName = session.businessName || 'My Business';
-    const invoiceDate = new Date(sale.timestamp).toLocaleString();
+    const invoiceDate = new Date(sale.timestamp || Date.now()).toLocaleString('en-ZA');
     const invoiceNo = sale.id ? sale.id.replace('sale_', 'INV-') : `INV-${Date.now()}`;
+
+    // Load full settings for receipt customisation
+    let cfg = {};
+    try { cfg = await db.get('settings', 'config') || {}; } catch {}
+    const logo        = cfg.businessLogo    || session.businessLogo    || null;
+    const tagline     = cfg.businessTagline || '';
+    const vatNumber   = cfg.vatNumber       || '';
+    const address     = cfg.businessAddress || '';
+    const phone       = cfg.businessPhone   || '';
+    const email       = cfg.businessEmail   || '';
 
     const linesHtml = (sale.items || []).map(item => `
       <tr>
@@ -816,15 +834,20 @@ class SalesUI {
       </tr>
     `).join('');
 
-    const payBadge = { cash: '#10b981', card: '#2563eb', mobile: '#f59e0b', mpesa: '#16a34a' }[paymentMethod] || '#6b7280';
+    const payBadge = { cash: '#10b981', card: '#2563eb', mobile: '#f59e0b', mpesa: '#16a34a', credit: '#f59e0b' }[paymentMethod] || '#6b7280';
 
     const modal = document.createElement('dialog');
     modal.className = 'invoice-modal';
     modal.innerHTML = `
       <div class="invoice-content">
         <div class="invoice-header">
+          ${logo ? `<img src="${logo}" alt="${businessName}" style="max-height:56px;max-width:180px;object-fit:contain;margin-bottom:0.5rem;display:block;">` : ''}
           <h2>${businessName}</h2>
-          <p style="color:#6b7280;margin:0">Tax Invoice</p>
+          ${tagline ? `<p style="margin:0.125rem 0 0;font-size:0.8125rem;color:#94a3b8;">${tagline}</p>` : ''}
+          ${address ? `<p style="margin:0.25rem 0 0;font-size:0.75rem;color:#94a3b8;">${address}</p>` : ''}
+          ${phone || email ? `<p style="margin:0.125rem 0 0;font-size:0.75rem;color:#94a3b8;">${[phone, email].filter(Boolean).join(' · ')}</p>` : ''}
+          <p style="margin:0.5rem 0 0;font-size:0.8125rem;font-weight:600;letter-spacing:0.04em;color:#94a3b8;">TAX INVOICE</p>
+          ${vatNumber ? `<p style="margin:0.125rem 0 0;font-size:0.75rem;color:#94a3b8;">VAT Reg: ${vatNumber}</p>` : ''}
         </div>
         <div class="invoice-meta">
           <div><strong>Invoice #:</strong> ${invoiceNo}</div>
@@ -972,6 +995,103 @@ class SalesUI {
 
     modal.querySelector('#close-sales-scanner').addEventListener('click', cleanup);
     modal.addEventListener('click', (e) => { if (e.target === modal) cleanup(); });
+  }
+
+  async showPINSwitcher() {
+    let allUsers = [];
+    try { allUsers = await db.getAll(STORES.users ?? 'users'); } catch {}
+    const pinUsers = allUsers.filter(u => u.posPin);
+
+    if (pinUsers.length === 0) {
+      alert('No staff members have a POS PIN set.\n\nGo to Settings → Team, add a team member and set their 4-digit PIN.');
+      return;
+    }
+
+    const modal = document.createElement('dialog');
+    modal.style.cssText = 'border:none;padding:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:12px;box-shadow:0 24px 48px rgba(0,0,0,0.5);width:min(340px,96vw);color:var(--text-primary);';
+    modal.innerHTML = `
+      <div style="padding:1.125rem 1.25rem;border-bottom:1px solid var(--border);text-align:center;">
+        <h2 style="margin:0;font-size:1rem;font-weight:700;">Switch Cashier</h2>
+        <p style="margin:0.25rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Select your name and enter your PIN</p>
+      </div>
+      <div style="padding:1.25rem;">
+        <select id="pin-user-select" style="width:100%;margin-bottom:1rem;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.04);color:var(--text-primary);font-size:0.875rem;">
+          ${pinUsers.map(u => `<option value="${u.username}">${u.ownerName || u.username} (${u.role})</option>`).join('')}
+        </select>
+
+        <!-- PIN pad -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:1rem;" id="pin-display">
+          ${[0,1,2,3].map(() => '<div style="height:12px;border-radius:50%;width:12px;background:var(--border);margin:auto;"></div>').join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;">
+          ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(d => `
+            <button class="pin-key" data-digit="${d}" style="padding:0.875rem;font-size:1.25rem;font-weight:600;border:1px solid var(--border);border-radius:8px;background:var(--bg-elevated,#232326);color:var(--text-primary);cursor:pointer;transition:background 0.1s;${d===''?'pointer-events:none;opacity:0;':''}">${d}</button>
+          `).join('')}
+        </div>
+        <div style="display:flex;gap:0.625rem;">
+          <button id="pin-cancel" class="btn btn-secondary" style="flex:1;">Cancel</button>
+          <button id="pin-confirm" class="btn btn-primary" style="flex:1;" disabled>Unlock</button>
+        </div>
+        <p id="pin-error" style="display:none;color:var(--danger);font-size:0.8125rem;text-align:center;margin:0.5rem 0 0;">Incorrect PIN. Try again.</p>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.showModal();
+
+    let pinEntry = '';
+    const dots = modal.querySelectorAll('#pin-display > div');
+    const confirmBtn = modal.querySelector('#pin-confirm');
+    const errorMsg = modal.querySelector('#pin-error');
+
+    const updateDots = () => {
+      dots.forEach((d, i) => {
+        d.style.background = i < pinEntry.length ? 'var(--accent,#2563eb)' : 'var(--border)';
+      });
+      confirmBtn.disabled = pinEntry.length !== 4;
+    };
+
+    modal.querySelectorAll('.pin-key').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = btn.dataset.digit;
+        if (d === '⌫') { pinEntry = pinEntry.slice(0, -1); }
+        else if (d !== '' && pinEntry.length < 4) { pinEntry += d; }
+        errorMsg.style.display = 'none';
+        updateDots();
+      });
+    });
+
+    const close = () => { modal.close(); modal.remove(); };
+    modal.querySelector('#pin-cancel').addEventListener('click', close);
+
+    confirmBtn.addEventListener('click', async () => {
+      const username = modal.querySelector('#pin-user-select').value;
+      const user = pinUsers.find(u => u.username === username);
+      if (!user?.posPin) { close(); return; }
+
+      // Hash the entered PIN and compare
+      const pinBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pinEntry));
+      const enteredHash = Array.from(new Uint8Array(pinBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+      if (enteredHash !== user.posPin) {
+        pinEntry = '';
+        updateDots();
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // Success — switch active session
+      const newSession = {
+        ...user,
+        lastLogin: Date.now(),
+        // Preserve business context from current session
+        businessName: getSession()?.businessName || user.businessName,
+        businessType: getSession()?.businessType || user.businessType,
+      };
+      localStorage.setItem('erp_session', JSON.stringify(newSession));
+      close();
+      // Reload POS to reflect new cashier name
+      window.location.reload();
+    });
   }
 
   async showTillReconciliation() {

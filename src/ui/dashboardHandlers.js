@@ -23,6 +23,29 @@ export function attachDashboardHandlers(app) {
       }
     });
 
+    // Sync status indicator
+    const syncIndicator = document.getElementById('sync-indicator');
+    const updateSyncUI = (state, label) => {
+      if (!syncIndicator) return;
+      syncIndicator.setAttribute('data-state', state);
+      const lbl = syncIndicator.querySelector('.sync-label');
+      if (lbl) lbl.textContent = label;
+    };
+
+    // Initial state based on connectivity
+    updateSyncUI(navigator.onLine ? 'synced' : 'offline', navigator.onLine ? 'Synced' : 'Offline');
+
+    window.addEventListener('online',  () => updateSyncUI('synced',  'Synced'));
+    window.addEventListener('offline', () => updateSyncUI('offline', 'Offline'));
+
+    window.addEventListener('sync-status', (e) => {
+      const { status, queuedCount, failedCount } = e.detail || {};
+      if (status === 'syncing')  updateSyncUI('syncing', 'Syncing…');
+      else if (status === 'synced')   updateSyncUI('synced',  'Synced');
+      else if (status === 'partial')  updateSyncUI('error',   `${failedCount} failed`);
+      else if (queuedCount > 0) updateSyncUI('queued',  `${queuedCount} queued`);
+    });
+
     // Listen for Plan Updates
     document.addEventListener('update-plan', async (e) => {
       const newType = e.detail; // e.g. 'trader'

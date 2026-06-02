@@ -167,7 +167,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering SmartShiftUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'SmartShift', err, () => this.navigateTo('smartshift'));
       }
     } else if (module === 'trustcircle') {
       console.log('Instantiating TrustCircleUI...');
@@ -176,7 +176,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering TrustCircleUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'TrustCircle', err, () => this.navigateTo('trustcircle'));
       }
     } else if (module === 'pocketwallet') {
       console.log('Instantiating PocketWalletUI...');
@@ -185,7 +185,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('Error rendering PocketWalletUI:', err);
-        contentArea.innerHTML = `<p class="error">Error loading module: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'PocketWallet', err, () => this.navigateTo('pocketwallet'));
       }
     } else if (module === 'pocketbooks') {
       try {
@@ -194,7 +194,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('PocketBooksUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading PocketBooks: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'PocketBooks', err, () => this.navigateTo('pocketbooks'));
       }
     } else if (module === 'poolstock') {
       try {
@@ -203,7 +203,7 @@ class IndustrialERPApp {
         await ui.render();
       } catch (err) {
         console.error('PoolStockUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading PoolStock: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'PoolStock', err, () => this.navigateTo('poolstock'));
       }
     } else if (module === 'sales') {
       try {
@@ -211,7 +211,7 @@ class IndustrialERPApp {
         await SalesUI.render(contentArea);
       } catch (err) {
         console.error('SalesUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Sales: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'Sales', err, () => this.navigateTo('sales'));
       }
     } else if (module === 'reports') {
       try {
@@ -219,7 +219,7 @@ class IndustrialERPApp {
         await ReportsUI.render(contentArea);
       } catch (err) {
         console.error('ReportsUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Reports: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'Reports', err, () => this.navigateTo('reports'));
       }
     } else if (module === 'settings') {
       try {
@@ -228,7 +228,7 @@ class IndustrialERPApp {
         await SettingsUI.render(contentArea);
       } catch (err) {
         console.error('SettingsUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Settings: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'Settings', err, () => this.navigateTo('settings'));
       }
     } else if (module === 'customers') {
       try {
@@ -237,7 +237,7 @@ class IndustrialERPApp {
         await CustomersUI.render(contentArea);
       } catch (err) {
         console.error('CustomersUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Customers: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'Customers', err, () => this.navigateTo('customers'));
       }
     } else if (module === 'pricing') {
       try {
@@ -246,7 +246,7 @@ class IndustrialERPApp {
         await PricingUI.render(contentArea, this.currentUser);
       } catch (err) {
         console.error('PricingUI error:', err);
-        contentArea.innerHTML = `<p class="error">Error loading Pricing: ${esc(err.message)}</p>`;
+        this.moduleError(contentArea, 'Pricing', err, () => this.navigateTo('pricing'));
       }
     } else if (module === 'dashboard' || !module) {
       const userModules = this.getModulesForUser();
@@ -790,14 +790,30 @@ class IndustrialERPApp {
   renderError(error) {
     const app = document.getElementById('app');
     app.innerHTML = `
-      <div style="padding: 2rem; text-align: center;">
-        <h1>Initialization Error</h1>
-        <p style="color: #ef4444;">${error.message}</p>
-        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 1rem;">
-          Retry
-        </button>
+      <div style="padding:2rem;text-align:center;max-width:400px;margin:4rem auto;">
+        <i class="ph-duotone ph-warning-circle" style="font-size:3rem;color:#ef4444;display:block;margin-bottom:1rem;"></i>
+        <h2 style="margin:0 0 0.5rem;font-size:1.125rem;">Initialization Error</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 1.5rem;">${esc(error.message)}</p>
+        <button onclick="location.reload()" class="btn btn-primary">Reload app</button>
       </div>
     `;
+  }
+
+  /** Render a per-module error state with retry */
+  moduleError(contentArea, moduleName, err, retryFn) {
+    console.error(`Error in ${moduleName}:`, err);
+    contentArea.innerHTML = `
+      <div style="padding:2rem;text-align:center;max-width:400px;margin:4rem auto;">
+        <i class="ph-duotone ph-warning-circle" style="font-size:2.5rem;color:#f59e0b;display:block;margin-bottom:0.875rem;"></i>
+        <h2 style="margin:0 0 0.375rem;font-size:1rem;font-weight:700;">${esc(moduleName)} couldn't load</h2>
+        <details style="text-align:left;margin:0.75rem 0 1.25rem;">
+          <summary style="font-size:0.75rem;color:var(--text-muted);cursor:pointer;">Show error details</summary>
+          <pre style="font-size:0.7rem;color:var(--danger);white-space:pre-wrap;margin:0.5rem 0 0;padding:0.5rem;background:rgba(239,68,68,0.08);border-radius:6px;">${esc(err.message)}</pre>
+        </details>
+        <button id="module-retry-btn" class="btn btn-secondary">Try again</button>
+      </div>
+    `;
+    contentArea.querySelector('#module-retry-btn')?.addEventListener('click', retryFn);
   }
 
   async updateDashboardStats() { return updateDashboardStats(this); }

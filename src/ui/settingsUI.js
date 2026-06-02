@@ -95,6 +95,27 @@ class SettingsUI {
                 <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown on receipts and financial documents.</small>
               </div>
               <div class="form-group">
+                <label>Tagline / Slogan</label>
+                <input type="text" id="set-tagline" value="${this.settings.businessTagline || ''}" placeholder="e.g. Fresh Quality Every Day">
+              </div>
+              <div class="form-group">
+                <label>VAT Registration Number</label>
+                <input type="text" id="set-vat-number" value="${this.settings.vatNumber || ''}" placeholder="e.g. 4123456789">
+                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Printed on invoices as required by SARS.</small>
+              </div>
+              <div class="form-group">
+                <label>Business Address</label>
+                <input type="text" id="set-address" value="${this.settings.businessAddress || ''}" placeholder="123 Main Road, Soweto, 1804">
+              </div>
+              <div class="form-group">
+                <label>Contact Phone</label>
+                <input type="tel" id="set-biz-phone" value="${this.settings.businessPhone || ''}" placeholder="011 000 0000">
+              </div>
+              <div class="form-group">
+                <label>Contact Email</label>
+                <input type="email" id="set-biz-email" value="${this.settings.businessEmail || ''}" placeholder="info@mybusiness.co.za">
+              </div>
+              <div class="form-group">
                 <label>Default Currency</label>
                 <select id="set-currency">
                    <option value="ZAR" ${this.settings.currency === 'ZAR' ? 'selected' : ''}>South African Rand (ZAR)</option>
@@ -318,12 +339,21 @@ class SettingsUI {
            </div>
            <form id="add-team-form" class="x-modal-body">
              <div class="form-group">
+               <label>Full Name</label>
+               <input type="text" name="ownerName" required placeholder="e.g. Thabo Molefe">
+             </div>
+             <div class="form-group">
                <label>Username</label>
-               <input type="text" name="username" required>
+               <input type="text" name="username" required placeholder="e.g. thabo">
              </div>
              <div class="form-group">
                <label>Password</label>
                <input type="password" name="password" required>
+             </div>
+             <div class="form-group">
+               <label>POS PIN (4 digits)</label>
+               <input type="text" name="posPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="e.g. 1234">
+               <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;display:block;">Optional — lets staff switch users at the POS without entering a full password.</small>
              </div>
              <div class="form-group">
                <label>Role</label>
@@ -431,11 +461,16 @@ class SettingsUI {
 
       const newSettings = {
         ...this.settings,
-        businessName: container.querySelector('#set-name')?.value || this.settings.businessName,
-        currency: container.querySelector('#set-currency')?.value || this.settings.currency,
-        businessLogo: currentLogoBase64,
-        taxRate: parseFloat(container.querySelector('#set-tax')?.value) || 0,
-        printerIp: container.querySelector('#set-printer')?.value || ''
+        businessName:     container.querySelector('#set-name')?.value    || this.settings.businessName,
+        businessTagline:  container.querySelector('#set-tagline')?.value  || '',
+        vatNumber:        container.querySelector('#set-vat-number')?.value || '',
+        businessAddress:  container.querySelector('#set-address')?.value  || '',
+        businessPhone:    container.querySelector('#set-biz-phone')?.value || '',
+        businessEmail:    container.querySelector('#set-biz-email')?.value || '',
+        currency:         container.querySelector('#set-currency')?.value  || this.settings.currency,
+        businessLogo:     currentLogoBase64,
+        taxRate:          parseFloat(container.querySelector('#set-tax')?.value) || 0,
+        printerIp:        container.querySelector('#set-printer')?.value   || ''
       };
 
       try {
@@ -712,19 +747,31 @@ class SettingsUI {
       const formData = new FormData(e.target);
       const username = formData.get('username');
       const password = formData.get('password');
-      const role = formData.get('role');
+      const role     = formData.get('role');
+      const pinRaw   = (formData.get('posPin') || '').trim();
+      const ownerName = formData.get('ownerName') || '';
 
       try {
-        // Hash password
-        const msgBuffer = new TextEncoder().encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // Hash password with PBKDF2
+        const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt, iterations:100000 }, km, 256);
+        const hashedPassword = `pbkdf2v1:${btoa(String.fromCharCode(...salt))}:${btoa(String.fromCharCode(...new Uint8Array(bits)))}`;
+
+        // Hash PIN if provided (simple SHA-256 is fine for a 4-digit PIN)
+        let hashedPin = null;
+        if (pinRaw && /^\d{4}$/.test(pinRaw)) {
+          const pinBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pinRaw));
+          hashedPin = Array.from(new Uint8Array(pinBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
 
         const newUser = {
           username,
           password: hashedPassword,
+          posPin: hashedPin,
           role,
+          ownerName,
+          email: '',
           businessName: currentUser.businessName || 'Platform Business',
           businessType: currentUser.businessType || 'shopowner',
           createdAt: Date.now()

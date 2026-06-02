@@ -1514,6 +1514,44 @@ export function renderAppStyles() {
         .theme-toggle:hover {
             background: rgba(255,255,255,0.1);
         }
+
+        /* ── Sync status indicator ── */
+        .sync-indicator {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.3rem 0.75rem;
+          margin: 0 0.5rem 0.25rem;
+          border-radius: 6px;
+          font-size: 0.6875rem;
+          font-weight: 500;
+          color: var(--text-muted);
+          cursor: default;
+          transition: background 0.2s;
+        }
+        .sync-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: var(--text-muted);
+          flex-shrink: 0;
+          transition: background 0.3s;
+        }
+        .sync-label { letter-spacing: 0.01em; }
+
+        /* States */
+        .sync-indicator[data-state="synced"]  .sync-dot { background: #10b981; }
+        .sync-indicator[data-state="syncing"] .sync-dot { background: #f59e0b; animation: syncPulse 1s ease-in-out infinite; }
+        .sync-indicator[data-state="queued"]  .sync-dot { background: #f59e0b; }
+        .sync-indicator[data-state="error"]   .sync-dot { background: #ef4444; }
+        .sync-indicator[data-state="offline"] .sync-dot { background: var(--text-muted); }
+
+        @keyframes syncPulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.35; }
+        }
+
+        .sidebar.collapsed .sync-indicator .sync-label { display: none; }
+        .sidebar.collapsed .sync-indicator { justify-content: center; padding: 0.3rem; }
       </style>
     `;
   }
