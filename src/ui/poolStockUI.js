@@ -1083,7 +1083,7 @@ class PoolStockUI {
                         </div>` : `
 
                     <div class="card" style="margin-bottom:1rem;">
-                        <div class="card-header"><h3>📊 Urgency Ranking — ${result.urgencyList.length} SKUs</h3>
+                        <div class="card-header"><h3>Urgency Ranking — ${result.urgencyList.length} SKUs</h3>
                             <span style="font-size:0.8rem;color:var(--text-secondary)">Score: <strong style="color:${result.score >= 70 ? '#10b981' : result.score >= 40 ? '#f59e0b' : '#ef4444'}">${result.score}/100</strong></span>
                         </div>
                         <div class="table-container">
@@ -1532,7 +1532,7 @@ class PoolStockUI {
                         <select name="supplierId" required>
                             <option value="">Select supplier...</option>
                             <optgroup label="TrustCircle B2B Network">
-                                ${networkSuppliers.map(s => `<option value="${s.id}">🔵 ${s.name} (${s.type})</option>`).join('')}
+                                ${networkSuppliers.map(s => `<option value="${s.id}">${s.name} (${s.type})</option>`).join('')}
                             </optgroup>
                             <optgroup label="📋 My Local Suppliers">
                                 ${localSuppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}

@@ -63,7 +63,7 @@ class NotificationService {
                 this.addNotification({
                     type: 'warning',
                     category: 'inventory',
-                    title: '⚠️ Low Stock Alert',
+                    title: 'Low Stock Alert',
                     message: `${lowStock.length} item(s) below reorder level`,
                     details: lowStock.map(i => `${i.name}: ${i.quantity} remaining`).slice(0, 5),
                     action: { label: 'Reorder Now', module: 'poolstock' },
