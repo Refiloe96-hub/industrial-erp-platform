@@ -349,6 +349,10 @@ class SalesUI {
     if (window._salesBarcodeListener) {
       document.removeEventListener('keydown', window._salesBarcodeListener);
     }
+    if (window._posKeyHandler) {
+      document.removeEventListener('keydown', window._posKeyHandler);
+      window._posKeyHandler = null;
+    }
 
     let barcodeBuffer = '';
     let barcodeTimeout = null;
@@ -479,6 +483,44 @@ class SalesUI {
       cart = [];
       updateCart();
     });
+
+    // ── POS Keyboard Shortcuts ──────────────────────────────────────────
+    // Only active when the POS is mounted (removed with content-area clone on navigate)
+    const posKeyHandler = (e) => {
+      // Ignore when typing in an input
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) return;
+
+      switch (e.key) {
+        case 'Escape':
+          // Clear search / close modal
+          const searchInput = container.querySelector('.category-filters input');
+          if (searchInput) { searchInput.value = ''; }
+          break;
+        case 'Enter':
+          // Trigger checkout if cart has items
+          if (!checkoutBtn.disabled && cart.length > 0) checkoutBtn.click();
+          break;
+        case 'Delete':
+        case 'Backspace':
+          // Remove last cart item
+          if (!e.target.value && cart.length > 0) {
+            cart.pop();
+            updateCart();
+          }
+          break;
+        case '1': case '2': case '3': case '4':
+          // Switch payment method: 1=cash 2=card 3=mobile 4=mpesa
+          if (!e.ctrlKey && !e.metaKey) {
+            const methods = ['cash','card','mobile','mpesa'];
+            const radio = container.querySelector(`input[name="payment"][value="${methods[parseInt(e.key)-1]}"]`);
+            if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+          }
+          break;
+      }
+    };
+    document.addEventListener('keydown', posKeyHandler);
+    // Stored so the barcode cleanup logic can also remove this handler on navigate
+    window._posKeyHandler = posKeyHandler;
 
     // Checkout
     checkoutBtn.addEventListener('click', async () => {
