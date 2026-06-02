@@ -865,7 +865,8 @@ class LandingUI {
           <p class="lp-hero-note">Free to start &nbsp;·&nbsp; Works through load shedding &nbsp;·&nbsp; Any phone or tablet</p>
 
           <!-- Hero — App preview -->
-          <div class="lp-hero-media lp-animate" style="background:#060c18;padding:0;overflow:hidden;">
+          <div class="lp-hero-media lp-animate" style="background:#060c18;padding:0;overflow:hidden;position:relative;">
+            <!-- Video hidden until it can actually play — avoids black flash -->
             <video
               src="/demo.mp4"
               width="100%"
@@ -874,11 +875,12 @@ class LandingUI {
               loop
               muted
               playsinline
-              style="object-fit:cover;width:100%;height:100%;display:block;"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              style="object-fit:cover;width:100%;height:100%;display:none;position:absolute;inset:0;"
+              oncanplay="this.style.display='block';document.getElementById('hero-mockup').style.display='none';"
+              onerror="this.style.display='none';">
             </video>
-            <!-- Fallback: app chrome mockup shown if video fails or is removed -->
-            <div style="display:none;flex-direction:column;width:100%;height:100%;background:#0c1220;font-family:'Inter',sans-serif;">
+            <!-- Mockup visible immediately while video loads -->
+            <div id="hero-mockup" style="display:flex;flex-direction:column;width:100%;height:100%;background:#0c1220;font-family:'Inter',sans-serif;">
               <!-- Fake browser bar -->
               <div style="background:#111827;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
                 <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>
