@@ -8,6 +8,7 @@ import { AIEngine } from './ai/engine.js';
 import { supabaseClient, isSupabaseEnabled, checkSupabaseReachable } from './services/supabase.js';
 import { esc } from './utils/safeJson.js';
 import DailySummary from './services/dailySummary.js';
+import { renderPrivacy, renderTerms, renderSupport } from './ui/legalUI.js';
 import { renderLoginHTML, renderPasskeySetupHTML } from './ui/authPage.js';
 import { renderAppStyles } from './ui/appStyles.js';
 import { renderDashboard, renderDashboardContent } from './ui/dashboardPage.js';
@@ -466,12 +467,15 @@ class IndustrialERPApp {
     const app = document.getElementById('app');
     const path = window.location.pathname;
 
+    // Public legal pages — accessible logged-in or not
+    if (path === '/privacy') { app.innerHTML = renderPrivacy(); return; }
+    if (path === '/terms')   { app.innerHTML = renderTerms();   return; }
+    if (path === '/support') { app.innerHTML = renderSupport(); return; }
+
     if (!this.currentUser) {
       if (path === '/' || path === '') {
-        // Show public landing page
         LandingUI.render(app);
       } else {
-        // Show Auth UI (for /app, /login, etc)
         app.innerHTML = this.renderLogin();
         this.attachLoginHandlers();
       }

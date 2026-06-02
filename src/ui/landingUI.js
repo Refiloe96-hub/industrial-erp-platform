@@ -1272,10 +1272,9 @@ class LandingUI {
           <div class="lp-footer">
             <p class="lp-footer-copy">&copy; ${new Date().getFullYear()} Industrial ERP. All rights reserved.</p>
             <div class="lp-footer-links">
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Security</a>
-              <a href="#">Status</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+              <a href="/support">Support</a>
             </div>
           </div>
         </footer>
