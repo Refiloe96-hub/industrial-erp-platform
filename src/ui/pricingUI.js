@@ -3,207 +3,162 @@ export default class PricingUI {
     const businessType = currentUser?.businessType || 'shopowner';
     const businessName = currentUser?.businessName || 'Your Business';
 
-    // Pricing Data per Business Type
+    // Unified pricing tiers — same price points across all business types,
+    // different feature descriptions per type.
+    const TIER_PRICES = {
+      starter: { price: 'Free',  period: 'forever',   tag: null,          btnClass: 'btn-secondary', highlight: false },
+      growth:  { price: 'R149',  period: 'per month',  tag: 'MOST POPULAR', btnClass: 'btn-primary',   highlight: true  },
+      business:{ price: 'R349',  period: 'per month',  tag: null,          btnClass: 'btn-white',     highlight: false },
+    };
+
     const PRICING_DATA = {
-      // 🏪 SHOP OWNER (Informal / Spaza)
+      // Spaza / Shop Owner
       shopowner: [
         {
-          id: 'starter',
-          name: 'Spaza Starter',
-          price: 'Free',
-          period: 'forever',
-          description: 'Essentials for running a single shop.',
+          id: 'starter', ...TIER_PRICES.starter,
+          name: 'Starter',
+          description: 'Core tools to run your shop offline — no internet required.',
           features: [
-            '<i class="ph-duotone ph-notebook"></i> Digital Cash Book',
-            '<i class="ph-duotone ph-chart-bar"></i> Daily Sales Reports',
-            '<i class="ph-duotone ph-wifi-slash"></i> Offline Access',
-            '<i class="ph-duotone ph-user"></i> 1 User Limit'
+            '<i class="ph-duotone ph-storefront"></i> POS & daily sales',
+            '<i class="ph-duotone ph-notebook"></i> PocketBooks ledger',
+            '<i class="ph-duotone ph-wifi-slash"></i> Works offline (load shedding)',
+            '<i class="ph-duotone ph-package"></i> Up to 200 products',
           ],
-          btnClass: 'btn-secondary',
-          highlight: false
         },
         {
-          id: 'pro',
-          name: 'Spaza Pro',
-          price: 'R89',
-          period: 'per month',
-          description: 'Grow your profits with smart insights.',
+          id: 'growth', ...TIER_PRICES.growth,
+          name: 'Growth',
+          description: 'Cloud backup and richer tools as your shop expands.',
           features: [
-            '<i class="ph-duotone ph-chart-line-up"></i> Profit/Loss Analytics',
-            '<i class="ph-duotone ph-shopping-bag"></i> Top Selling Items',
-            '<i class="ph-duotone ph-receipt"></i> Digital Receipts',
-            '<i class="ph-duotone ph-users"></i> 2 Staff Logins'
+            '<i class="ph-duotone ph-cloud-arrow-up"></i> Cloud sync & daily backup',
+            '<i class="ph-duotone ph-package"></i> Unlimited products',
+            '<i class="ph-duotone ph-star"></i> Loyalty & credit tracking',
+            '<i class="ph-duotone ph-users"></i> Up to 3 staff members',
           ],
-          btnClass: 'btn-white',
-          highlight: true,
-          tag: 'MOST POPULAR'
         },
         {
-          id: 'chain',
-          name: 'Super Spaza',
-          price: 'R199',
-          period: 'per month',
-          description: 'Manage multiple locations easily.',
+          id: 'business', ...TIER_PRICES.business,
+          name: 'Business',
+          description: 'Full platform for shops running multiple staff and suppliers.',
           features: [
-            '<i class="ph-duotone ph-link"></i> Multi-Branch Support',
-            '<i class="ph-duotone ph-package"></i> Central Inventory',
-            '<i class="ph-duotone ph-truck"></i> Supplier Management',
-            '<i class="ph-duotone ph-shield-check"></i> Theft Protection'
+            '<i class="ph-duotone ph-handshake"></i> TrustCircle syndicates',
+            '<i class="ph-duotone ph-truck"></i> Supplier management',
+            '<i class="ph-duotone ph-users-three"></i> Unlimited staff + PIN login',
+            '<i class="ph-duotone ph-trend-up"></i> Advanced reports & exports',
           ],
-          btnClass: 'btn-white',
-          highlight: false
-        }
+        },
       ],
 
-      // 📦 TRADER (Wholesaler / Distributor)
+      // Trader / Wholesaler / Distributor
       trader: [
         {
-          id: 'starter',
-          name: 'Depot Starter',
-          price: 'Free',
-          period: 'forever',
-          description: 'Basic stock tracking for small depots.',
+          id: 'starter', ...TIER_PRICES.starter,
+          name: 'Starter',
+          description: 'Basic stock tracking to get your depot digital.',
           features: [
-            '<i class="ph-duotone ph-package"></i> PoolStock Basic',
-            '<i class="ph-duotone ph-clipboard-text"></i> Order Management',
-            '<i class="ph-duotone ph-device-mobile"></i> 1 Device',
-            '<i class="ph-duotone ph-warning-circle"></i> Stock Level Alerts'
+            '<i class="ph-duotone ph-package"></i> PoolStock inventory',
+            '<i class="ph-duotone ph-clipboard-text"></i> Purchase orders',
+            '<i class="ph-duotone ph-wifi-slash"></i> Offline access',
+            '<i class="ph-duotone ph-warning-circle"></i> Low-stock alerts',
           ],
-          btnClass: 'btn-secondary',
-          highlight: false
         },
         {
-          id: 'pro',
-          name: 'Trader Pro',
-          price: 'R250',
-          period: 'per month',
-          description: 'Advanced logistics for busy traders.',
+          id: 'growth', ...TIER_PRICES.growth,
+          name: 'Growth',
+          description: 'Sync across devices and start managing customers.',
           features: [
-            '<i class="ph-duotone ph-truck"></i> Fleet Tracking',
-            '<i class="ph-duotone ph-trend-down"></i> Bulk Discount Engine',
-            '<i class="ph-duotone ph-file-text"></i> Invoicing & Waybills',
-            '<i class="ph-duotone ph-users"></i> 5 Staff Logins'
+            '<i class="ph-duotone ph-cloud-arrow-up"></i> Cloud sync & backup',
+            '<i class="ph-duotone ph-receipt"></i> Invoicing & waybills',
+            '<i class="ph-duotone ph-star"></i> Customer credit tracking',
+            '<i class="ph-duotone ph-users"></i> Up to 3 staff members',
           ],
-          btnClass: 'btn-primary',
-          highlight: true,
-          tag: 'RECOMMENDED'
         },
         {
-          id: 'enterprise',
-          name: 'National Hub',
-          price: 'R950',
-          period: 'per month',
-          description: 'Full scale distribution network.',
+          id: 'business', ...TIER_PRICES.business,
+          name: 'Business',
+          description: 'Scale your distribution with syndicates and advanced tools.',
           features: [
-            '<i class="ph-duotone ph-globe"></i> Regional Analytics',
-            '<i class="ph-duotone ph-handshake"></i> B2B Syndicate Portal',
-            '<i class="ph-duotone ph-credit-card"></i> PocketWallet API',
-            '<i class="ph-duotone ph-factory"></i> Unlimited Warehouses'
+            '<i class="ph-duotone ph-handshake"></i> TrustCircle bulk buying',
+            '<i class="ph-duotone ph-truck"></i> Supplier & fleet management',
+            '<i class="ph-duotone ph-users-three"></i> Unlimited team members',
+            '<i class="ph-duotone ph-trend-up"></i> Full financial reports',
           ],
-          btnClass: 'btn-white',
-          highlight: false
-        }
+        },
       ],
 
-      // 🏭 WAREHOUSE
+      // Warehouse
       warehouse: [
         {
-          id: 'starter',
-          name: 'Storage Basic',
-          price: 'R150',
-          period: 'per month',
-          description: 'Digitalize your stock sheets.',
+          id: 'starter', ...TIER_PRICES.starter,
+          name: 'Starter',
+          description: 'Replace paper stock sheets with a digital system.',
           features: [
-            '<i class="ph-duotone ph-map-pin"></i> Bin Location Tracking',
-            '<i class="ph-duotone ph-arrows-left-right"></i> Stock In/Out Logs',
-            '<i class="ph-duotone ph-barcode"></i> Barcode Scanning',
-            '<i class="ph-duotone ph-users"></i> 3 Users'
+            '<i class="ph-duotone ph-package"></i> Stock in/out tracking',
+            '<i class="ph-duotone ph-barcode"></i> Barcode scanning',
+            '<i class="ph-duotone ph-wifi-slash"></i> Offline access',
+            '<i class="ph-duotone ph-warning-circle"></i> Reorder alerts',
           ],
-          btnClass: 'btn-white',
-          highlight: false
         },
         {
-          id: 'pro',
-          name: 'Smart Warehouse',
-          price: 'R450',
-          period: 'per month',
-          description: 'Optimize space and flow.',
+          id: 'growth', ...TIER_PRICES.growth,
+          name: 'Growth',
+          description: 'Cloud sync and full procurement management.',
           features: [
-            '<i class="ph-duotone ph-brain"></i> AI Demand Forecasting',
-            '<i class="ph-duotone ph-gear-six"></i> Automated Reordering',
-            '<i class="ph-duotone ph-calendar-x"></i> Expiry Date Alerts',
-            '<i class="ph-duotone ph-truck"></i> Dispatch Management'
+            '<i class="ph-duotone ph-cloud-arrow-up"></i> Cloud sync & backup',
+            '<i class="ph-duotone ph-clipboard-text"></i> Purchase orders',
+            '<i class="ph-duotone ph-chart-line-up"></i> Demand forecasting',
+            '<i class="ph-duotone ph-users"></i> Up to 3 staff members',
           ],
-          btnClass: 'btn-primary',
-          highlight: true,
-          tag: 'AI POWERED'
         },
         {
-          id: 'enterprise',
-          name: 'Logistics Center',
-          price: 'Custom',
-          period: 'contact us',
-          description: 'Complex 3PL operations.',
+          id: 'business', ...TIER_PRICES.business,
+          name: 'Business',
+          description: 'Full warehouse operations with suppliers and team.',
           features: [
-            '<i class="ph-duotone ph-plugs-connected"></i> ERP Integrations',
-            '<i class="ph-duotone ph-robot"></i> Robotics API',
-            '<i class="ph-duotone ph-shield-check"></i> Advanced Security',
-            '<i class="ph-duotone ph-headset"></i> 24/7 Support'
+            '<i class="ph-duotone ph-truck"></i> Supplier management',
+            '<i class="ph-duotone ph-handshake"></i> TrustCircle syndicates',
+            '<i class="ph-duotone ph-users-three"></i> Unlimited team members',
+            '<i class="ph-duotone ph-trend-up"></i> Advanced analytics & exports',
           ],
-          btnClass: 'btn-white',
-          highlight: false
-        }
+        },
       ],
 
-      // ⚙️ MANUFACTURER
+      // Manufacturer
       manufacturer: [
         {
-          id: 'starter',
-          name: 'Workshop',
-          price: 'Free',
-          period: 'forever',
-          description: 'Track production for small workshops.',
+          id: 'starter', ...TIER_PRICES.starter,
+          name: 'Starter',
+          description: 'Track production runs for small workshops.',
           features: [
-            '<i class="ph-duotone ph-gear"></i> SmartShift Basic',
-            '<i class="ph-duotone ph-hammer"></i> Job Cards',
-            '<i class="ph-duotone ph-timer"></i> Time Tracking',
-            '<i class="ph-duotone ph-clipboard-text"></i> Output Logs'
+            '<i class="ph-duotone ph-gear"></i> SmartShift production',
+            '<i class="ph-duotone ph-hammer"></i> Job cards & output logs',
+            '<i class="ph-duotone ph-wifi-slash"></i> Offline access',
+            '<i class="ph-duotone ph-timer"></i> Time tracking',
           ],
-          btnClass: 'btn-secondary',
-          highlight: false
         },
         {
-          id: 'pro',
-          name: 'Factory Ops',
-          price: 'R750',
-          period: 'per month',
-          description: 'Optimize lines and reduce downtime.',
+          id: 'growth', ...TIER_PRICES.growth,
+          name: 'Growth',
+          description: 'Cloud backup and machine management for growing factories.',
           features: [
-            '<i class="ph-duotone ph-warning-circle"></i> AI Maintenance Alerts',
-            '<i class="ph-duotone ph-trend-down"></i> Cost Per Unit Analysis',
-            '<i class="ph-duotone ph-lightning"></i> Energy Monitoring',
-            '<i class="ph-duotone ph-factory"></i> Unlimited Shifts'
+            '<i class="ph-duotone ph-cloud-arrow-up"></i> Cloud sync & backup',
+            '<i class="ph-duotone ph-factory"></i> Machine health tracking',
+            '<i class="ph-duotone ph-trend-down"></i> Cost per unit analysis',
+            '<i class="ph-duotone ph-users"></i> Up to 3 staff members',
           ],
-          btnClass: 'btn-primary',
-          highlight: true,
-          tag: 'BEST VALUE'
         },
         {
-          id: 'enterprise',
-          name: 'Industrial',
-          price: 'Custom',
-          period: 'contact us',
-          description: 'For large scale production facilities.',
+          id: 'business', ...TIER_PRICES.business,
+          name: 'Business',
+          description: 'Full operations with suppliers, shifts, and team management.',
           features: [
-            '<i class="ph-duotone ph-globe"></i> Supply Chain Tower',
-            '<i class="ph-duotone ph-cpu"></i> IoT Machine Integration',
-            '<i class="ph-duotone ph-clipboard-check"></i> Compliance Audits',
-            '<i class="ph-duotone ph-handshake"></i> Syndicate Sourcing'
+            '<i class="ph-duotone ph-truck"></i> Raw material suppliers',
+            '<i class="ph-duotone ph-handshake"></i> TrustCircle sourcing',
+            '<i class="ph-duotone ph-users-three"></i> Unlimited team + PIN login',
+            '<i class="ph-duotone ph-trend-up"></i> Advanced reports & exports',
           ],
-          btnClass: 'btn-white',
-          highlight: false
-        }
-      ]
+        },
+      ],
     };
 
     // Default to 'shopowner' if type not found, or merge trader/warehouse if needed
@@ -212,21 +167,15 @@ export default class PricingUI {
 
     // Helper to determine button state
     // For now, since these are tiers WITHIN a type, we assume "Current Plan" is tracked by 'planLevel' or similar in user object.
-    // simpler: If price is 'Free', it's likely current. 
-    // REALITY: We need to store 'planId' in user object.
     const currentPlanId = currentUser?.planId || 'starter';
+    const TIER_ORDER = ['starter', 'growth', 'business'];
 
     const getBtnState = (plan) => {
-      if (plan.price === 'Custom') return { text: 'Contact Sales', disabled: false, action: 'contact' };
       if (plan.id === currentPlanId) return { text: 'Current Plan', disabled: true, action: 'none' };
-
-      // Simple hierarchy: starter < pro < enterprise/chain
-      const levels = ['starter', 'pro', 'chain', 'enterprise'];
-      const currentIdx = levels.indexOf(currentPlanId);
-      const planIdx = levels.indexOf(plan.id);
-
-      if (planIdx > currentIdx) return { text: `Upgrade`, disabled: false, action: 'upgrade' };
-      if (planIdx < currentIdx && planIdx !== -1) return { text: 'Downgrade', disabled: false, action: 'downgrade' };
+      const currentIdx = TIER_ORDER.indexOf(currentPlanId);
+      const planIdx    = TIER_ORDER.indexOf(plan.id);
+      if (planIdx > currentIdx) return { text: 'Upgrade', disabled: false, action: 'upgrade' };
+      if (planIdx < currentIdx) return { text: 'Downgrade', disabled: false, action: 'downgrade' };
 
       return { text: 'Select Plan', disabled: false, action: 'upgrade' };
     };
@@ -237,8 +186,8 @@ export default class PricingUI {
           <button class="btn btn-sm btn-outline-light back-btn">
             ← Back to Dashboard
           </button>
-          <h1>Plans for ${businessType.charAt(0).toUpperCase() + businessType.slice(1)}s</h1>
-          <p>Tailored tools for <strong>${businessName}</strong> to scale efficiently.</p>
+          <h1>Simple, transparent pricing</h1>
+          <p>Plans for <strong>${businessName}</strong> — upgrade or downgrade any time.</p>
         </div>
         
         <div class="pricing-grid">
