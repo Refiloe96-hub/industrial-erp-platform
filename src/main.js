@@ -256,6 +256,17 @@ class IndustrialERPApp {
     console.log('🚀 Initializing Industrial ERP Platform...');
     Analytics.init();
 
+    // Legal pages don't need DB/auth — render immediately before full init
+    const earlyPath = window.location.pathname;
+    const legalPaths = { '/privacy': renderPrivacy, '/terms': renderTerms, '/support': renderSupport };
+    if (legalPaths[earlyPath]) {
+      const appEl = document.getElementById('app');
+      if (appEl) {
+        appEl.innerHTML = legalPaths[earlyPath]();
+        return; // Skip full initialization for static pages
+      }
+    }
+
     try {
       // Force Dark Mode
       document.documentElement.setAttribute('data-theme', 'dark');
