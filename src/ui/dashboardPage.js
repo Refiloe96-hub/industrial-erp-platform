@@ -83,7 +83,11 @@ export function renderDashboard(app) {
                 <button class="ud-item" id="settings-nav-btn"><i class="ph ph-gear-six"></i> Settings</button>
                 <button class="ud-item" id="upgrade-btn"><i class="ph ph-arrow-circle-up"></i> Upgrade Plan</button>
                 <button class="ud-item" id="install-btn" style="display:none;"><i class="ph ph-device-mobile"></i> Install App</button>
+              </div>
+              <div class="ud-section" style="border-top:1px solid var(--border);padding-top:0.3rem;">
                 <a class="ud-item" href="/support" style="text-decoration:none;"><i class="ph ph-lifebuoy"></i> Support</a>
+                <a class="ud-item" href="/privacy" style="text-decoration:none;"><i class="ph ph-shield-check"></i> Privacy Policy</a>
+                <a class="ud-item" href="/terms" style="text-decoration:none;"><i class="ph ph-file-text"></i> Terms &amp; Conditions</a>
               </div>
               <div class="ud-section ud-section--danger">
                 <button class="ud-item ud-item--danger" id="logout-btn"><i class="ph ph-sign-out"></i> Log out</button>
