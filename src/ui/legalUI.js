@@ -153,9 +153,9 @@ export function renderSupport() {
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:0 0 2.5rem;">
       ${[
-        { icon:'📧', title:'Email support', body:`Send us a message at <a href="mailto:${CONTACT_EMAIL}" style="color:#60a5fa;">${CONTACT_EMAIL}</a>. We aim to respond within 1 business day.` },
-        { icon:'📚', title:'Documentation', body:'Find step-by-step guides for every module in the Settings → Support section inside the app.' },
-        { icon:'🐛', title:'Report a bug', body:`Email us with the module name and what you were doing when it went wrong. Screenshots help.` },
+        { icon:'<i class="ph-duotone ph-envelope-simple" style="font-size:1.5rem;color:#60a5fa;"></i>', title:'Email support', body:`Send us a message at <a href="mailto:${CONTACT_EMAIL}" style="color:#60a5fa;">${CONTACT_EMAIL}</a>. We aim to respond within 1 business day.` },
+        { icon:'<i class="ph-duotone ph-book-open" style="font-size:1.5rem;color:#60a5fa;"></i>', title:'Documentation', body:'Find step-by-step guides for every module in the Settings Support section inside the app.' },
+        { icon:'<i class="ph-duotone ph-bug" style="font-size:1.5rem;color:#60a5fa;"></i>', title:'Report a bug', body:'Email us with the module name and what you were doing when it went wrong. Screenshots help.' },
       ].map(c => `
         <div style="background:#18181b;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1.25rem;">
           <div style="font-size:1.5rem;margin-bottom:0.5rem;">${c.icon}</div>
