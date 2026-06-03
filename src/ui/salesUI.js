@@ -3,7 +3,6 @@ import sales from '../modules/Sales.js';
 import Customers from '../modules/Customers.js';
 import PoolStock from '../modules/PoolStock.js';
 import PocketBooks from '../modules/PocketBooks.js';
-import Customers from '../modules/Customers.js';
 import PaymentService from '../services/payments.js';
 import HardwareService from '../services/HardwareService.js';
 import db, { STORES } from '../db/index.js';
