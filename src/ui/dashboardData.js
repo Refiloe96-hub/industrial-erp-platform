@@ -9,11 +9,11 @@ export async function updateDashboardStats(app) {
     try {
       // Lazy-load missing dependencies (happens if user just logged in without page refresh)
       if (!app.pocketBooks) {
-        const { default: PocketBooks } = await import('./modules/PocketBooks.js');
+        const { default: PocketBooks } = await import('../modules/PocketBooks.js');
         app.pocketBooks = new PocketBooks();
       }
       if (!app.poolStock) {
-        const { default: PoolStock } = await import('./modules/PoolStock.js');
+        const { default: PoolStock } = await import('../modules/PoolStock.js');
         app.poolStock = new PoolStock(db);
       }
       if (!db) console.error('❌ DB is missing');
@@ -154,7 +154,7 @@ export async function updateDashboardStats(app) {
 
       // Attach click handlers to dashboard stat cards (data now available)
       try {
-        const { showDetailPanel, dpBar, dpKV } = await import('./ui/panelHelper.js');
+        const { showDetailPanel, dpBar, dpKV } = await import('./panelHelper.js');
         const txs = app.pocketBooks ? await app.pocketBooks.getTransactions() : [];
         const items = app.poolStock ? await app.poolStock.getInventory() : [];
         const machines = await db.getAll('machines');
@@ -312,7 +312,7 @@ export async function loadAIAdvisor(app) {
     const moduleLabels = { finance: 'Finance', inventory: 'Inventory', production: 'Production', syndicate: 'Syndicate', sales: 'Sales' };
 
     try {
-      const { default: aiEngine } = await import('./services/aiEngine.js');
+      const { default: aiEngine } = await import('../services/aiEngine.js');
       const snapshot = await aiEngine.getBusinessSnapshot();
 
       // Render module health scores
