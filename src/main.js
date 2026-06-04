@@ -34,8 +34,8 @@ import PoolStock from './modules/PoolStock.js';
 import Analytics from './utils/analytics.js';
 
 // Module configuration — defined once in src/config/modules.js
-// Re-exported here so existing imports of main.js still work
-export { MODULE_ACCESS, MODULE_INFO, BUSINESS_LABELS } from './config/modules.js';
+import { MODULE_ACCESS, MODULE_INFO, BUSINESS_LABELS } from './config/modules.js';
+export { MODULE_ACCESS, MODULE_INFO, BUSINESS_LABELS };
 
 class IndustrialERPApp {
   constructor() {
