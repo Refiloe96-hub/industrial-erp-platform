@@ -745,10 +745,10 @@ class PoolStockUI {
 
         this.container.innerHTML = `
             <div class="poolstock-ui">
-                <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                <header class="module-header">
                     <div>
-                        <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Stock Take</h1>
-                        <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Count physical stock and record adjustments</p>
+                        <h1>Stock Take</h1>
+                        <p>Count physical stock and record adjustments</p>
                     </div>
                     <div style="display:flex;gap:0.5rem;">
                         <button class="btn btn-secondary" id="st-back-btn"><i class="ph ph-arrow-left"></i> Back</button>
@@ -870,10 +870,10 @@ class PoolStockUI {
 
         this.container.innerHTML = `
             <div class="poolstock-ui">
-                <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                <header class="module-header">
                     <div>
-                        <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Suppliers</h1>
-                        <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">${suppliers.length} supplier${suppliers.length !== 1 ? 's' : ''} on record</p>
+                        <h1>Suppliers</h1>
+                        <p>${suppliers.length} supplier${suppliers.length !== 1 ? 's' : ''} on record</p>
                     </div>
                     <div style="display:flex;gap:0.5rem;">
                         <button class="btn btn-secondary" id="back-to-inventory-btn"><i class="ph ph-arrow-left"></i> Back</button>
@@ -1070,7 +1070,7 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;">Demand Forecast</h1>
+                            <h1>Demand Forecast</h1>
                             <p>AI-powered stockout prediction (${aiEngine.getHorizon()}-day horizon)</p>
                         </div>
                         <button id="back-to-inv" class="btn btn-secondary"><i class="ph ph-arrow-left"></i> Back</button>

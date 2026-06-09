@@ -107,7 +107,7 @@ class ReportsUI {
         </div>
 
         <!-- Summary Cards -->
-        <div class="report-stats">
+        <div class="stats-grid">
           <div class="stat-card revenue">
             <div class="stat-icon"><i class="ph-duotone ph-money"></i></div>
             <div class="stat-content">
@@ -1064,12 +1064,6 @@ class ReportsUI {
           gap: 0.5rem;
         }
 
-        .report-stats {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
 
         .stat-card.revenue {
           border-left: 4px solid #16a34a;
@@ -1157,7 +1151,7 @@ class ReportsUI {
           /* All grids: single column on mobile */
           .reports-grid,
           .advanced-stats-grid,
-          .report-stats {
+          .stats-grid {
             grid-template-columns: 1fr !important;
             gap: 0.75rem !important;
           }

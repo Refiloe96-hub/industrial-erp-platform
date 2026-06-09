@@ -272,10 +272,10 @@ class TrustCircleUI {
         }
       </style>
       <div class="trustcircle-dashboard">
-        <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+        <header class="module-header">
           <div>
-            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">TrustCircle</h1>
-            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Group syndicates & cooperative buying</p>
+            <h1>TrustCircle</h1>
+            <p>Group syndicates &amp; cooperative buying</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;">
             <button id="tc-ai-btn" class="btn btn-secondary" style="font-size:0.8125rem;">Insights</button>
