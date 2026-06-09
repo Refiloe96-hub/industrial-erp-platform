@@ -33,8 +33,8 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PoolStock</h1>
-                            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Inventory & procurement</p>
+                            <h1>PoolStock</h1>
+                            <p>Inventory &amp; procurement</p>
                         </div>
                         <div style="display:flex;gap:0.5rem;">
                             <button id="export-inventory-btn" class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export CSV</button>
@@ -1417,8 +1417,8 @@ class PoolStockUI {
                 <div class="poolstock-ui">
                     <header class="module-header">
                         <div>
-                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PoolStock</h1>
-                            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Inventory & procurement</p>
+                            <h1>PoolStock</h1>
+                            <p>Inventory &amp; procurement</p>
                         </div>
                         <button id="create-po-btn" class="btn btn-primary"><i class="ph ph-plus"></i> Create PO</button>
                     </header>
@@ -1821,65 +1821,6 @@ class PoolStockUI {
         const style = document.createElement('style');
         style.id = 'poolstock-styles';
         style.textContent = `
-            .poolstock-ui .module-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2rem;
-            }
-
-            .poolstock-ui .module-header h1 {
-                margin: 0;
-                font-size: 1.75rem;
-            }
-
-            .poolstock-ui .module-header p {
-                margin: 0.25rem 0 0;
-                color: var(--text-secondary);
-            }
-
-            /* Stats */
-            .stat-card {
-                background: var(--bg-primary);
-                border-radius: var(--radius-md);
-                padding: 1rem 1.25rem;
-                display: block;
-                border: 1px solid var(--border);
-                border-left: 3px solid var(--border);
-                transition: border-color 0.15s;
-            }
-            .stat-card:hover { border-color: var(--border-strong); }
-
-            .stat-card.primary { border-left-color: #2563eb; }
-            .stat-card.warning { border-left-color: #f59e0b; }
-            .stat-card.danger  { border-left-color: #ef4444; }
-            .stat-card.success { border-left-color: #10b981; }
-
-            .stat-content {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .stat-label {
-                font-size: 0.875rem;
-                color: var(--text-secondary);
-            }
-
-            .stat-value {
-                font-size: 1.6rem;
-                font-weight: 700;
-                color: var(--text-primary);
-            }
-
-            .stat-card.warning .stat-value { color: #f59e0b; }
-            .stat-card.danger .stat-value { color: #ef4444; }
-            .stat-card.success .stat-value { color: #10b981; }
-            
-            .stat-icon {
-                font-size: 2.5rem;
-                color: var(--text-primary);
-            }
-
             /* Filters */
             .filter-group.search input {
                 padding: 0.5rem 1rem;
@@ -2014,30 +1955,6 @@ class PoolStockUI {
                 width: 50px;
             }
 
-            /* Tab Bar */
-            .ps-tab-bar {
-                display: flex;
-                gap: 0;
-                border-bottom: 2px solid var(--border);
-                margin-bottom: 1.5rem;
-            }
-            .ps-tab {
-                padding: .6rem 1.25rem;
-                background: none;
-                border: none;
-                border-bottom: 2px solid transparent;
-                margin-bottom: -2px;
-                cursor: pointer;
-                font-size: .95rem;
-                color: var(--text-secondary);
-                display: flex;
-                align-items: center;
-                gap: .4rem;
-                transition: color .2s, border-color .2s;
-            }
-            .ps-tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); font-weight: 600; }
-            .ps-tab:hover { color: var(--text-primary); }
-
             /* Search with scan */
             .search-with-scan { display: flex; gap: .4rem; align-items: center; }
             .search-with-scan input { flex: 1; }
@@ -2071,7 +1988,6 @@ class PoolStockUI {
             .text-success { color: #10b981; }
             .text-danger { color: #ef4444; }
             .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-            .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
         `;
         document.head.appendChild(style);
     }

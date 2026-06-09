@@ -12,15 +12,18 @@ class CustomersUI {
 
     container.innerHTML = `
       <div class="customers-container">
-        <div class="page-header">
-          <h2 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">Customers</h2>
+        <header class="module-header">
+          <div>
+            <h1>Customers</h1>
+            <p>Manage contacts, loyalty &amp; debtors</p>
+          </div>
           <div style="display:flex;gap:0.5rem;">
             <button class="btn btn-secondary" id="btn-debtors-view" title="Show customers who owe money">
               <i class="ph ph-clock"></i> Debtors
             </button>
             <button class="btn btn-primary" id="btn-add-customer"><i class="ph ph-plus"></i> New Customer</button>
           </div>
-        </div>
+        </header>
 
         <div class="search-bar" style="margin-bottom:1rem;">
           <input type="text" id="customer-search" placeholder="Search by name or phone...">
@@ -74,10 +77,10 @@ class CustomersUI {
 
   renderCustomerParams(customers) {
     if (customers.length === 0) {
-      return `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-        <i class="ph-duotone ph-users" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.4;"></i>
-        <p style="font-size:0.9375rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.375rem;">No customers yet</p>
-        <p style="font-size:0.8125rem;margin:0;">Click "New Customer" to add your first one.</p>
+      return `<div class="empty-state" style="grid-column:1/-1">
+        <i class="ph-duotone ph-users"></i>
+        <h3>No customers yet</h3>
+        <p>Click "New Customer" to add your first one.</p>
       </div>`;
     }
 
@@ -282,12 +285,6 @@ class CustomersUI {
       <style>
         .customers-container {
           padding: 1rem;
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.25rem;
         }
         .customers-grid {
             display: grid;

@@ -45,9 +45,26 @@ class ReportsUI {
       <div class="reports-container">
         ${this.renderStyles()}
 
-        <div class="module-nav" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-          <button class="btn-tab active" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials & KPIs</button>
-          <button class="btn-tab" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
+        <header class="module-header">
+          <div>
+            <h1>Reports</h1>
+            <p>Business analytics &amp; financial summaries</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button id="export-pdf-btn" class="btn btn-secondary"><i class="ph-duotone ph-file-pdf"></i> Export PDF</button>
+            <select id="export-type" class="form-select">
+              <option value="">Export CSV...</option>
+              <option value="all">Everything (CSV)</option>
+              <option value="mpesa">M-Pesa Sales</option>
+              <option value="cash">Cash Sales</option>
+              <option value="card">Card Sales</option>
+            </select>
+          </div>
+        </header>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials &amp; KPIs</button>
+          <button class="tab-btn" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
         </div>
         
         <!-- Date Range Selector -->
@@ -70,19 +87,6 @@ class ReportsUI {
                     ${this.renderFilterOptions(inventory, this.activeFilter.type)}
                 </select>
             ` : ''}
-          </div>
-
-          </div>
-          
-          <div class="export-controls" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-            <button id="export-pdf-btn" class="btn btn-secondary"><i class="ph-duotone ph-file-pdf"></i> Export PDF</button>
-            <select id="export-type" class="form-select">
-                <option value=""><i class="ph-duotone ph-download-simple"></i> Export CSV...</option>
-                <option value="all">Everything (CSV)</option>
-                <option value="mpesa">M-Pesa Sales</option>
-                <option value="cash">Cash Sales</option>
-                <option value="card">Card Sales</option>
-            </select>
           </div>
         </div>
 
@@ -239,9 +243,16 @@ class ReportsUI {
       <div class="reports-container">
         ${this.renderStyles()}
 
-        <div class="module-nav" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-          <button class="btn-tab" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials & KPIs</button>
-          <button class="btn-tab active" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
+        <header class="module-header">
+          <div>
+            <h1>Reports</h1>
+            <p>Business analytics &amp; financial summaries</p>
+          </div>
+        </header>
+
+        <div class="tab-bar">
+          <button class="tab-btn" data-view="financials"><i class="ph-duotone ph-chart-line-up"></i> Financials &amp; KPIs</button>
+          <button class="tab-btn active" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
         </div>
 
         <div class="card" style="margin-bottom: 2rem;">
@@ -273,7 +284,7 @@ class ReportsUI {
 
   attachTraceHandlers(container) {
     // Shared Navigation
-    container.querySelectorAll('.btn-tab').forEach(btn => {
+    container.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         this.currentView = e.currentTarget.dataset.view;
         this.render(this.container);

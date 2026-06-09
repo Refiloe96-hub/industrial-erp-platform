@@ -27,8 +27,8 @@ class PocketBooksUI {
                 <div class="pocketbooks-ui">
                     <header class="module-header">
                         <div>
-                            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PocketBooks</h1>
-                            <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Financial ledger & cash flow</p>
+                            <h1>PocketBooks</h1>
+                            <p>Financial ledger &amp; cash flow</p>
                         </div>
                         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
                             <button id="pb-export-btn" class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export CSV</button>
@@ -887,80 +887,6 @@ class PocketBooksUI {
         const style = document.createElement('style');
         style.id = 'pocketbooks-styles';
         style.textContent = `
-            .pocketbooks-ui {
-                padding: 0;
-            }
-
-            .pocketbooks-ui .module-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2rem;
-            }
-
-            .pocketbooks-ui .module-header h1 {
-                margin: 0;
-                font-size: 1.75rem;
-            }
-
-            .pocketbooks-ui .module-header p {
-                margin: 0.25rem 0 0;
-                color: var(--text-secondary);
-            }
-
-            /* Stats Grid */
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1.5rem;
-                margin-bottom: 2rem;
-            }
-
-            .stat-card {
-                background: var(--bg-primary);
-                border-radius: 8px;
-                padding: 1.125rem 1.25rem;
-                display: block;
-                border: 1px solid var(--border);
-                border-left: 3px solid var(--border);
-                transition: border-color 0.15s;
-            }
-            .stat-card:hover { border-color: var(--border-strong); }
-
-            .stat-card.income { border-left-color: #10a37f; }
-            .stat-card.expense { border-left-color: #ef4444; }
-            .stat-card.positive { border-left-color: #10a37f; }
-            .stat-card.negative { border-left-color: #ef4444; }
-            .stat-card.neutral { border-left-color: #f59e0b; }
-
-            .stat-icon { display: none; }
-
-            .stat-content { display: block; }
-
-            .stat-label {
-                font-size: 0.6875rem;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.07em;
-                color: var(--text-muted);
-                margin-bottom: 0.375rem;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-                font-weight: 700;
-                letter-spacing: -0.02em;
-                color: var(--text-primary);
-                line-height: 1.2;
-            }
-
-            .stat-card.income  { border-left-color: #10b981; }
-            .stat-card.expense { border-left-color: #ef4444; }
-            .stat-card.positive { border-left-color: #10b981; }
-            .stat-card.negative { border-left-color: #ef4444; }
-            .stat-card.positive .stat-value { color: #34d399; }
-            .stat-card.negative .stat-value { color: #f87171; }
-
             /* Filters */
             .filters-bar {
                 display: flex;

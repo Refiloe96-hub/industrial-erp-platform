@@ -53,8 +53,10 @@ class PocketWalletUI {
         this.container.innerHTML = `
       <div class="pocketwallet-dashboard">
         <header class="module-header">
-          <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">PocketWallet</h1>
-          <p style="margin:0.125rem 0 0;font-size:0.8125rem;color:var(--text-muted);">Secure B2B payments</p>
+          <div>
+            <h1>PocketWallet</h1>
+            <p>Secure B2B payments &amp; transfers</p>
+          </div>
         </header>
 
         <div class="wallet-card">

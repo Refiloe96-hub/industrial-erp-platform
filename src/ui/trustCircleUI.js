@@ -22,36 +22,6 @@ class TrustCircleUI {
         const style = document.createElement('style');
         style.id = 'trustcircle-styles';
         style.textContent = `
-            /* Detail Tabs */
-            .detail-tab-nav {
-                display: flex;
-                gap: 0;
-                border-bottom: 2px solid var(--border);
-                margin-bottom: 1.5rem;
-            }
-            .detail-tab {
-                padding: .6rem 1.25rem;
-                background: none;
-                border: none;
-                border-bottom: 2px solid transparent;
-                margin-bottom: -2px;
-                cursor: pointer;
-                font-size: .95rem;
-                color: var(--text-secondary);
-                display: flex;
-                align-items: center;
-                gap: .4rem;
-                transition: color .2s, border-color .2s;
-            }
-            .detail-tab.active {
-                color: var(--accent-primary);
-                border-bottom-color: var(--accent-primary);
-                font-weight: 600;
-            }
-            .detail-tab:hover {
-                color: var(--text-primary);
-            }
-
             /* Main Layout Grid */
             .trustcircle-dashboard .grid-layout,
             .syndicate-detail .grid-layout {

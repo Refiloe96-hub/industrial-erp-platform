@@ -31,10 +31,10 @@ class SalesUI {
       <div class="sales-container">
         ${this.renderStyles()}
 
-        <header class="module-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; padding-bottom: 1rem;">
+        <header class="module-header">
           <div>
-            <h1 style="margin:0; font-size:1.125rem; font-weight:700; letter-spacing:-0.01em;">Point of Sale</h1>
-            <p style="margin:0.125rem 0 0; color:var(--text-muted); font-size:0.8125rem;">Sales, checkout, and receipts</p>
+            <h1>Point of Sale</h1>
+            <p>Sales, checkout &amp; receipts</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
             <button id="switch-user-btn" class="btn btn-secondary" title="Switch cashier with PIN">
@@ -49,18 +49,34 @@ class SalesUI {
           </div>
         </header>
 
-        <!-- Sales Stats (Compact) -->
-        <div class="sales-stats">
-          <div class="stat-card today-revenue">
+        <!-- Sales Stats -->
+        <div class="stats-grid">
+          <div class="stat-card revenue">
+            <div class="stat-icon"><i class="ph-duotone ph-currency-circle-dollar"></i></div>
             <div class="stat-content">
-              <p class="stat-label">Revenue</p>
-              <h2 class="stat-value">${sym}${todaySummary.revenue.toLocaleString()}</h2>
+              <span class="stat-label">Today's Revenue</span>
+              <span class="stat-value">${sym}${todaySummary.revenue.toLocaleString()}</span>
             </div>
           </div>
-          <div class="stat-card">
-             <div class="stat-content">
-              <p class="stat-label">Sales</p>
-              <h2 class="stat-value">${todaySummary.totalSales}</h2>
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="ph-duotone ph-shopping-cart"></i></div>
+            <div class="stat-content">
+              <span class="stat-label">Sales</span>
+              <span class="stat-value">${todaySummary.totalSales}</span>
+            </div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-icon"><i class="ph-duotone ph-chart-bar"></i></div>
+            <div class="stat-content">
+              <span class="stat-label">Avg Sale</span>
+              <span class="stat-value">${sym}${todaySummary.avgSale.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</span>
+            </div>
+          </div>
+          <div class="stat-card neutral">
+            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
+            <div class="stat-content">
+              <span class="stat-label">Products</span>
+              <span class="stat-value">${inventory.length}</span>
             </div>
           </div>
         </div>
@@ -1273,27 +1289,10 @@ class SalesUI {
       <style>
         .sales-container { padding: 1rem; max-width: 1200px; margin: 0 auto; overflow-x: hidden; }
 
-        .sales-stats {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-        .stat-card {
-          background: var(--bg-primary);
-          border: 1px solid var(--border);
-          padding: 1rem 1.25rem;
-          border-radius: 8px;
-          display: block;
-        }
         .badge.cash { background: #10b981; color: white; }
         .badge.card { background: #2563eb; color: white; }
         .badge.mobile { background: #f59e0b; color: white; }
         .badge.mpesa { background: #16a34a; color: white; }
-        .today-revenue { border-left: 4px solid #10b981; }
-        .today-revenue .stat-value { color: #10b981; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-primary); }
-        .stat-label { font-size: 0.8rem; margin: 0; color: var(--text-secondary); }
 
         .pos-layout {
           display: grid;
@@ -1515,13 +1514,13 @@ class SalesUI {
           .module-header > div:last-child { width: 100%; }
           .module-header > div:last-child .btn { width: 100%; justify-content: center; }
 
-          .sales-stats {
+          .stats-grid {
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
             margin-bottom: 0.75rem;
           }
-          .stat-card { padding: 0.75rem; }
-          .stat-value { font-size: 1.2rem !important; }
+          .stats-grid .stat-card { padding: 0.75rem; }
+          .stats-grid .stat-value { font-size: 1.2rem !important; }
 
           .pos-layout {
             display: flex;

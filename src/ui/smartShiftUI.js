@@ -15,20 +15,20 @@ class SmartShiftUI {
   async render() {
     this.container.innerHTML = `
       <div class="smart-shift-layout">
-        <header class="module-header" style="padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+        <header class="module-header">
           <div>
-            <h1 style="margin:0;font-size:1.125rem;font-weight:700;letter-spacing:-0.01em;">SmartShift</h1>
-            <p style="margin:0.125rem 0 0;color:var(--text-muted);font-size:0.8125rem;">Production & machine management</p>
+            <h1>SmartShift</h1>
+            <p>Production &amp; machine management</p>
           </div>
           <button id="ss-ai-btn" class="btn btn-secondary" style="font-size:0.8125rem;">Insights</button>
         </header>
 
-        <div class="module-nav">
-          <button class="btn-tab active" data-view="scheduler"><i class="ph-duotone ph-calendar"></i> Scheduler</button>
-          <button class="btn-tab" data-view="machines">Machines</button>
-          <button class="btn-tab" data-view="orders">Production Orders</button>
-          <button class="btn-tab" data-view="shifts">Shifts</button>
-          <button class="btn-tab" data-view="workers">Workers</button>
+        <div class="tab-bar">
+          <button class="tab-btn active" data-view="scheduler"><i class="ph-duotone ph-calendar"></i> Scheduler</button>
+          <button class="tab-btn" data-view="machines">Machines</button>
+          <button class="tab-btn" data-view="orders">Production Orders</button>
+          <button class="tab-btn" data-view="shifts">Shifts</button>
+          <button class="tab-btn" data-view="workers">Workers</button>
         </div>
         <div id="smart-shift-content" class="module-content">
           <div class="loading-spinner">Loading...</div>
@@ -42,9 +42,9 @@ class SmartShiftUI {
   }
 
   attachNavHandlers() {
-    this.container.querySelectorAll('.btn-tab').forEach(btn => {
+    this.container.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        this.container.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+        this.container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         this.loadView(e.target.dataset.view);
       });
