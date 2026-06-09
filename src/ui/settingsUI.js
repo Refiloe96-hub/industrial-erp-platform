@@ -33,347 +33,349 @@ class SettingsUI {
     await this.init();
 
     container.innerHTML = `
-      <div class="settings-layout">
-        <!-- LEFT COLUMN: Navigation Master -->
-        <div class="settings-nav">
-          <div class="nav-header">
-            <h2>Settings</h2>
+      ${this.renderStyles()}
+      <div class="settings-page">
+        <header class="module-header">
+          <div>
+            <h1>Settings</h1>
+            <p>Workspace, team &amp; integrations</p>
           </div>
-          <div class="nav-menu">
-            <button class="nav-item active" data-target="pane-business">
-              <i class="ph-duotone ph-buildings"></i> Your Business
-            </button>
-            <button class="nav-item" data-target="pane-financials">
-              <i class="ph-duotone ph-currency-dollar"></i> Financials
-            </button>
-            <button class="nav-item" data-target="pane-team">
-              <i class="ph-duotone ph-users"></i> Team Management
-            </button>
-            <button class="nav-item" data-target="pane-data">
-              <i class="ph-duotone ph-floppy-disk"></i> Data & Storage
-            </button>
-            <button class="nav-item" data-target="pane-hardware">
-              <i class="ph-duotone ph-plugs-connected"></i> Hardware Integrations
-            </button>
-            <button class="nav-item" data-target="pane-sync">
-              <i class="ph-duotone ph-wifi-slash"></i> Offline P2P Sync
-            </button>
-            <button class="nav-item" data-target="pane-ai">
-              <i class="ph-duotone ph-cpu"></i> AI & Forecasting
-            </button>
-          </div>
-        </div>
+        </header>
 
-        <!-- RIGHT COLUMN: Content Detail -->
-        <div class="settings-pane">
-          <!-- Mobile Header (Hidden on Desktop) -->
-          <div class="pane-mobile-header" style="display:none;">
-            <button class="btn-icon" id="btn-back-nav"><i class="ph-bold ph-arrow-left"></i></button>
-            <h3 id="mobile-pane-title">Your Business</h3>
-          </div>
+        <div class="settings-scroll">
 
-          <!-- PANE: Business -->
-          <div class="pane-content active" id="pane-business">
-            <div class="pane-header">
-              <h3>Your Business</h3>
-              <p>Configure your workspace details and branding.</p>
+          <!-- ── Your Business ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>Your Business</h2>
+              <p>Workspace details, branding, and contact information.</p>
             </div>
-            <div class="pane-body">
-              <div class="form-group">
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Business Logo</label>
-                <div style="display:flex;align-items:center;gap:1rem;">
-                  <div id="logo-preview" style="width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
-                    ${this.settings.businessLogo ? `<img src="${this.settings.businessLogo}" style="max-width:100%;max-height:100%;object-fit:contain;">` : '<i class="ph-duotone ph-image" style="font-size:1.25rem;color:var(--text-muted);"></i>'}
-                  </div>
-                  <input type="file" id="set-logo" accept="image/*" style="font-size:0.8125rem;color:var(--text-secondary);">
+                <p>Shown in the sidebar and on receipts. Max 1 MB.</p>
+              </div>
+              <div class="set-ctrl" style="display:flex;align-items:center;gap:0.875rem;">
+                <div id="logo-preview" style="width:48px;height:48px;border-radius:6px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+                  ${this.settings.businessLogo ? `<img src="${this.settings.businessLogo}" style="width:100%;height:100%;object-fit:contain;">` : '<i class="ph ph-image" style="color:var(--text-muted);font-size:1.25rem;"></i>'}
                 </div>
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown in the sidebar and on receipts. Max 1MB.</small>
+                <input type="file" id="set-logo" accept="image/*" style="font-size:0.8125rem;color:var(--text-secondary);">
               </div>
-              <div class="form-group">
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Business Name</label>
-                <input type="text" id="set-name" value="${this.settings.businessName}" placeholder="My Shop">
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown on receipts and financial documents.</small>
+                <p>Shown on receipts and financial documents.</p>
               </div>
-              <div class="form-group">
-                <label>Tagline / Slogan</label>
-                <input type="text" id="set-tagline" value="${this.settings.businessTagline || ''}" placeholder="e.g. Fresh Quality Every Day">
+              <div class="set-ctrl">
+                <input type="text" id="set-name" value="${this.settings.businessName || ''}" placeholder="My Shop">
               </div>
-              <div class="form-group">
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Tagline</label>
+                <p>Optional. Printed below the business name on receipts.</p>
+              </div>
+              <div class="set-ctrl">
+                <input type="text" id="set-tagline" value="${this.settings.businessTagline || ''}" placeholder="Fresh Quality Every Day">
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>VAT Registration Number</label>
-                <input type="text" id="set-vat-number" value="${this.settings.vatNumber || ''}" placeholder="e.g. 4123456789">
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Printed on invoices as required by SARS.</small>
+                <p>Printed on invoices as required by SARS.</p>
               </div>
-              <div class="form-group">
-                <label>Business Address</label>
+              <div class="set-ctrl">
+                <input type="text" id="set-vat-number" value="${this.settings.vatNumber || ''}" placeholder="4123456789">
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-meta"><label>Business Address</label></div>
+              <div class="set-ctrl">
                 <input type="text" id="set-address" value="${this.settings.businessAddress || ''}" placeholder="123 Main Road, Soweto, 1804">
               </div>
-              <div class="form-group">
-                <label>Contact Phone</label>
+            </div>
+            <div class="set-row">
+              <div class="set-meta"><label>Contact Phone</label></div>
+              <div class="set-ctrl">
                 <input type="tel" id="set-biz-phone" value="${this.settings.businessPhone || ''}" placeholder="011 000 0000">
               </div>
-              <div class="form-group">
-                <label>Contact Email</label>
+            </div>
+            <div class="set-row">
+              <div class="set-meta"><label>Contact Email</label></div>
+              <div class="set-ctrl">
                 <input type="email" id="set-biz-email" value="${this.settings.businessEmail || ''}" placeholder="info@mybusiness.co.za">
               </div>
-              <div class="form-group">
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Default Currency</label>
+                <p>Sets the currency symbol across the platform.</p>
+              </div>
+              <div class="set-ctrl">
                 <select id="set-currency">
-                   <option value="ZAR" ${this.settings.currency === 'ZAR' ? 'selected' : ''}>South African Rand (ZAR)</option>
-                   <option value="KES" ${this.settings.currency === 'KES' ? 'selected' : ''}>Kenyan Shilling (KES)</option>
-                   <option value="NGN" ${this.settings.currency === 'NGN' ? 'selected' : ''}>Nigerian Naira (NGN)</option>
-                   <option value="USD" ${this.settings.currency === 'USD' ? 'selected' : ''}>US Dollar (USD)</option>
-                   <option value="EUR" ${this.settings.currency === 'EUR' ? 'selected' : ''}>Euro (EUR)</option>
+                  <option value="ZAR" ${this.settings.currency === 'ZAR' ? 'selected' : ''}>South African Rand (ZAR)</option>
+                  <option value="KES" ${this.settings.currency === 'KES' ? 'selected' : ''}>Kenyan Shilling (KES)</option>
+                  <option value="NGN" ${this.settings.currency === 'NGN' ? 'selected' : ''}>Nigerian Naira (NGN)</option>
+                  <option value="USD" ${this.settings.currency === 'USD' ? 'selected' : ''}>US Dollar (USD)</option>
+                  <option value="EUR" ${this.settings.currency === 'EUR' ? 'selected' : ''}>Euro (EUR)</option>
                 </select>
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Sets the currency symbol across dashboards and receipts.</small>
-              </div>
-              <div class="pane-actions">
-                <button class="btn btn-primary" id="save-settings-business">Save Changes</button>
               </div>
             </div>
-          </div>
+            <div class="set-actions">
+              <button class="btn btn-primary" id="save-settings-business">Save business details</button>
+            </div>
+          </section>
 
-          <!-- PANE: Financials -->
-          <div class="pane-content" id="pane-financials">
-            <div class="pane-header">
-              <h3>Financials</h3>
-              <p>Manage tax rates and accounting preferences.</p>
+          <!-- ── Financials ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>Financials</h2>
+              <p>Tax rates and payment preferences.</p>
             </div>
-            <div class="pane-body">
-              <div class="form-group">
-                <label>VAT / Tax Rate (%)</label>
-                <input type="number" id="set-tax" value="${this.settings.taxRate}" min="0" max="100">
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Applied automatically at the Point of Sale to calculate VAT.</small>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>VAT / Tax Rate</label>
+                <p>Applied at the Point of Sale to calculate tax.</p>
               </div>
-              <div class="form-group">
+              <div class="set-ctrl" style="display:flex;align-items:center;gap:0.5rem;">
+                <input type="number" id="set-tax" value="${this.settings.taxRate}" min="0" max="100" style="width:80px;">
+                <span style="font-size:0.875rem;color:var(--text-muted);">%</span>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Mobile Money / QR Merchant ID</label>
-                <input type="text" id="set-mpesa-id" value="${this.settings.mpesaMerchantId || ''}" placeholder="e.g. 0821234567 or your M-Pesa Till number">
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;display:block;">Shown as a QR code at the POS for mobile payments (M-Pesa, Capitec Pay, SnapScan etc.).</small>
+                <p>Shown as a QR code at POS for M-Pesa, Capitec Pay, SnapScan.</p>
               </div>
-              <div class="pane-actions">
-                <button class="btn btn-primary" id="save-settings-finance">Save Changes</button>
+              <div class="set-ctrl">
+                <input type="text" id="set-mpesa-id" value="${this.settings.mpesaMerchantId || ''}" placeholder="0821234567 or Till number">
               </div>
             </div>
-          </div>
+            <div class="set-actions">
+              <button class="btn btn-primary" id="save-settings-finance">Save financials</button>
+            </div>
+          </section>
 
-          <!-- PANE: Team -->
-          <div class="pane-content" id="pane-team">
-            <div class="pane-header">
-              <h3>Team Management</h3>
-              <p>Manage staff access and roles for your business.</p>
-            </div>
-            <div class="pane-body">
-              <button class="btn btn-secondary" id="btn-add-team-member" style="margin-bottom:1rem;">
-                <i class="ph-bold ph-user-plus"></i> Add Team Member
+          <!-- ── Team ── -->
+          <section class="set-section">
+            <div class="set-section-hd" style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <h2>Team</h2>
+                <p>Staff accounts and POS access roles.</p>
+              </div>
+              <button class="btn btn-secondary" id="btn-add-team-member" style="font-size:0.8125rem;padding:0.35rem 0.75rem;flex-shrink:0;">
+                <i class="ph ph-user-plus"></i> Add member
               </button>
-              <div id="team-list" class="slim-list">
-                <div class="loading-spinner"><i class="ph ph-spinner ph-spin"></i> Loading team...</div>
+            </div>
+            <div id="team-list" class="team-list"></div>
+          </section>
+
+          <!-- ── Data & Storage ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>Data &amp; Storage</h2>
+              <p>Backup, restore, and import tools.</p>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Backup &amp; Restore</label>
+                <p>Restore overwrites all current data — download a backup first.</p>
+              </div>
+              <div class="set-ctrl" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="btn btn-secondary" id="btn-backup" style="font-size:0.8125rem;">
+                  <i class="ph ph-download-simple"></i> Download backup
+                </button>
+                <button class="btn btn-secondary" id="btn-restore" style="font-size:0.8125rem;color:var(--danger);border-color:rgba(239,68,68,0.3);">
+                  <i class="ph ph-upload-simple"></i> Restore from file
+                </button>
+                <input type="file" id="file-restore" style="display:none;" accept=".json">
               </div>
             </div>
-          </div>
-
-          <!-- PANE: Data -->
-          <div class="pane-content" id="pane-data">
-            <div class="pane-header">
-              <h3>Data & Storage</h3>
-              <p>Back up your database, restore from a file, or import templates.</p>
-            </div>
-            <div class="pane-body">
-              <div class="form-group">
-                <label>Backup & Restore</label>
-                <div style="display:flex;flex-direction:column;gap:0.5rem;">
-                  <button class="btn btn-secondary" id="btn-backup" style="justify-content:flex-start;">
-                    <i class="ph-bold ph-download-simple"></i> Download Backup (JSON)
-                  </button>
-                  <button class="btn btn-secondary" id="btn-restore" style="justify-content:flex-start;color:var(--danger);border-color:rgba(239,68,68,0.3);">
-                    <i class="ph-bold ph-upload-simple"></i> Restore from Backup
-                  </button>
-                  <input type="file" id="file-restore" style="display:none;" accept=".json">
-                </div>
-                <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;display:block;">Restore will overwrite all current data.</small>
-              </div>
-
-              <div class="settings-section-divider"></div>
-
-              <div class="form-group">
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Import Wizard</label>
-                <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0 0 0.75rem;">Load your workspace with industry-specific inventory templates.</p>
-                <button class="btn btn-secondary" id="btn-import-wizard" style="justify-content:flex-start;">
-                  Open Import Wizard
+                <p>Load industry-specific inventory templates.</p>
+              </div>
+              <div class="set-ctrl">
+                <button class="btn btn-secondary" id="btn-import-wizard" style="font-size:0.8125rem;">Open import wizard</button>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Developer Tools</label>
+                <p>Populate workspace with realistic sample data for testing.</p>
+              </div>
+              <div class="set-ctrl" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="btn btn-secondary" id="btn-seed-data" style="font-size:0.8125rem;">Load sample data</button>
+                <button class="btn btn-secondary" id="btn-test-onboarding" style="font-size:0.8125rem;">Preview onboarding</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── Hardware ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>Hardware</h2>
+              <p>Connect scales and printers via Web Serial or Bluetooth. Falls back to simulator mode if no device is found.</p>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Weighing Scale</label>
+                <p>Connects via Web Serial.</p>
+              </div>
+              <div class="set-ctrl">
+                <button class="btn btn-secondary" id="btn-connect-scale" style="font-size:0.8125rem;">
+                  <i class="ph ph-scales"></i> Connect scale
                 </button>
               </div>
-
-              <div class="settings-section-divider"></div>
-
-              <div class="form-group">
-                <label>Developer Tools</label>
-                <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0 0 0.75rem;">Populate your workspace with realistic sample data for testing.</p>
-                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                  <button class="btn btn-secondary" id="btn-seed-data" style="justify-content:flex-start;">
-                    Load Sample Data
-                  </button>
-                  <button class="btn btn-secondary" id="btn-test-onboarding" style="justify-content:flex-start;">
-                    Preview Onboarding
-                  </button>
-                </div>
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Thermal Printer</label>
+                <p>Connects via Bluetooth.</p>
+              </div>
+              <div class="set-ctrl">
+                <button class="btn btn-secondary" id="btn-connect-printer" style="font-size:0.8125rem;">
+                  <i class="ph ph-printer"></i> Connect printer
+                </button>
               </div>
             </div>
-          </div>
+            <div id="hardware-status" class="status-line">Status: Waiting for connection…</div>
+          </section>
 
-          <!-- PANE: Hardware -->
-          <div class="pane-content" id="pane-hardware">
-            <div class="pane-header">
-              <h3>Hardware Integrations</h3>
-              <p>Connect physical devices via Web Serial and Web Bluetooth.</p>
+          <!-- ── Offline P2P Sync ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>Offline P2P Sync</h2>
+              <p>Sync data directly between local devices without internet.</p>
             </div>
-            <div class="pane-body">
-              <p class="text-sm text-muted mb-4">Legacy rugged hardware connects directly to the browser. Fallbacks to simulator mode if physical devices aren't found.</p>
-              
-              <button class="btn btn-secondary w-100 mb-3" id="btn-connect-scale">
-                  <i class="ph-bold ph-scales"></i> Connect Weighing Scale (Serial)
-              </button>
-              <button class="btn btn-secondary w-100 mb-4" id="btn-connect-printer">
-                  <i class="ph-bold ph-printer"></i> Connect Thermal Printer (Bluetooth)
-              </button>
-              
-              <div id="hardware-status" class="status-box">
-                 Status: Waiting for connection...
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Host a session</label>
+                <p>Generate a token for other devices to join.</p>
+              </div>
+              <div class="set-ctrl" style="display:flex;gap:0.5rem;">
+                <input type="text" id="p2p-host-token" readonly placeholder="Click Host →" style="flex:1;">
+                <button class="btn btn-secondary" id="btn-p2p-host" style="font-size:0.8125rem;white-space:nowrap;">Host</button>
               </div>
             </div>
-          </div>
-
-          <!-- PANE: Sync -->
-          <div class="pane-content" id="pane-sync">
-            <div class="pane-header">
-              <h3>Offline P2P Sync</h3>
-              <p>Sync data directly across local devices without internet.</p>
-            </div>
-            <div class="pane-body">
-              <div class="form-group mb-4">
-                  <label>Host a Session (Server)</label>
-                  <p class="text-xs text-muted mb-2">Generate a token for other devices to join.</p>
-                  <div class="flex-input-group">
-                      <input type="text" id="p2p-host-token" readonly placeholder="Click 'Host' ->">
-                      <button class="btn btn-secondary" id="btn-p2p-host"><i class="ph-bold ph-qr-code"></i> Host</button>
-                  </div>
+            <div class="set-row">
+              <div class="set-meta">
+                <label>Join a session</label>
+                <p>Paste the token from the host device.</p>
               </div>
-              
-              <div class="settings-section-divider"></div>
-
-              <div class="form-group mb-4">
-                  <label>Join a Session (Client)</label>
-                  <p class="text-xs text-muted mb-2">Paste the token from the Host device.</p>
-                  <div class="flex-input-group">
-                      <input type="text" id="p2p-join-token" placeholder="Paste Host Token Here">
-                      <button class="btn btn-secondary" id="btn-p2p-join"><i class="ph-bold ph-plug"></i> Join</button>
-                  </div>
-              </div>
-
-              <div id="p2p-status" class="status-box">
-                 Status: Disconnected
+              <div class="set-ctrl" style="display:flex;gap:0.5rem;">
+                <input type="text" id="p2p-join-token" placeholder="Paste host token" style="flex:1;">
+                <button class="btn btn-secondary" id="btn-p2p-join" style="font-size:0.8125rem;white-space:nowrap;">Join</button>
               </div>
             </div>
-          </div>
+            <div id="p2p-status" class="status-line">Disconnected</div>
+          </section>
 
-          <!-- PANE: AI -->
-          <div class="pane-content" id="pane-ai">
-            <div class="pane-header">
-              <h3>AI & Forecasting</h3>
-              <p>Configure the intelligence engine for PocketBooks and SmartShift.</p>
+          <!-- ── AI & Forecasting ── -->
+          <section class="set-section">
+            <div class="set-section-hd">
+              <h2>AI &amp; Forecasting</h2>
+              <p>Configure the intelligence engine for insights and demand forecasting.</p>
             </div>
-            <div class="pane-body">
-              <div class="form-group mb-4">
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Groq API Key</label>
-                <p class="text-xs text-muted mb-2">Powers the Business Advisor. Leave blank for rule-based mode. <br><a href="https://console.groq.com" target="_blank" class="text-accent underline">Get a free key here</a>.</p>
+                <p>Powers the Business Advisor. Leave blank for rule-based mode. <a href="https://console.groq.com" target="_blank" style="color:var(--accent);">Get a free key</a>.</p>
+              </div>
+              <div class="set-ctrl">
                 <input type="password" id="set-groq-key"
                   value="${localStorage.getItem('erp_groq_api_key') || ''}"
                   placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx"
                   autocomplete="off">
               </div>
-              <div class="form-group mb-4">
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Forecast Horizon</label>
-                <select id="set-forecast-horizon">
-                  <option value="7" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '7' ? 'selected' : ''}>7 Days</option>
-                  <option value="14" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '14' ? 'selected' : ''}>14 Days</option>
-                  <option value="30" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '30' ? 'selected' : ''}>30 Days</option>
+                <p>How far ahead the AI predicts stock demand.</p>
+              </div>
+              <div class="set-ctrl">
+                <select id="set-forecast-horizon" style="width:auto;">
+                  <option value="7"  ${(localStorage.getItem('erp_forecast_horizon') || '14') === '7'  ? 'selected' : ''}>7 days</option>
+                  <option value="14" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '14' ? 'selected' : ''}>14 days</option>
+                  <option value="30" ${(localStorage.getItem('erp_forecast_horizon') || '14') === '30' ? 'selected' : ''}>30 days</option>
                 </select>
               </div>
-              <div class="settings-section-divider"></div>
-
-              <div class="form-group">
+            </div>
+            <div class="set-row">
+              <div class="set-meta">
                 <label>Daily Summary Notification</label>
-                <p class="text-xs text-muted mb-2">
-                  Get a browser notification at end of day with today's revenue, sales count, and low-stock alerts.
-                </p>
+                <p>Browser notification at end of day with revenue, sales count, and low-stock alerts.</p>
+              </div>
+              <div class="set-ctrl">
                 <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-                  <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;">
+                  <label style="display:flex;align-items:center;gap:0.375rem;cursor:pointer;font-size:0.875rem;font-weight:normal;">
                     <input type="checkbox" id="set-daily-summary"
                       ${localStorage.getItem('erp_daily_summary_enabled') === 'true' ? 'checked' : ''}
                       style="width:auto;accent-color:var(--accent);">
-                    Enable daily summary
+                    Enable
                   </label>
-                  <div style="display:flex;align-items:center;gap:0.375rem;">
-                    <span style="font-size:0.8125rem;color:var(--text-secondary);">at</span>
+                  <div style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-secondary);">
+                    at
                     <select id="set-summary-hour" style="width:auto;padding:0.25rem 0.5rem;font-size:0.8125rem;">
                       ${[15,16,17,18,19,20].map(h => `<option value="${h}" ${parseInt(localStorage.getItem('erp_daily_summary_hour')||'17')===h?'selected':''}>${h}:00</option>`).join('')}
                     </select>
                   </div>
-                  <button class="btn btn-secondary" id="test-notification-btn" style="font-size:0.75rem;padding:0.3rem 0.75rem;">
-                    Test now
-                  </button>
+                  <button class="btn btn-secondary" id="test-notification-btn" style="font-size:0.75rem;padding:0.3rem 0.625rem;">Test</button>
                 </div>
-                <p id="notif-permission-note" class="text-xs" style="margin-top:0.5rem;color:var(--text-muted);display:none;">
-                  Browser notifications are blocked. Enable them in your browser settings.
+                <p id="notif-permission-note" style="margin:0.375rem 0 0;font-size:0.75rem;color:var(--danger);display:none;">
+                  Notifications are blocked — enable them in browser settings.
                 </p>
               </div>
-
-              <div class="pane-actions">
-                <button class="btn btn-primary" id="save-ai-settings">Save AI Settings</button>
-              </div>
             </div>
-          </div>
+            <div class="set-actions">
+              <button class="btn btn-primary" id="save-ai-settings">Save AI settings</button>
+            </div>
+          </section>
 
-        </div> <!-- /.settings-pane -->
-      </div> <!-- /.settings-layout -->
+        </div>
+      </div>
 
       <!-- Add Team Member Modal -->
       <dialog id="add-team-modal" class="x-modal">
         <div class="x-modal-content">
-           <div class="x-modal-header">
-              <h3>Add Team Member</h3>
-              <button type="button" class="btn-icon" id="close-add-team">&times;</button>
-           </div>
-           <form id="add-team-form" class="x-modal-body">
-             <div class="form-group">
-               <label>Full Name</label>
-               <input type="text" name="ownerName" required placeholder="e.g. Thabo Molefe">
-             </div>
-             <div class="form-group">
-               <label>Username</label>
-               <input type="text" name="username" required placeholder="e.g. thabo">
-             </div>
-             <div class="form-group">
-               <label>Password</label>
-               <input type="password" name="password" required>
-             </div>
-             <div class="form-group">
-               <label>POS PIN (4 digits)</label>
-               <input type="text" name="posPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="e.g. 1234">
-               <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;display:block;">Optional — lets staff switch users at the POS without entering a full password.</small>
-             </div>
-             <div class="form-group">
-               <label>Role</label>
-               <select name="role" required>
-                 <option value="staff">Staff (Limited Access)</option>
-                 <option value="manager">Manager</option>
-                 <option value="admin">Admin / Owner</option>
-               </select>
-             </div>
-             <button type="submit" class="btn btn-primary w-100 mt-2">Create Account</button>
-           </form>
+          <div class="x-modal-header">
+            <h3>Add Team Member</h3>
+            <button type="button" class="btn-icon" id="close-add-team">&times;</button>
+          </div>
+          <form id="add-team-form" class="x-modal-body">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" name="ownerName" required placeholder="e.g. Thabo Molefe">
+            </div>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" name="username" required placeholder="e.g. thabo">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" required>
+            </div>
+            <div class="form-group">
+              <label>POS PIN <span style="font-weight:400;color:var(--text-muted);">(4 digits, optional)</span></label>
+              <input type="text" name="posPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="e.g. 1234">
+              <small style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;display:block;">Lets staff switch at the POS without a full password.</small>
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select name="role" required>
+                <option value="staff">Staff — limited access</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin / Owner</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-2">Create account</button>
+          </form>
         </div>
       </dialog>
 
-      ${this.renderStyles()}
       ${this.renderImportModal()}
     `;
 
@@ -391,12 +393,12 @@ class SettingsUI {
         return;
       }
       listContainer.innerHTML = users.map(u => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; background:var(--bg-secondary); border-radius:6px; margin-bottom:0.5rem">
-          <div>
-            <div style="font-weight:600">${u.username || u.email || 'User'}</div>
-            <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:capitalize">${u.role || 'staff'}</div>
+        <div class="team-row">
+          <div class="team-row-info">
+            <span class="team-row-name">${u.username || u.email || 'User'}</span>
+            <span class="team-row-role">${u.role || 'staff'}</span>
           </div>
-          <button class="btn btn-sm" style="background:transparent;border:1px solid var(--danger);color:var(--danger);padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="alert('Account deletion not enabled in demo mode.')">Remove</button>
+          <button class="btn btn-sm team-row-remove" onclick="alert('Account deletion not enabled in demo mode.')">Remove</button>
         </div>
       `).join('');
     } catch {
@@ -405,38 +407,6 @@ class SettingsUI {
   }
 
   attachHandlers(container) {
-    // --- Navigation Routing (Master-Detail Split Pane) ---
-    const navItems = container.querySelectorAll('.nav-item');
-    const panes = container.querySelectorAll('.pane-content');
-    const layout = container.querySelector('.settings-layout');
-    const mobileBackBtn = container.querySelector('#btn-back-nav');
-    const mobileTitle = container.querySelector('#mobile-pane-title');
-
-    navItems.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Remove active class from all
-        navItems.forEach(n => n.classList.remove('active'));
-        panes.forEach(p => p.classList.remove('active'));
-
-        // Add active class to clicked
-        btn.classList.add('active');
-        const targetId = btn.getAttribute('data-target');
-        container.querySelector(`#${targetId}`).classList.add('active');
-        
-        // Mobile handling
-        if (window.innerWidth <= 768) {
-           layout.classList.add('pane-active');
-           const iconHtml = btn.querySelector('i').outerHTML;
-           const textTitle = btn.textContent.trim();
-           mobileTitle.innerHTML = `${iconHtml} ${textTitle}`;
-        }
-      });
-    });
-
-    mobileBackBtn?.addEventListener('click', () => {
-       layout.classList.remove('pane-active');
-    });
-
     // Image Logo Upload Preview
     const logoInput = container.querySelector('#set-logo');
     let currentLogoBase64 = this.settings.businessLogo || null;
@@ -903,323 +873,201 @@ class SettingsUI {
   renderStyles() {
     return `
       <style>
-        .settings-layout {
-          display: flex;
-          height: calc(100vh - 60px);
-          width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-          overflow-x: hidden;
-          overflow-y: hidden;
-          position: relative;
-        }
-
-        /* --- NAV COLUMN --- */
-        .settings-nav {
-          width: 200px;
-          flex-shrink: 0;
-          border-right: 1px solid var(--border);
-          overflow-y: auto;
-          background: var(--bg-secondary);
-          height: 100%;
-          padding: 0.5rem 0;
-        }
-
-        .nav-header {
-          padding: 0.75rem 1rem 0.5rem;
-          position: sticky;
-          top: 0;
-          background: var(--bg-secondary);
-          z-index: 10;
-        }
-
-        .nav-header h2 {
-          margin: 0;
-          font-size: 0.6875rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.07em;
-          color: var(--text-muted);
-        }
-
-        .nav-menu {
+        /* ── Settings page layout ── */
+        .settings-page {
           display: flex;
           flex-direction: column;
-          padding: 0.25rem 0.5rem 1rem;
-          gap: 1px;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: 0.625rem;
-          width: 100%;
-          padding: 0.5rem 0.75rem;
-          background: transparent;
-          border: none;
-          border-radius: 6px;
-          color: var(--text-secondary);
-          font-size: 0.875rem;
-          text-align: left;
-          cursor: pointer;
-          transition: background 0.12s, color 0.12s;
-          font-family: inherit;
-        }
-        .nav-item i { font-size: 0.9375rem; flex-shrink: 0; }
-
-        .nav-item:hover {
-          background: var(--bg-hover);
-          color: var(--text-primary);
-        }
-
-        .nav-item.active {
-          background: rgba(37,99,235,0.1);
-          color: #93c5fd;
-        }
-        .nav-item.active i { color: #93c5fd; }
-
-        /* --- CONTENT PANE --- */
-        .settings-pane {
-          flex: 1;
-          overflow-y: auto;
-          background: var(--bg-secondary);
-          position: relative;
           height: 100%;
         }
-
-        .pane-content {
-          display: none;
-          padding: 1.75rem 2rem;
-          max-width: 600px;
-          animation: fadeIn 0.2s ease;
+        .settings-scroll {
+          flex: 1;
+          overflow-y: auto;
+          padding: 0 1.5rem 3rem;
+          max-width: 720px;
+          width: 100%;
         }
-        .pane-content.active { display: block; }
 
-        .pane-header {
-          margin-bottom: 1.5rem;
-          padding-bottom: 1.25rem;
+        /* ── Section ── */
+        .set-section {
+          padding: 1.75rem 0;
           border-bottom: 1px solid var(--border);
         }
-        .pane-header h3 {
-          margin: 0 0 0.25rem;
-          font-size: 1.125rem;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-        }
-        .pane-header p {
-          margin: 0;
-          color: var(--text-muted);
-          font-size: 0.8125rem;
-          line-height: 1.5;
-        }
+        .set-section:last-child { border-bottom: none; }
 
-        /* --- FORM ELEMENTS --- */
-        .form-group {
+        .set-section-hd {
           margin-bottom: 1.25rem;
         }
-        .form-group label {
-          display: block;
-          font-size: 0.75rem;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          color: var(--text-muted);
-          margin-bottom: 0.375rem;
+        .set-section-hd h2 {
+          margin: 0 0 0.2rem;
+          font-size: 0.9375rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          color: var(--text-primary);
         }
-        .form-group input, .form-group select {
+        .set-section-hd p {
+          margin: 0;
+          font-size: 0.8125rem;
+          color: var(--text-muted);
+          line-height: 1.4;
+        }
+
+        /* ── Row ── */
+        .set-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 1.5rem;
+          padding: 0.875rem 0;
+          border-top: 1px solid var(--border);
+        }
+        .set-row:first-of-type { border-top: none; }
+
+        .set-meta {
+          flex: 0 0 200px;
+          padding-top: 0.3rem;
+        }
+        .set-meta label {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 0.2rem;
+        }
+        .set-meta p {
+          margin: 0;
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          line-height: 1.45;
+        }
+        .set-meta p a { color: var(--accent); text-decoration: none; }
+        .set-meta p a:hover { text-decoration: underline; }
+
+        .set-ctrl {
+          flex: 1;
+          min-width: 0;
+        }
+        .set-ctrl input,
+        .set-ctrl select {
           width: 100%;
-          padding: 0.5rem 0.75rem;
-          background: rgba(255,255,255,0.04);
+          padding: 0.4375rem 0.625rem;
+          background: var(--bg-elevated, rgba(255,255,255,0.04));
           border: 1px solid var(--border);
-          border-radius: 8px;
+          border-radius: 6px;
           color: var(--text-primary);
           font-family: inherit;
           font-size: 0.875rem;
-          transition: border-color 0.15s;
+          transition: border-color 0.12s;
         }
-        .form-group input:focus, .form-group select:focus {
+        .set-ctrl input:focus,
+        .set-ctrl select:focus {
           outline: none;
           border-color: var(--accent);
-          box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-        }
-        
-        /* Flex Input Row (for buttons next to inputs) */
-        .flex-input-group {
-          display: flex;
-          gap: 0.5rem;
-        }
-        .flex-input-group input {
-          flex: 1;
-        }
-        .flex-input-group .btn {
-          width: auto;
-          white-space: nowrap;
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
         }
 
-        .settings-section-divider {
-          height: 1px;
-          background: var(--border);
-          margin: 1.5rem 0;
-        }
-
-        .pane-actions {
-          margin-top: 1.5rem;
+        /* ── Section save button ── */
+        .set-actions {
           display: flex;
           justify-content: flex-end;
-        }
-        .pane-actions .btn {
-          padding: 0.5rem 1.25rem;
-          font-weight: 600;
+          padding-top: 1rem;
+          margin-top: 0.25rem;
         }
 
-        .status-box {
+        /* ── Team list ── */
+        .team-list { display: flex; flex-direction: column; gap: 1px; }
+        .team-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.625rem 0.75rem;
+          background: var(--bg-elevated, rgba(255,255,255,0.02));
+          border: 1px solid var(--border);
+          border-radius: 6px;
+        }
+        .team-row + .team-row { margin-top: 4px; }
+        .team-row-info { display: flex; flex-direction: column; gap: 2px; }
+        .team-row-name { font-size: 0.875rem; font-weight: 600; }
+        .team-row-role {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          text-transform: capitalize;
+        }
+        .team-row-remove {
+          background: transparent;
+          border: 1px solid rgba(239,68,68,0.35);
+          color: var(--danger);
+          font-size: 0.75rem;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        /* ── Status line ── */
+        .status-line {
           margin-top: 0.75rem;
           font-size: 0.8125rem;
-          padding: 0.625rem 0.875rem;
-          border-radius: 8px;
-          background: rgba(255,255,255,0.02);
+          color: var(--text-muted);
+          padding: 0.5rem 0.75rem;
           border: 1px solid var(--border);
-          text-align: center;
-          color: var(--text-secondary);
+          border-radius: 6px;
+          background: var(--bg-elevated, rgba(255,255,255,0.02));
         }
 
-        /* Custom Slim List (for Team members) */
-        .slim-list {
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .slim-list > div {
-          padding: 1rem;
-          border-bottom: 1px solid var(--border);
-        }
-        .slim-list > div:last-child {
-          border-bottom: none;
-        }
-
-        /* --- MODALS --- */
+        /* ── Modals ── */
         .x-modal {
-          border: none;
-          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
           padding: 0;
           background: var(--bg-secondary);
           color: var(--text-primary);
           box-shadow: 0 20px 50px rgba(0,0,0,0.7);
           width: 400px;
           max-width: 95vw;
-          border: 1px solid rgba(255,255,255,0.1);
         }
         .x-modal::backdrop { background: rgba(0,0,0,0.7); }
         .x-modal-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 1.5rem 1.5rem 1rem;
+          padding: 1.25rem 1.5rem 0.875rem;
+          border-bottom: 1px solid var(--border);
         }
-        .x-modal-header h3 { margin: 0; font-weight: 800; font-size: 1.25rem; }
-        .x-modal-body { padding: 0 1.5rem 1.5rem; }
-
-        /* Utility classes used in pane content */
-        .w-100   { width: 100%; }
-        .mt-2    { margin-top: 0.5rem; }
-        .mt-4    { margin-top: 1rem; }
-        .mb-2    { margin-bottom: 0.5rem; }
-        .mb-3    { margin-bottom: 0.75rem; }
-        .mb-4    { margin-bottom: 1rem; }
-        .text-xs   { font-size: 0.75rem; color: var(--text-muted); }
-        .text-sm   { font-size: 0.8125rem; }
-        .text-muted { color: var(--text-muted); }
-        .text-accent { color: var(--accent); }
-        .underline { text-decoration: underline; }
-        .block     { display: block; }
-        .font-bold { font-weight: 700; }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
-          to   { opacity: 1; transform: translateY(0); }
+        .x-modal-header h3 { margin: 0; font-weight: 700; font-size: 1rem; }
+        .x-modal-body { padding: 1.25rem 1.5rem 1.5rem; }
+        .x-modal-body .form-group { margin-bottom: 1rem; }
+        .x-modal-body .form-group label {
+          display: block;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          margin-bottom: 0.3rem;
+          color: var(--text-primary);
+        }
+        .x-modal-body .form-group input,
+        .x-modal-body .form-group select {
+          width: 100%;
+          padding: 0.4375rem 0.625rem;
+          background: var(--bg-elevated, rgba(255,255,255,0.04));
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          color: var(--text-primary);
+          font-family: inherit;
+          font-size: 0.875rem;
+        }
+        .x-modal-body .form-group input:focus,
+        .x-modal-body .form-group select:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
         }
 
-        @media (max-width: 768px) {
-          .settings-layout {
-            position: relative;
-            overflow: hidden;
-            height: calc(100vh - 120px);
-          }
+        /* Utility */
+        .w-100 { width: 100%; }
+        .mt-2  { margin-top: 0.5rem; }
 
-          .settings-nav {
-            width: 100%;
-            border-right: none;
-            height: 100%;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            background: var(--bg-secondary);
-            padding: 0.5rem 0;
-          }
-
-          /* Show chevron on mobile to indicate drill-down */
-          .nav-item::after {
-            content: '›';
-            margin-left: auto;
-            font-size: 1.125rem;
-            color: var(--text-muted);
-          }
-
-          .settings-pane {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-secondary);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-          }
-
-          /* pane-content scrolls inside */
-          .pane-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem 1.25rem;
-            padding-bottom: 2rem; /* Extra bottom breathing room */
-          }
-
-          /* Slide pane in when active */
-          .settings-layout.pane-active .settings-nav {
-            transform: translateX(-100%);
-            pointer-events: none;
-          }
-          .settings-layout.pane-active .settings-pane {
-            transform: translateX(0);
-          }
-
-          .pane-mobile-header {
-            display: flex !important;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            flex-shrink: 0;
-            background: var(--bg-secondary);
-            z-index: 30;
-          }
-          .pane-mobile-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-          .pane-mobile-header #btn-back-nav {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            border-radius: 8px;
-            padding: 0.4rem 0.6rem;
-            cursor: pointer;
-            font-size: 1rem;
-            flex-shrink: 0;
-          }
-          .pane-header { display: none; }
+        @media (max-width: 640px) {
+          .settings-scroll { padding: 0 1rem 2.5rem; }
+          .set-row { flex-direction: column; gap: 0.5rem; }
+          .set-meta { flex: none; padding-top: 0; }
+          .set-section-hd { flex-direction: column !important; align-items: flex-start !important; gap: 0.5rem; }
         }
       </style>
     `;
