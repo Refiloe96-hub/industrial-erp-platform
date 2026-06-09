@@ -277,48 +277,43 @@ class SmartShiftUI {
     const machines = await this.module.getMachines();
 
     container.innerHTML = `
-      <div class="dashboard-grid">
-        <div class="card stat-card" data-card="running" style="cursor:pointer" title="Click for details">
-          <div class="stat-content">
-            <p class="stat-label">Running Orders</p>
-            <div class="stat-value">${metrics.orders.inProgress}</div>
-          </div>
+      <div class="fin-bar">
+        <div class="fin-bar-item" data-card="running" style="cursor:pointer" title="Click for details">
+          <span class="fin-bar-label">Running orders</span>
+          <span class="fin-bar-value">${metrics.orders.inProgress}</span>
         </div>
-        <div class="card stat-card" data-card="pending" style="cursor:pointer" title="Click for details">
-          <div class="stat-content">
-            <p class="stat-label">Pending Orders</p>
-            <div class="stat-value">${metrics.orders.pending}</div>
-          </div>
+        <div class="fin-bar-sep"></div>
+        <div class="fin-bar-item" data-card="pending" style="cursor:pointer" title="Click for details">
+          <span class="fin-bar-label">Pending</span>
+          <span class="fin-bar-value">${metrics.orders.pending}</span>
         </div>
-        <div class="card stat-card" data-card="utilization" style="cursor:pointer" title="Click for machine breakdown">
-          <div class="stat-content">
-            <p class="stat-label">Machine Utilization</p>
-            <div class="stat-value">${metrics.machineUtilization}%</div>
-          </div>
+        <div class="fin-bar-sep"></div>
+        <div class="fin-bar-item" data-card="utilization" style="cursor:pointer" title="Click for machine breakdown">
+          <span class="fin-bar-label">Utilization</span>
+          <span class="fin-bar-value" style="color:${metrics.machineUtilization >= 70 ? 'var(--success)' : 'var(--warning)'};">${metrics.machineUtilization}%</span>
         </div>
-        <div class="card stat-card" data-card="delivery" style="cursor:pointer" title="Click for details">
-          <div class="stat-content">
-            <p class="stat-label">On-Time Delivery</p>
-            <div class="stat-value">${metrics.onTimeDeliveryRate}%</div>
-          </div>
+        <div class="fin-bar-sep"></div>
+        <div class="fin-bar-item" data-card="delivery" style="cursor:pointer" title="Click for details">
+          <span class="fin-bar-label">On-time delivery</span>
+          <span class="fin-bar-value" style="color:${metrics.onTimeDeliveryRate >= 90 ? 'var(--success)' : 'var(--warning)'};">${metrics.onTimeDeliveryRate}%</span>
         </div>
       </div>
 
-          <div class="card" style="margin-top:1rem;">
-            <div class="card-header"><h3>Insights</h3></div>
-            <div class="card-body"><ul class="insight-list">
-              ${metrics.insights.map(i => `
+      <div class="ss-insights">
+        <div class="ss-insights-hd">Insights</div>
+        <ul class="insight-list">
+          ${metrics.insights.map(i => `
             <li class="insight-item ${i.type}">
               <strong>${i.message}</strong>
               ${i.action ? `<p>${i.action}</p>` : ''}
             </li>
           `).join('')}
-            </ul></div>
-          </div>
+        </ul>
+      </div>
     `;
 
-    // Stat card click handlers
-    container.querySelectorAll('.card[data-card]').forEach(card => {
+    // Stat item click handlers
+    container.querySelectorAll('.fin-bar-item[data-card]').forEach(card => {
       card.addEventListener('click', () => this.showStatPanel(card.dataset.card, metrics, machines));
     });
   }

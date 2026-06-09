@@ -37,35 +37,26 @@ class PocketBooksUI {
                         </div>
                     </header>
 
-                    <!-- Stats Cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card income" data-card="income" style="cursor:pointer" title="Click for breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-trend-up"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Total Income</span>
-                                <span class="stat-value">${sym()}${cashFlow.income.toLocaleString()}</span>
-                            </div>
+                    <!-- Summary strip -->
+                    <div class="fin-bar">
+                        <div class="fin-bar-item" data-card="income" style="cursor:pointer" title="Click for breakdown">
+                            <span class="fin-bar-label">Income</span>
+                            <span class="fin-bar-value" style="color:var(--success);">${sym()}${cashFlow.income.toLocaleString()}</span>
                         </div>
-                        <div class="stat-card expense" data-card="expenses" style="cursor:pointer" title="Click for breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-trend-down"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Total Expenses</span>
-                                <span class="stat-value">${sym()}${cashFlow.expenses.toLocaleString()}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="expenses" style="cursor:pointer" title="Click for breakdown">
+                            <span class="fin-bar-label">Expenses</span>
+                            <span class="fin-bar-value" style="color:var(--danger);">${sym()}${cashFlow.expenses.toLocaleString()}</span>
                         </div>
-                        <div class="stat-card ${cashFlow.netCashFlow >= 0 ? 'positive' : 'negative'}" data-card="net" style="cursor:pointer" title="Click for breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-money"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Net Cash Flow</span>
-                                <span class="stat-value">${cashFlow.netCashFlow >= 0 ? '+' : ''}${sym()}${cashFlow.netCashFlow.toLocaleString()}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="net" style="cursor:pointer" title="Click for breakdown">
+                            <span class="fin-bar-label">Net Cash Flow</span>
+                            <span class="fin-bar-value" style="color:${cashFlow.netCashFlow >= 0 ? 'var(--success)' : 'var(--danger)'};">${cashFlow.netCashFlow >= 0 ? '+' : ''}${sym()}${cashFlow.netCashFlow.toLocaleString()}</span>
                         </div>
-                        <div class="stat-card neutral" data-card="count" style="cursor:pointer" title="Click for breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-list-numbers"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Transactions</span>
-                                <span class="stat-value">${transactions.length}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="count" style="cursor:pointer" title="Click for breakdown">
+                            <span class="fin-bar-label">Transactions</span>
+                            <span class="fin-bar-value">${transactions.length}</span>
                         </div>
                     </div>
 
@@ -574,8 +565,8 @@ class PocketBooksUI {
             if (t) this.showTransactionDetail(t);
         });
 
-        // Stat card click → drill-down panel
-        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+        // Stat item click → drill-down panel
+        this.container.querySelectorAll('.fin-bar-item[data-card]').forEach(card => {
             card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
         });
 

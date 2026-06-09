@@ -90,146 +90,98 @@ class ReportsUI {
           </div>
         </div>
 
-        <!-- Advanced Supply Chain Analytics (Phase 4) -->
-        <div class="section-header">
-            <h3><i class="ph-duotone ph-factory"></i> Supply Chain Health</h3>
-        </div>
-        ${this.renderAdvancedDashboard(advancedStats)}
-
-        <!-- ABC Analysis (Phase 5) -->
-        <div class="section-header">
-            <h3><i class="ph-duotone ph-chart-polar"></i> Product Performance (ABC Analysis)</h3>
-        </div>
-        ${this.renderABCAnalysis(abcData, inventoryMap)}
-
-        <div class="section-header">
-            <h3><i class="ph-duotone ph-briefcase"></i> Financial Overview</h3>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="stats-grid">
-          <div class="stat-card revenue">
-            <div class="stat-icon"><i class="ph-duotone ph-money"></i></div>
-            <div class="stat-content">
-              <p class="stat-label">Total Income</p>
-              <h2 class="stat-value">R ${financialData.totalIncome.toLocaleString()}</h2>
-            </div>
+        <!-- Financial summary strip -->
+        <div class="fin-bar">
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Income</span>
+            <span class="fin-bar-value" style="color:var(--success);">${sym()}${financialData.totalIncome.toLocaleString()}</span>
           </div>
-          
-          <div class="stat-card expenses">
-            <div class="stat-icon"><i class="ph-duotone ph-trend-down"></i></div>
-            <div class="stat-content">
-              <p class="stat-label">Total Expenses</p>
-              <h2 class="stat-value">R ${financialData.totalExpenses.toLocaleString()}</h2>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Expenses</span>
+            <span class="fin-bar-value" style="color:var(--danger);">${sym()}${financialData.totalExpenses.toLocaleString()}</span>
           </div>
-          
-          <div class="stat-card profit ${financialData.profit >= 0 ? 'positive' : 'negative'}">
-            <div class="stat-icon">${financialData.profit >= 0 ? '<i class="ph-duotone ph-trend-up"></i>' : '<i class="ph-duotone ph-trend-down"></i>'}</div>
-            <div class="stat-content">
-              <p class="stat-label">Net Profit</p>
-              <h2 class="stat-value">R ${financialData.profit.toLocaleString()}</h2>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Net Profit</span>
+            <span class="fin-bar-value" style="color:${financialData.profit >= 0 ? 'var(--success)' : 'var(--danger)'};">${sym()}${financialData.profit.toLocaleString()}</span>
           </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
-            <div class="stat-content">
-              <p class="stat-label">Inventory Value</p>
-              <h2 class="stat-value">R ${inventoryData.totalValue.toLocaleString()}</h2>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Stock Value</span>
+            <span class="fin-bar-value">${sym()}${inventoryData.totalValue.toLocaleString()}</span>
+          </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">SKUs</span>
+            <span class="fin-bar-value">${inventoryData.totalItems}</span>
+          </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Low stock</span>
+            <span class="fin-bar-value" style="color:${inventoryData.lowStockItems > 0 ? 'var(--warning)' : 'inherit'};">${inventoryData.lowStockItems}</span>
+          </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Out of stock</span>
+            <span class="fin-bar-value" style="color:${inventoryData.outOfStock > 0 ? 'var(--danger)' : 'inherit'};">${inventoryData.outOfStock}</span>
           </div>
         </div>
 
-        <!-- Detailed Reports -->
-        <div class="reports-grid">
-          <!-- Income by Category -->
-          <div class="card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-chart-bar"></i> Income by Category</h3>
-            </div>
-            <div class="card-body">
-              ${Object.keys(financialData.incomeByCategory).length > 0 ? `
-                <div class="table-container">
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>%</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${Object.entries(financialData.incomeByCategory).map(([cat, amt]) => `
-                        <tr>
-                          <td>${cat}</td>
-                          <td>R ${amt.toLocaleString()}</td>
-                          <td>${((amt / financialData.totalIncome) * 100).toFixed(1)}%</td>
-                        </tr>
-                      `).join('')}
-                    </tbody>
-                  </table>
-                </div>
-              ` : '<p class="text-muted">No income recorded in this period</p>'}
-            </div>
+        <!-- Supply Chain KPIs -->
+        <div class="rpt-section">
+          <div class="rpt-section-hd">Supply Chain</div>
+          ${this.renderAdvancedDashboard(advancedStats)}
+        </div>
+
+        <!-- ABC Analysis -->
+        <div class="rpt-section">
+          <div class="rpt-section-hd">Product Performance (ABC Analysis)</div>
+          ${this.renderABCAnalysis(abcData, inventoryMap)}
+        </div>
+
+        <!-- Breakdown tables -->
+        <div class="rpt-grid">
+          <div class="rpt-block">
+            <div class="rpt-block-hd">Income by Category</div>
+            ${Object.keys(financialData.incomeByCategory).length > 0 ? `
+              <table class="data-table">
+                <thead><tr><th>Category</th><th>Amount</th><th>Share</th></tr></thead>
+                <tbody>
+                  ${Object.entries(financialData.incomeByCategory).map(([cat, amt]) => `
+                    <tr>
+                      <td>${cat}</td>
+                      <td>${sym()}${amt.toLocaleString()}</td>
+                      <td>
+                        <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${((amt/financialData.totalIncome)*100).toFixed(0)}%;background:var(--success);"></div></div>
+                        <span class="tbl-pct">${((amt/financialData.totalIncome)*100).toFixed(1)}%</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : '<p class="rpt-empty">No income recorded in this period</p>'}
           </div>
 
-          <!-- Expenses by Category -->
-          <div class="card">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-chart-bar"></i> Expenses by Category</h3>
-            </div>
-            <div class="card-body">
-              ${Object.keys(financialData.expensesByCategory).length > 0 ? `
-                <div class="table-container">
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>%</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${Object.entries(financialData.expensesByCategory).map(([cat, amt]) => `
-                        <tr>
-                          <td>${cat}</td>
-                          <td>R ${amt.toLocaleString()}</td>
-                          <td>${((amt / financialData.totalExpenses) * 100).toFixed(1)}%</td>
-                        </tr>
-                      `).join('')}
-                    </tbody>
-                  </table>
-                </div>
-              ` : '<p class="text-muted">No expenses recorded in this period</p>'}
-            </div>
-          </div>
-
-          <!-- Inventory Summary -->
-          <div class="card full-width">
-            <div class="card-header">
-              <h3><i class="ph-duotone ph-package"></i> Inventory Summary</h3>
-            </div>
-            <div class="card-body">
-              <div class="inventory-summary">
-                <div class="summary-item">
-                  <span class="label">Total Items:</span>
-                  <span class="value">${inventoryData.totalItems}</span>
-                </div>
-                <div class="summary-item">
-                  <span class="label">Low Stock Items:</span>
-                  <span class="value warning">${inventoryData.lowStockItems}</span>
-                </div>
-                <div class="summary-item">
-                  <span class="label">Out of Stock:</span>
-                  <span class="value danger">${inventoryData.outOfStock}</span>
-                </div>
-                <div class="summary-item">
-                  <span class="label">Categories:</span>
-                  <span class="value">${inventoryData.categories}</span>
-                </div>
-              </div>
-            </div>
+          <div class="rpt-block">
+            <div class="rpt-block-hd">Expenses by Category</div>
+            ${Object.keys(financialData.expensesByCategory).length > 0 ? `
+              <table class="data-table">
+                <thead><tr><th>Category</th><th>Amount</th><th>Share</th></tr></thead>
+                <tbody>
+                  ${Object.entries(financialData.expensesByCategory).map(([cat, amt]) => `
+                    <tr>
+                      <td>${cat}</td>
+                      <td>${sym()}${amt.toLocaleString()}</td>
+                      <td>
+                        <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${((amt/financialData.totalExpenses)*100).toFixed(0)}%;background:var(--danger);"></div></div>
+                        <span class="tbl-pct">${((amt/financialData.totalExpenses)*100).toFixed(1)}%</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : '<p class="rpt-empty">No expenses recorded in this period</p>'}
           </div>
         </div>
       </div>
@@ -255,25 +207,24 @@ class ReportsUI {
           <button class="tab-btn active" data-view="traceability"><i class="ph-duotone ph-tree-structure"></i> QC Traceability</button>
         </div>
 
-        <div class="card" style="margin-bottom: 2rem;">
-          <div class="card-header">
-            <h3><i class="ph-duotone ph-magnifying-glass"></i> Product Genealogy Search</h3>
-          </div>
-          <div class="card-body" style="display: flex; gap: 1rem; align-items: flex-end;">
-            <div style="flex: 1;">
-              <label style="display:block; margin-bottom:0.5rem; color:var(--text-secondary); font-size:0.875rem;">Production Order ID</label>
-              <input type="number" id="trace-order-id" class="form-input" placeholder="Enter Order ID (e.g., 1)" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;" />
+        <div class="rpt-block" style="margin-bottom:1.5rem;">
+          <div class="rpt-block-hd">Product Genealogy Search</div>
+          <div style="display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label style="display:block;margin-bottom:0.375rem;font-size:0.8125rem;color:var(--text-muted);">Production Order ID</label>
+              <input type="number" id="trace-order-id" placeholder="e.g. 1"
+                style="width:100%;padding:0.4375rem 0.625rem;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated,rgba(255,255,255,0.04));color:var(--text-primary);font-size:0.875rem;font-family:inherit;" />
             </div>
-            <button id="btn-trace" class="btn btn-primary" style="height: 40px; padding: 0 1.5rem;"><i class="ph-bold ph-arrow-right"></i> Trace History</button>
+            <button id="btn-trace" class="btn btn-primary" style="white-space:nowrap;">Trace history</button>
           </div>
         </div>
 
         <div id="trace-results">
-            <!-- Results injected here -->
-            <div class="empty-state" style="text-align:center; padding: 3rem; color: var(--text-secondary);">
-                <i class="ph-duotone ph-barcode" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <p>Enter an Order ID to trace its manufacturing history.</p>
-            </div>
+          <div class="empty-state">
+            <i class="ph-duotone ph-barcode"></i>
+            <h3>No trace yet</h3>
+            <p>Enter a production order ID above to trace its manufacturing history.</p>
+          </div>
         </div>
 
       </div>
@@ -334,56 +285,36 @@ class ReportsUI {
     }
 
     return `
-      <div class="card">
-        <div class="card-header" style="background:var(--bg-secondary); border-bottom:1px solid var(--border); padding: 1rem;">
-          <h2 style="margin:0; font-size:1.25rem;">Traceability Passport</h2>
-          <div style="display: flex; gap: 2rem; margin-top: 1rem;">
-            <div>
-              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Product</span>
-              <strong>${trace.product} (Order #${trace.orderNumber})</strong>
-            </div>
-            <div>
-              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Total QA Approved</span>
-              <strong>${trace.quantityProduced} units</strong>
-            </div>
-            <div>
-              <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Total Labor Time</span>
-              <strong>${trace.totalLaborHours.toFixed(2)} hrs</strong>
-            </div>
-          </div>
+      <div class="rpt-block">
+        <div class="rpt-block-hd">Traceability Passport</div>
+        <div class="trace-meta">
+          <span><span class="trace-meta-l">Product</span> <strong>${trace.product} — Order #${trace.orderNumber}</strong></span>
+          <span><span class="trace-meta-l">QA Approved</span> <strong>${trace.quantityProduced} units</strong></span>
+          <span><span class="trace-meta-l">Total Labor</span> <strong>${trace.totalLaborHours.toFixed(2)} hrs</strong></span>
         </div>
-        <div class="card-body" style="padding: 2rem;">
-          <div class="timeline" style="position:relative; margin-left: 1rem; border-left: 2px solid var(--border); padding-left: 2rem;">
-            ${trace.shifts.map((s, idx) => `
-              <div class="timeline-item" style="position:relative; margin-bottom: 2rem;">
-                <div style="position:absolute; left: -2.6rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary-color); border: 4px solid var(--bg-primary);"></div>
-                
-                <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
-                  <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <h4 style="margin:0;"><i class="ph-fill ph-gear"></i> ${s.machineEmployed}</h4>
-                    <span style="font-size:0.8rem; color:var(--text-secondary);">${s.date}</span>
-                  </div>
-                  <p style="margin:0 0 1rem 0; font-size:0.9rem;">Operated by <strong>${s.workerEmployed}</strong> for ${s.durationHours} hrs. Produced ${s.outputGenerated} units.</p>
-                  
-                  <div style="background: var(--bg-primary); padding: 1rem; border-radius: 6px; border: 1px dashed var(--border);">
-                    <h5 style="margin: 0 0 0.5rem 0; font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Raw Materials Consumed</h5>
-                    ${s.rawMaterialBatches && s.rawMaterialBatches.length > 0 ? `
-                      <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                        ${s.rawMaterialBatches.map(b => `<span class="badge" style="background:var(--bg-secondary); font-family:monospace; border:1px solid var(--border);">${b}</span>`).join('')}
-                      </div>
-                    ` : `
-                      <span class="text-muted" style="font-size:0.8rem;">No specific batch numbers logged for this shift.</span>
-                    `}
-                  </div>
+        <div class="trace-timeline">
+          ${trace.shifts.map(s => `
+            <div class="trace-step">
+              <div class="trace-dot"></div>
+              <div class="trace-step-body">
+                <div class="trace-step-hd">
+                  <span class="trace-step-title">${s.machineEmployed}</span>
+                  <span class="trace-step-date">${s.date}</span>
+                </div>
+                <p class="trace-step-desc">Operated by <strong>${s.workerEmployed}</strong> · ${s.durationHours} hrs · ${s.outputGenerated} units</p>
+                <div class="trace-batches">
+                  <span class="trace-batches-l">Materials</span>
+                  ${s.rawMaterialBatches && s.rawMaterialBatches.length > 0
+                    ? s.rawMaterialBatches.map(b => `<code class="trace-batch">${b}</code>`).join('')
+                    : '<span style="font-size:0.75rem;color:var(--text-muted);">No batch numbers logged</span>'
+                  }
                 </div>
               </div>
-            `).join('')}
-            
-            <div class="timeline-item" style="position:relative;">
-                <div style="position:absolute; left: -2.6rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--success); border: 4px solid var(--bg-primary);"></div>
-                <h3 style="margin:0; color:var(--success);"><i class="ph-fill ph-check-circle"></i> Manufacturing Complete</h3>
             </div>
-            
+          `).join('')}
+          <div class="trace-step trace-step-final">
+            <div class="trace-dot trace-dot-ok"></div>
+            <span style="font-size:0.875rem;font-weight:600;color:var(--success);">Manufacturing complete</span>
           </div>
         </div>
       </div>
@@ -731,61 +662,45 @@ class ReportsUI {
     };
 
     return `
-      <div class="reports-grid mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h3><i class="ph-duotone ph-trophy"></i> Winning Products (Class A)</h3>
-                <span class="badge success">${classified.a.length} Items (80% Revenue)</span>
-            </div>
-            <div class="card-body">
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead><tr><th>Product</th><th>Revenue</th><th>Share</th></tr></thead>
-                        <tbody>
-                            ${(() => {
-                              const totalRev = classified.a.reduce((s,i)=>s+i.rev,0) || 1;
-                              return classified.a.slice(0, 5).map(i => `
-                                <tr>
-                                    <td>${getProductName(i.sku)}</td>
-                                    <td>${sym()}${i.rev.toLocaleString()}</td>
-                                    <td style="width:80px;">
-                                      <div style="background:var(--border);border-radius:999px;height:6px;overflow:hidden;">
-                                        <div style="height:100%;background:var(--success);border-radius:999px;width:${Math.round(i.rev/totalRev*100)}%;"></div>
-                                      </div>
-                                      <span style="font-size:0.7rem;color:var(--text-muted);">${Math.round(i.rev/totalRev*100)}%</span>
-                                    </td>
-                                </tr>
-                              `).join('');
-                            })()}
-                            ${classified.a.length === 0 ? '<tr><td colspan="3" class="text-muted">No Class A items yet</td></tr>' : ''}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div class="rpt-grid">
+        <div class="rpt-block">
+          <div class="rpt-block-hd">Top performers — Class A <span class="rpt-badge rpt-badge-ok">${classified.a.length} items · 80% revenue</span></div>
+          <table class="data-table">
+            <thead><tr><th>Product</th><th>Revenue</th><th>Share</th></tr></thead>
+            <tbody>
+              ${(() => {
+                const totalRev = classified.a.reduce((s,i)=>s+i.rev,0) || 1;
+                return classified.a.slice(0,5).map(i => `
+                  <tr>
+                    <td>${getProductName(i.sku)}</td>
+                    <td>${sym()}${i.rev.toLocaleString()}</td>
+                    <td>
+                      <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${Math.round(i.rev/totalRev*100)}%;background:var(--success);"></div></div>
+                      <span class="tbl-pct">${Math.round(i.rev/totalRev*100)}%</span>
+                    </td>
+                  </tr>
+                `).join('');
+              })()}
+              ${classified.a.length === 0 ? '<tr><td colspan="3" class="rpt-empty">No Class A items yet</td></tr>' : ''}
+            </tbody>
+          </table>
         </div>
 
-         <div class="card">
-            <div class="card-header">
-                <h3><i class="ph-duotone ph-warning-circle"></i> Slow Movers (Class C)</h3>
-                 <span class="badge danger">${classified.c.length} Items (Bottom 5%)</span>
-            </div>
-            <div class="card-body">
-                 <div class="table-container">
-                    <table class="data-table">
-                        <thead><tr><th>Product</th><th>Revenue</th><th>Action</th></tr></thead>
-                        <tbody>
-                            ${classified.c.slice(0, 5).map(i => `
-                                <tr>
-                                    <td>${getProductName(i.sku)}</td>
-                                    <td>${sym()}${i.rev.toLocaleString()}</td>
-                                    <td><span style="font-size:0.75rem;color:var(--danger);font-weight:600;">Consider clearance</span></td>
-                                </tr>
-                            `).join('')}
-                             ${classified.c.length === 0 ? '<tr><td colspan="3" class="text-muted">No Class C items yet</td></tr>' : ''}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="rpt-block">
+          <div class="rpt-block-hd">Slow movers — Class C <span class="rpt-badge rpt-badge-warn">${classified.c.length} items · bottom 5%</span></div>
+          <table class="data-table">
+            <thead><tr><th>Product</th><th>Revenue</th><th>Action</th></tr></thead>
+            <tbody>
+              ${classified.c.slice(0,5).map(i => `
+                <tr>
+                  <td>${getProductName(i.sku)}</td>
+                  <td>${sym()}${i.rev.toLocaleString()}</td>
+                  <td style="font-size:0.75rem;color:var(--danger);font-weight:600;">Consider clearance</td>
+                </tr>
+              `).join('')}
+              ${classified.c.length === 0 ? '<tr><td colspan="3" class="rpt-empty">No Class C items yet</td></tr>' : ''}
+            </tbody>
+          </table>
         </div>
       </div>
     `;
@@ -800,52 +715,38 @@ class ReportsUI {
     const roiColor = stats.roi >= 100 ? '#10b981' : stats.roi >= 0 ? '#f59e0b' : '#ef4444';
 
     return `
-      <div class="advanced-stats-grid">
-        <!-- ROI Widget -->
-        <div class="kpi-card" data-kpi="roi" style="cursor:pointer" title="Click for details">
-           <div class="kpi-header">
-              <span><i class="ph-duotone ph-rocket"></i> ROI</span>
-              <span class="info-icon" title="Return on Investment = (Margin / Inventory Value)"><i class="ph-duotone ph-info"></i></span>
-           </div>
-           <div class="kpi-body">
-             <div class="kpi-value" style="color: ${roiColor}">${stats.roi.toFixed(1)}%</div>
-             <p class="kpi-sub">Potential Return</p>
-             <div class="progress-bar-bg">
-               <div class="progress-bar-fill" style="width: ${Math.min(stats.roi, 100)}%; background: ${roiColor}"></div>
-             </div>
-           </div>
-        </div>
-
-        <!-- Service Level Widget -->
-        <div class="kpi-card" data-kpi="serviceLevel" style="cursor:pointer" title="Click for details">
-           <div class="kpi-header">
-              <span><i class="ph-duotone ph-target"></i> Service Level</span>
-              <span class="info-icon" title="Percentage of items in stock"><i class="ph-duotone ph-info"></i></span>
-           </div>
-           <div class="kpi-body">
-             <div class="kpi-value" style="color: ${slColor}">${stats.serviceLevel.toFixed(1)}%</div>
-             <p class="kpi-sub">Availability</p>
-             <div class="progress-bar-bg">
-               <div class="progress-bar-fill" style="width: ${stats.serviceLevel}%; background: ${slColor}"></div>
-             </div>
-           </div>
-        </div>
-
-        <!-- Stock Turns Widget -->
-        <div class="kpi-card" data-kpi="stockTurns" style="cursor:pointer" title="Click for details">
-           <div class="kpi-header">
-              <span><i class="ph-duotone ph-arrows-clockwise"></i> Stock Turns</span>
-              <span class="info-icon" title="How many times you sell out your stock per year"><i class="ph-duotone ph-info"></i></span>
-           </div>
-           <div class="kpi-body">
-             <div class="kpi-value">${stats.stockTurns.toFixed(1)}x</div>
-             <p class="kpi-sub">Per Year</p>
-             <div class="stat-badge">
-               High Speed Flow
-             </div>
-           </div>
-        </div>
-      </div>
+      <table class="kpi-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th style="width:40%;">Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="kpi-row" data-kpi="roi" style="cursor:pointer;" title="Click for details">
+            <td>ROI</td>
+            <td style="font-weight:700;color:${roiColor};">${stats.roi.toFixed(1)}%</td>
+            <td>
+              <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${Math.min(stats.roi,100)}%;background:${roiColor};"></div></div>
+            </td>
+          </tr>
+          <tr class="kpi-row" data-kpi="serviceLevel" style="cursor:pointer;" title="Click for details">
+            <td>Service Level</td>
+            <td style="font-weight:700;color:${slColor};">${stats.serviceLevel.toFixed(1)}%</td>
+            <td>
+              <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${stats.serviceLevel}%;background:${slColor};"></div></div>
+            </td>
+          </tr>
+          <tr class="kpi-row" data-kpi="stockTurns" style="cursor:pointer;" title="Click for details">
+            <td>Stock Turns</td>
+            <td style="font-weight:700;">${stats.stockTurns.toFixed(1)}×/yr</td>
+            <td>
+              <div class="tbl-bar-wrap"><div class="tbl-bar-fill" style="width:${Math.min(stats.stockTurns/12*100,100)}%;background:var(--accent);"></div></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     `;
   }
 
@@ -934,9 +835,9 @@ class ReportsUI {
         }
       };
 
-      document.querySelectorAll('.kpi-card[data-kpi]').forEach(card => {
-        card.addEventListener('click', () => {
-          const p = panels[card.dataset.kpi];
+      document.querySelectorAll('.kpi-row[data-kpi]').forEach(row => {
+        row.addEventListener('click', () => {
+          const p = panels[row.dataset.kpi];
           if (p) showDetailPanel(p);
         });
       });
@@ -956,251 +857,222 @@ class ReportsUI {
   renderStyles() {
     return `
       <style>
-        .reports-container {
-          padding: 1rem;
-        }
+        .reports-container { padding: 0; }
 
+        /* Controls bar */
         .report-controls {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
+          padding: 0.625rem 1.5rem;
+          border-bottom: 1px solid var(--border);
           flex-wrap: wrap;
-          gap: 1rem;
+          gap: 0.75rem;
+          background: var(--bg-secondary);
         }
-
-        .filter-controls {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
+        .date-range-selector { display: flex; gap: 0.375rem; }
+        .date-range-selector .btn { font-size: 0.8125rem; padding: 0.3rem 0.75rem; }
+        .filter-controls { display: flex; gap: 0.5rem; align-items: center; }
         .form-select {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            min-width: 120px;
+          padding: 0.375rem 0.625rem;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          background: var(--bg-elevated, rgba(255,255,255,0.04));
+          color: var(--text-primary);
+          font-size: 0.8125rem;
+          font-family: inherit;
+          min-width: 120px;
         }
 
-        .section-header {
-            margin: 1.5rem 0 1rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-        }
-        
-        .section-header h3 {
-            margin: 0;
-            color: var(--text-primary);
-            font-size: 1.1rem;
-        }
-
-        /* Advanced Stats Grid */
-        .advanced-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .kpi-card {
-            background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border);
-        }
-
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
-            line-height: 1;
-        }
-
-        .kpi-sub {
-            margin: 0 0 1rem 0;
-            font-size: 0.875rem;
-            color: #9ca3af;
-        }
-
-        .progress-bar-bg {
-            height: 8px;
-            background: var(--bg-secondary);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .stat-badge {
-            display: inline-block;
-            padding: 0.2rem 0.625rem;
-            background: rgba(37,99,235,0.12);
-            color: #60a5fa;
-            border: 1px solid rgba(37,99,235,0.2);
-            border-radius: 4px;
-            font-size: 0.6875rem;
-            font-weight: 600;
-        }
-
-        .date-range-selector {
+        /* Financial summary strip */
+        .fin-bar {
           display: flex;
-          gap: 0.5rem;
+          align-items: stretch;
+          border-bottom: 1px solid var(--border);
+          background: var(--bg-secondary);
+          overflow-x: auto;
         }
-
-
-        .stat-card.revenue {
-          border-left: 4px solid #16a34a;
-        }
-
-        .stat-card.expenses {
-          border-left: 4px solid #dc2626;
-        }
-
-        .stat-card.profit.positive {
-          border-left: 4px solid #2563eb;
-        }
-
-        .stat-card.profit.negative {
-          border-left: 4px solid #f59e0b;
-        }
-
-        .stat-card.revenue .stat-label,
-        .stat-card.expenses .stat-label,
-        .stat-card.profit .stat-label {
-          color: var(--text-secondary);
-        }
-
-        .reports-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
-          gap: 1.5rem;
-        }
-
-        .full-width {
-          grid-column: 1 / -1;
-        }
-
-        .inventory-summary {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-          gap: 1rem;
-        }
-
-        .summary-item {
+        .fin-bar-item {
           display: flex;
           flex-direction: column;
-          padding: 1rem;
-          background: var(--bg-secondary);
-          border-radius: 8px;
+          padding: 0.875rem 1.25rem;
+          gap: 2px;
+          flex: 1;
+          min-width: 100px;
         }
-
-        .summary-item .label {
-          font-size: 0.8125rem;
-          color: var(--text-secondary);
+        .fin-bar-label {
+          font-size: 0.6875rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--text-muted);
         }
-
-        .summary-item .value {
-          font-size: 1.5rem;
+        .fin-bar-value {
+          font-size: 1rem;
           font-weight: 700;
-        }
-
-        .summary-item .value.warning {
-          color: #f59e0b;
-        }
-
-        .summary-item .value.danger {
-          color: #ef4444;
-        }
-
-        .summary-item .value.danger {
-          color: #ef4444;
-        }
-
-        /* Ensure tables in reports are transparent to pick up card background */
-        .reports-grid table {
-          background: transparent !important;
-        }
-        
-        .reports-grid tr {
-          background: transparent;
+          letter-spacing: -0.01em;
           color: var(--text-primary);
         }
-        
-        .reports-grid td {
-          border-bottom: 1px solid var(--border);
+        .fin-bar-sep {
+          width: 1px;
+          background: var(--border);
+          align-self: stretch;
+          flex-shrink: 0;
         }
 
-        @media (max-width: 768px) {
-          /* All grids: single column on mobile */
-          .reports-grid,
-          .advanced-stats-grid,
-          .stats-grid {
-            grid-template-columns: 1fr !important;
-            gap: 0.75rem !important;
-          }
+        /* Section wrappers */
+        .rpt-section {
+          padding: 1.25rem 1.5rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .rpt-section-hd {
+          font-size: 0.6875rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: var(--text-muted);
+          margin-bottom: 0.875rem;
+        }
 
-          /* Inventory summary: 2-col on mobile is fine */
-          .inventory-summary {
-            grid-template-columns: 1fr 1fr !important;
-            gap: 0.5rem !important;
-          }
+        /* Block: flat section with a heading above a table */
+        .rpt-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+          gap: 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .rpt-block {
+          padding: 1.25rem 1.5rem;
+          border-right: 1px solid var(--border);
+        }
+        .rpt-block:last-child { border-right: none; }
+        .rpt-block-hd {
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 0.75rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .rpt-empty { font-size: 0.8125rem; color: var(--text-muted); margin: 0; padding: 0.5rem 0; }
 
-          /* Controls: stack vertically */
-          .report-controls {
-            flex-direction: column !important;
-            align-items: stretch !important;
-          }
+        /* Badges inside headings */
+        .rpt-badge {
+          font-size: 0.6875rem;
+          font-weight: 500;
+          padding: 0.15rem 0.5rem;
+          border-radius: 4px;
+        }
+        .rpt-badge-ok   { background: rgba(16,185,129,0.12); color: #34d399; }
+        .rpt-badge-warn { background: rgba(239,68,68,0.1);   color: #f87171; }
 
-          .filter-controls {
-            flex-direction: column !important;
-            width: 100% !important;
-          }
+        /* KPI table (Supply Chain) */
+        .kpi-table { width: 100%; border-collapse: collapse; }
+        .kpi-table th {
+          font-size: 0.6875rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--text-muted);
+          padding: 0 0 0.5rem;
+          text-align: left;
+          border-bottom: 1px solid var(--border);
+        }
+        .kpi-row td {
+          padding: 0.625rem 0;
+          border-bottom: 1px solid var(--border);
+          font-size: 0.875rem;
+          vertical-align: middle;
+        }
+        .kpi-row:last-child td { border-bottom: none; }
+        .kpi-row:hover td { background: rgba(255,255,255,0.02); }
 
-          .filter-controls .form-select,
-          .export-controls .form-select {
-            width: 100% !important;
-          }
+        /* Inline bar used in tables */
+        .tbl-bar-wrap {
+          height: 5px;
+          background: var(--border);
+          border-radius: 3px;
+          overflow: hidden;
+          margin-bottom: 2px;
+        }
+        .tbl-bar-fill {
+          height: 100%;
+          border-radius: 3px;
+          transition: width 0.4s ease;
+        }
+        .tbl-pct { font-size: 0.6875rem; color: var(--text-muted); }
 
-          .date-range-selector {
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-          }
+        /* Traceability timeline */
+        .trace-meta {
+          display: flex;
+          gap: 1.5rem;
+          flex-wrap: wrap;
+          font-size: 0.875rem;
+          margin-bottom: 1.25rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .trace-meta-l { color: var(--text-muted); font-size: 0.75rem; display: block; }
 
-          .date-range-selector button {
-            flex: 1;
-            min-width: 0;
-            font-size: 0.8rem;
-            padding: 0.4rem 0.5rem;
-            white-space: nowrap;
-          }
+        .trace-timeline {
+          position: relative;
+          margin-left: 0.75rem;
+          border-left: 2px solid var(--border);
+          padding-left: 1.5rem;
+        }
+        .trace-step { position: relative; margin-bottom: 1.5rem; }
+        .trace-step:last-child { margin-bottom: 0; }
+        .trace-dot {
+          position: absolute;
+          left: -1.9rem;
+          top: 3px;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--accent);
+          border: 2px solid var(--bg-primary);
+        }
+        .trace-dot-ok { background: var(--success); }
+        .trace-step-body {
+          background: var(--bg-elevated, rgba(255,255,255,0.03));
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 0.75rem 1rem;
+        }
+        .trace-step-hd {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 0.25rem;
+        }
+        .trace-step-title { font-size: 0.875rem; font-weight: 700; }
+        .trace-step-date  { font-size: 0.75rem; color: var(--text-muted); }
+        .trace-step-desc  { margin: 0 0 0.625rem; font-size: 0.8125rem; color: var(--text-secondary); }
+        .trace-batches    { display: flex; gap: 0.375rem; flex-wrap: wrap; align-items: center; }
+        .trace-batches-l  { font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.25rem; }
+        .trace-batch {
+          font-family: monospace;
+          font-size: 0.75rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 3px;
+          padding: 0.1rem 0.375rem;
+          color: var(--text-primary);
+        }
+        .trace-step-final { display: flex; align-items: center; gap: 0.5rem; }
 
-          /* ABC analysis cards: full width */
-          .reports-grid.mb-4 {
-            grid-template-columns: 1fr !important;
-          }
-
-          /* KPI value smaller on mobile */
-          .kpi-value {
-            font-size: 1.75rem !important;
-          }
+        @media (max-width: 640px) {
+          .report-controls { flex-direction: column; align-items: stretch; }
+          .filter-controls  { flex-direction: column; }
+          .date-range-selector { flex-wrap: wrap; }
+          .date-range-selector .btn { flex: 1; }
+          .fin-bar { flex-wrap: wrap; }
+          .fin-bar-sep { display: none; }
+          .fin-bar-item { flex: 0 0 calc(50% - 1px); border-bottom: 1px solid var(--border); }
+          .rpt-grid { grid-template-columns: 1fr; }
+          .rpt-block { border-right: none; border-bottom: 1px solid var(--border); }
+          .rpt-block:last-child { border-bottom: none; }
         }
       </style>
     `;

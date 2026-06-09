@@ -51,35 +51,26 @@ class PoolStockUI {
                         <button class="ps-tab" data-tab="forecast"><i class="ph ph-chart-line-up"></i> Forecast</button>
                     </div>
 
-                    <!-- Stats Cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card primary" data-card="items" style="cursor:pointer" title="Click for breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Total Items</span>
-                                <span class="stat-value">${totalItems}</span>
-                            </div>
+                    <!-- Summary strip -->
+                    <div class="fin-bar">
+                        <div class="fin-bar-item" data-card="items" style="cursor:pointer" title="Click for breakdown">
+                            <span class="fin-bar-label">SKUs</span>
+                            <span class="fin-bar-value">${totalItems}</span>
                         </div>
-                        <div class="stat-card warning" data-card="low" style="cursor:pointer" title="Click to see low stock items">
-                            <div class="stat-icon"><i class="ph-duotone ph-warning-circle"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Low Stock</span>
-                                <span class="stat-value">${lowStockItems.length}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="low" style="cursor:pointer" title="Click to see low stock items">
+                            <span class="fin-bar-label">Low stock</span>
+                            <span class="fin-bar-value" style="color:${lowStockItems.length > 0 ? 'var(--warning)' : 'inherit'};">${lowStockItems.length}</span>
                         </div>
-                        <div class="stat-card danger" data-card="out" style="cursor:pointer" title="Click to see out of stock items">
-                            <div class="stat-icon"><i class="ph-duotone ph-prohibit"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Out of Stock</span>
-                                <span class="stat-value">${outOfStock.length}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="out" style="cursor:pointer" title="Click to see out of stock items">
+                            <span class="fin-bar-label">Out of stock</span>
+                            <span class="fin-bar-value" style="color:${outOfStock.length > 0 ? 'var(--danger)' : 'inherit'};">${outOfStock.length}</span>
                         </div>
-                        <div class="stat-card success" data-card="value" style="cursor:pointer" title="Click for value breakdown">
-                            <div class="stat-icon"><i class="ph-duotone ph-currency-dollar"></i></div>
-                            <div class="stat-content">
-                                <span class="stat-label">Inventory Value</span>
-                                <span class="stat-value">R ${totalValue.toLocaleString()}</span>
-                            </div>
+                        <div class="fin-bar-sep"></div>
+                        <div class="fin-bar-item" data-card="value" style="cursor:pointer" title="Click for value breakdown">
+                            <span class="fin-bar-label">Inventory value</span>
+                            <span class="fin-bar-value">R ${totalValue.toLocaleString()}</span>
                         </div>
                     </div>
 
@@ -565,8 +556,8 @@ class PoolStockUI {
             if (item) this.showItemDetail(item);
         });
 
-        // Stat card click → drill-down panel
-        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+        // Stat item click → drill-down panel
+        this.container.querySelectorAll('.fin-bar-item[data-card]').forEach(card => {
             card.addEventListener('click', () => this.showStatPanel(card.dataset.card));
         });
 

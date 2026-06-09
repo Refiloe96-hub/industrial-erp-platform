@@ -49,35 +49,26 @@ class SalesUI {
           </div>
         </header>
 
-        <!-- Sales Stats -->
-        <div class="stats-grid">
-          <div class="stat-card revenue">
-            <div class="stat-icon"><i class="ph-duotone ph-currency-circle-dollar"></i></div>
-            <div class="stat-content">
-              <span class="stat-label">Today's Revenue</span>
-              <span class="stat-value">${sym}${todaySummary.revenue.toLocaleString()}</span>
-            </div>
+        <!-- Sales summary strip -->
+        <div class="fin-bar">
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Today's revenue</span>
+            <span class="fin-bar-value" style="color:var(--success);">${sym}${todaySummary.revenue.toLocaleString()}</span>
           </div>
-          <div class="stat-card primary">
-            <div class="stat-icon"><i class="ph-duotone ph-shopping-cart"></i></div>
-            <div class="stat-content">
-              <span class="stat-label">Sales</span>
-              <span class="stat-value">${todaySummary.totalSales}</span>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Sales</span>
+            <span class="fin-bar-value">${todaySummary.totalSales}</span>
           </div>
-          <div class="stat-card warning">
-            <div class="stat-icon"><i class="ph-duotone ph-chart-bar"></i></div>
-            <div class="stat-content">
-              <span class="stat-label">Avg Sale</span>
-              <span class="stat-value">${sym}${todaySummary.avgSale.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</span>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Avg sale</span>
+            <span class="fin-bar-value">${sym}${todaySummary.avgSale.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</span>
           </div>
-          <div class="stat-card neutral">
-            <div class="stat-icon"><i class="ph-duotone ph-package"></i></div>
-            <div class="stat-content">
-              <span class="stat-label">Products</span>
-              <span class="stat-value">${inventory.length}</span>
-            </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Products</span>
+            <span class="fin-bar-value">${inventory.length}</span>
           </div>
         </div>
 
@@ -1514,13 +1505,8 @@ class SalesUI {
           .module-header > div:last-child { width: 100%; }
           .module-header > div:last-child .btn { width: 100%; justify-content: center; }
 
-          .stats-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-          }
-          .stats-grid .stat-card { padding: 0.75rem; }
-          .stats-grid .stat-value { font-size: 1.2rem !important; }
+          .fin-bar-item { padding: 0.625rem 0.875rem; min-width: 80px; }
+          .fin-bar-value { font-size: 0.9rem; }
 
           .pos-layout {
             display: flex;

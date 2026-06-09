@@ -283,23 +283,25 @@ class TrustCircleUI {
           </div>
         </header>
 
-        <div class="stats-overview">
-          <div class="stat-card" data-card="trust_score" style="cursor:pointer;" title="Click for details">
-            <h3 style="margin:0 0 0.375rem;font-size:0.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">Trust Score</h3>
-            <div class="value" style="display:flex; align-items:baseline; gap:0.5rem;">
-                ${trustProfile.score} <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:500;">/ 1000</span>
-            </div>
-            <p style="margin: 0.5rem 0 0 0; font-size:0.85rem; color:var(--text-secondary);">
-                Tier: <strong style="color:var(--text-primary);">${trustProfile.tier}</strong> | Credit Limit: <strong style="color:var(--text-primary);">R ${trustProfile.maxCreditLimit.toLocaleString()}</strong>
-            </p>
+        <div class="fin-bar">
+          <div class="fin-bar-item" data-card="trust_score" style="cursor:pointer;" title="Click for details">
+            <span class="fin-bar-label">Trust Score</span>
+            <span class="fin-bar-value">${trustProfile.score}<span style="font-size:0.75rem;font-weight:400;color:var(--text-muted);"> / 1000 · ${trustProfile.tier}</span></span>
           </div>
-          <div class="stat-card" data-card="syndicates" style="cursor:pointer" title="Click for breakdown">
-            <h3>Active Group Buys</h3>
-            <div class="value">${syndicates.length}</div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item" data-card="syndicates" style="cursor:pointer" title="Click for breakdown">
+            <span class="fin-bar-label">Active group buys</span>
+            <span class="fin-bar-value">${syndicates.length}</span>
           </div>
-          <div class="stat-card" data-card="capital" style="cursor:pointer" title="Click for breakdown">
-            <h3>Total Capital Locked</h3>
-            <div class="value">R ${totalPool.toLocaleString()}</div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item" data-card="capital" style="cursor:pointer" title="Click for breakdown">
+            <span class="fin-bar-label">Capital locked</span>
+            <span class="fin-bar-value">R ${totalPool.toLocaleString()}</span>
+          </div>
+          <div class="fin-bar-sep"></div>
+          <div class="fin-bar-item">
+            <span class="fin-bar-label">Credit limit</span>
+            <span class="fin-bar-value">R ${trustProfile.maxCreditLimit.toLocaleString()}</span>
           </div>
         </div>
 
@@ -374,8 +376,8 @@ class TrustCircleUI {
             });
         });
 
-        // Stat card click → drill-down panels
-        this.container.querySelectorAll('.stat-card[data-card]').forEach(card => {
+        // Stat item click → drill-down panels
+        this.container.querySelectorAll('.fin-bar-item[data-card]').forEach(card => {
             card.addEventListener('click', () => this.showStatPanel(card.dataset.card, syndicates, totalPool));
         });
     }

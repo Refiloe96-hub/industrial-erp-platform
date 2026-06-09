@@ -1597,81 +1597,58 @@ export function renderAppStyles() {
           color: var(--text-muted);
         }
 
-        /* Stats grid — module pages */
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 1rem;
-          padding: 1.25rem 1.5rem;
-        }
-        .stats-grid .stat-card {
-          background: var(--bg-primary);
-          border: 1px solid var(--border);
-          border-left: 3px solid var(--border-strong);
-          border-radius: 8px;
-          padding: 1rem 1.125rem;
+        /* ── Horizontal summary strip — replaces stat card grid on all module pages ── */
+        .fin-bar {
           display: flex;
-          align-items: center;
-          gap: 0.875rem;
-          cursor: pointer;
-          transition: box-shadow 0.15s;
+          align-items: stretch;
+          border-bottom: 1px solid var(--border);
+          background: var(--bg-secondary);
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
-        .stats-grid .stat-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .stats-grid .stat-icon {
-          display: flex !important;
-          width: 36px; height: 36px;
-          border-radius: 8px;
-          align-items: center; justify-content: center;
-          font-size: 1.125rem;
-          flex-shrink: 0;
+        .fin-bar::-webkit-scrollbar { display: none; }
+        .fin-bar-item {
+          display: flex;
+          flex-direction: column;
+          padding: 0.75rem 1.25rem;
+          gap: 2px;
+          flex: 1;
+          min-width: 100px;
+          transition: background 0.12s;
         }
-        .stats-grid .stat-content { display: flex !important; flex-direction: column; min-width: 0; }
-        .stats-grid .stat-label {
+        .fin-bar-item[style*="cursor:pointer"]:hover { background: var(--bg-elevated, rgba(255,255,255,0.03)); }
+        .fin-bar-label {
           font-size: 0.6875rem;
           font-weight: 500;
           text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--text-muted);
+        }
+        .fin-bar-value {
+          font-size: 1rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+        .fin-bar-sep {
+          width: 1px;
+          background: var(--border);
+          align-self: stretch;
+          flex-shrink: 0;
+        }
+
+        /* SmartShift insights block */
+        .ss-insights { padding: 1.25rem 1.5rem; }
+        .ss-insights-hd {
+          font-size: 0.6875rem;
+          font-weight: 600;
+          text-transform: uppercase;
           letter-spacing: 0.07em;
           color: var(--text-muted);
-          margin-bottom: 0.25rem;
+          margin-bottom: 0.75rem;
         }
-        .stats-grid .stat-value {
-          font-size: 1.375rem;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: var(--text-primary);
-          line-height: 1.2;
-        }
-
-        /* Stat card color variants */
-        .stats-grid .stat-card.primary  { border-left-color: var(--accent); }
-        .stats-grid .stat-card.primary  .stat-icon { background: rgba(37,99,235,0.1);  color: #60a5fa; }
-
-        .stats-grid .stat-card.success,
-        .stats-grid .stat-card.income,
-        .stats-grid .stat-card.positive,
-        .stats-grid .stat-card.revenue  { border-left-color: #10b981; }
-        .stats-grid .stat-card.success  .stat-icon,
-        .stats-grid .stat-card.income   .stat-icon,
-        .stats-grid .stat-card.positive .stat-icon,
-        .stats-grid .stat-card.revenue  .stat-icon { background: rgba(16,185,129,0.1); color: #34d399; }
-
-        .stats-grid .stat-card.warning  { border-left-color: #f59e0b; }
-        .stats-grid .stat-card.warning  .stat-icon { background: rgba(245,158,11,0.1); color: #fbbf24; }
-
-        .stats-grid .stat-card.neutral  { border-left-color: var(--border-strong); }
-        .stats-grid .stat-card.neutral  .stat-icon { background: var(--bg-elevated);   color: var(--text-muted); }
-
-        .stats-grid .stat-card.danger,
-        .stats-grid .stat-card.expense,
-        .stats-grid .stat-card.negative,
-        .stats-grid .stat-card.expenses { border-left-color: #ef4444; }
-        .stats-grid .stat-card.danger   .stat-icon,
-        .stats-grid .stat-card.expense  .stat-icon,
-        .stats-grid .stat-card.negative .stat-icon,
-        .stats-grid .stat-card.expenses .stat-icon { background: rgba(239,68,68,0.1);  color: #f87171; }
-
-        .stats-grid .stat-card.positive .stat-value { color: #34d399; }
-        .stats-grid .stat-card.negative .stat-value { color: #f87171; }
 
         /* Unified tab bar — .ps-tab-bar and .detail-tab-nav are legacy aliases */
         .tab-bar, .ps-tab-bar, .detail-tab-nav {
